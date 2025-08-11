@@ -1,0 +1,13 @@
+---
+name: autofix.ci
+on: pull_request
+permissions: {}
+jobs:
+  autofix:
+    runs-on: ubuntu-24.04
+    permissions: {}
+    timeout-minutes: 15
+    steps:
+      - uses: suzuki-shunsuke/go-autofix-action@f3658e6f845e80b18d78046fa8faa43d3ef30eed # v0.1.9
+        with:
+          aqua_version: v2.53.9
