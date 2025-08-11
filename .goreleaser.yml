@@ -1,0 +1,22 @@
+---
+version: 2
+project_name: enforce-pr-review-app
+archives:
+  - name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
+    files:
+      - LICENSE
+      - README.md
+      - third_party_licenses/**/*
+builds:
+  - binary: lambda
+    main: cmd/lambda/main.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+sboms:
+  - id: default
+    disable: false
