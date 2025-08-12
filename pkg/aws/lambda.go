@@ -74,7 +74,7 @@ func (h *Handler) Start(ctx context.Context) {
 	lambda.StartWithOptions(h.do, lambda.WithContext(ctx))
 }
 
-func (h *Handler) do(ctx context.Context, req *Request) error {
+func (h *Handler) do(ctx context.Context, req *Request) error { //nolint:funlen
 	h.logger.Info("Starting a request", "request", req)
 	defer h.logger.Info("Ending a request", "request", req)
 	ev, err := h.validate(h.logger, req)
@@ -82,11 +82,68 @@ func (h *Handler) do(ctx context.Context, req *Request) error {
 		h.logger.Warn("Failed to validate request", "error", err)
 		return err
 	}
-	// TODO create a check run
-	if err := h.run(ctx, ev); err != nil {
-		return err
+
+	// Create initial check run
+	checkName := githubv4.String("Enforce PR Review")
+
+	// Get repository ID for GraphQL mutation
+	repoID := githubv4.String(ev.GetRepo().GetNodeID())
+	headSha := githubv4.GitObjectID(ev.GetPullRequest().GetHead().GetSHA())
+
+	// Create initial check run with IN_PROGRESS status
+	inProgressStatus := githubv4.RequestableCheckStatusStateInProgress
+	checkRunInput := githubv4.CreateCheckRunInput{
+		RepositoryID: repoID,
+		HeadSha:      headSha,
+		Name:         checkName,
+		Status:       &inProgressStatus,
+		Output: &githubv4.CheckRunOutput{
+			Title:   githubv4.String("Validating PR review requirements"),
+			Summary: githubv4.String("Checking if the PR meets review requirements..."),
+		},
 	}
-	return nil
+
+	if err := h.gh.CreateCheckRun(ctx, checkRunInput); err != nil {
+		h.logger.Error("Failed to create initial check run", "error", err)
+		// Continue with validation even if check run creation fails
+	}
+
+	// Run validation
+	validationErr := h.run(ctx, ev)
+
+	// Update check run based on validation result
+	var conclusion githubv4.CheckConclusionState
+	var title, summary githubv4.String
+
+	if validationErr != nil {
+		conclusion = githubv4.CheckConclusionStateFailure
+		title = githubv4.String("PR review requirements not met")
+		summary = githubv4.String(fmt.Sprintf("Validation failed: %v", validationErr))
+	} else {
+		conclusion = githubv4.CheckConclusionStateSuccess
+		title = githubv4.String("PR review requirements met")
+		summary = githubv4.String("All PR review requirements have been satisfied.")
+	}
+
+	// Create final check run with conclusion
+	completedStatus := githubv4.RequestableCheckStatusStateCompleted
+	finalCheckRunInput := githubv4.CreateCheckRunInput{
+		RepositoryID: repoID,
+		HeadSha:      headSha,
+		Name:         checkName,
+		Status:       &completedStatus,
+		Conclusion:   &conclusion,
+		Output: &githubv4.CheckRunOutput{
+			Title:   title,
+			Summary: summary,
+		},
+	}
+
+	if err := h.gh.CreateCheckRun(ctx, finalCheckRunInput); err != nil {
+		h.logger.Error("Failed to create final check run", "error", err)
+	}
+
+	return validationErr
 }
 
 func (h *Handler) run(ctx context.Context, ev *github.PullRequestReviewEvent) error {
