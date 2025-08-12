@@ -84,7 +84,7 @@ func (h *Handler) do(ctx context.Context, req *Request) error { //nolint:funlen
 	}
 
 	// Create initial check run
-	checkName := githubv4.String("Enforce PR Review")
+	checkName := githubv4.String(h.config.CheckName)
 
 	// Get repository ID for GraphQL mutation
 	repoID := githubv4.String(ev.GetRepo().GetNodeID())
@@ -167,6 +167,9 @@ func readConfig(cfg *config.Config) error {
 	}
 	if err := yaml.Unmarshal([]byte(cfgstr), cfg); err != nil {
 		return fmt.Errorf("failed to parse CONFIG environment variable: %w", err)
+	}
+	if cfg.CheckName == "" {
+		cfg.CheckName = "check-approval"
 	}
 	return nil
 }

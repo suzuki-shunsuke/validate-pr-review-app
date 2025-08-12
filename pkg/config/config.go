@@ -6,6 +6,7 @@ type Config struct {
 	TrustedApps           map[string]struct{} `yaml:"trusted_apps"`
 	UntrustedMachineUsers map[string]struct{} `yaml:"untrusted_machine_users"`
 	AWS                   *AWS                `yaml:"aws"`
+	CheckName             string              `yaml:"check_name"`
 }
 
 type AWS struct {
