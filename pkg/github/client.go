@@ -5,12 +5,15 @@ import (
 	"net/http"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
+	"github.com/google/go-github/v74/github"
 	"github.com/shurcooL/githubv4"
 )
 
 type Client struct {
 	v4Client *githubv4.Client
 }
+
+type PullRequestReviewEvent = github.PullRequestReviewEvent
 
 func New(param *ParamNewApp) (*Client, error) {
 	itr, err := ghinstallation.New(http.DefaultTransport, param.AppID, param.InstallationID, []byte(param.KeyFile))

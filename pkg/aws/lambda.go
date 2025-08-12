@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
+	"github.com/shurcooL/githubv4"
 	"github.com/stretchr/testify/assert/yaml"
 	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github"
@@ -28,6 +29,7 @@ type GitHub interface {
 	GetPR(ctx context.Context, owner, name string, number int) (*github.PullRequest, error)
 	ListReviews(ctx context.Context, owner, name string, number int, cursor string) ([]*github.Review, error)
 	ListCommits(ctx context.Context, owner, name string, number int, cursor string) ([]*github.PullRequestCommit, error)
+	CreateCheckRun(ctx context.Context, input githubv4.CreateCheckRunInput) error
 }
 
 type Validator interface {
@@ -75,13 +77,19 @@ func (h *Handler) Start(ctx context.Context) {
 func (h *Handler) do(ctx context.Context, req *Request) error {
 	h.logger.Info("Starting a request", "request", req)
 	defer h.logger.Info("Ending a request", "request", req)
-	// TODO parse webhook payload
 	ev, err := h.validate(h.logger, req)
 	if err != nil {
 		h.logger.Warn("Failed to validate request", "error", err)
 		return err
 	}
-	// TODO process the event
+	// TODO create a check run
+	if err := h.run(ctx, ev); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (h *Handler) run(ctx context.Context, ev *github.PullRequestReviewEvent) error {
 	if err := h.validator.Run(ctx, h.logger, &validation.Input{
 		RepoOwner:             ev.GetRepo().GetOwner().GetLogin(),
 		RepoName:              ev.GetRepo().GetName(),
