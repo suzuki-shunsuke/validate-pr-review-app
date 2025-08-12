@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -25,6 +26,10 @@ func run(logger *slog.Logger) error {
 	logger.Info("Starting the application")
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	handler := aws.NewHandler(logger)
-	return handler.Start(ctx) //nolint:wrapcheck
+	handler, err := aws.NewHandler(ctx, logger)
+	if err != nil {
+		return fmt.Errorf("create a new handler: %w", err)
+	}
+	handler.Start(ctx)
+	return nil
 }

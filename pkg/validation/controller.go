@@ -19,11 +19,13 @@ type GitHub interface {
 	GetPR(ctx context.Context, owner, repo string, number int) (*github.PullRequest, error)
 }
 
-func (c *Controller) Init(fs afero.Fs, gh GitHub, stdout, stderr io.Writer) {
-	c.fs = fs
-	c.gh = gh
-	c.stdout = stdout
-	c.stderr = stderr
+func New(fs afero.Fs, gh GitHub, stdout, stderr io.Writer) *Controller {
+	return &Controller{
+		fs:     fs,
+		gh:     gh,
+		stdout: stdout,
+		stderr: stderr,
+	}
 }
 
 type Input struct {
