@@ -1,0 +1,47 @@
+package aws
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
+)
+
+type SecretsManager struct {
+	client *secretsmanager.Client
+}
+
+func NewConfig(ctx context.Context) (aws.Config, error) {
+	return config.LoadDefaultConfig(ctx) //nolint:wrapcheck
+}
+
+func NewSecretsManager(config aws.Config) *SecretsManager {
+	client := secretsmanager.NewFromConfig(config)
+	return &SecretsManager{client: client}
+}
+
+type Secret struct {
+	GitHubAppPrivateKey string `json:"github_app_private_key"`
+}
+
+func (sm *SecretsManager) Get(ctx context.Context, input *secretsmanager.GetSecretValueInput) (*Secret, error) {
+	// config, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// // Create Secrets Manager client
+	// svc := secretsmanager.NewFromConfig(config)
+	result, err := sm.client.GetSecretValue(ctx, input)
+	if err != nil {
+		return nil, fmt.Errorf("get secret value from AWS Secrets Manager: %w", err)
+	}
+	secret := &Secret{}
+	if err := json.Unmarshal([]byte(*result.SecretString), secret); err != nil {
+		return nil, fmt.Errorf("unmarshal the secret as JSON: %w", err)
+	}
+	return secret, nil
+}
