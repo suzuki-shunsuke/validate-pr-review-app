@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	errHeaderXGitHubHookInstallationTargetIDIsRequired   = errors.New("header X-GITHUB-HOOK-INSTALLATION-TARGET-ID is required")
+	errHeaderXGitHubHookInstallationTargetIDIsRequired  = errors.New("header X-GITHUB-HOOK-INSTALLATION-TARGET-ID is required")
 	errHeaderXGitHubHookInstallationTargetIDMustBeInt64 = errors.New("header X-GITHUB-HOOK-INSTALLATION-TARGET-ID must be integer")
 	errHeaderXHubSignatureIsRequired                    = errors.New("header X-HUB-SIGNATURE is required")
 	errSignatureInvalid                                 = errors.New("signature is invalid")
