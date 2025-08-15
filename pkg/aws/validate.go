@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	errHeaderXGitHubHookInstallationTargetIDIsRequred   = errors.New("header X-GITHUB-HOOK-INSTALLATION-TARGET-ID is required")
+	errHeaderXGitHubHookInstallationTargetIDIsRequired   = errors.New("header X-GITHUB-HOOK-INSTALLATION-TARGET-ID is required")
 	errHeaderXGitHubHookInstallationTargetIDMustBeInt64 = errors.New("header X-GITHUB-HOOK-INSTALLATION-TARGET-ID must be integer")
 	errHeaderXHubSignatureIsRequired                    = errors.New("header X-HUB-SIGNATURE is required")
 	errSignatureInvalid                                 = errors.New("signature is invalid")
@@ -23,7 +23,7 @@ func (h *Handler) validate(logger *slog.Logger, req *Request) (*github.PullReque
 	bodyStr := req.Body
 	appIDstr, ok := headers["X-GITHUB-HOOK-INSTALLATION-TARGET-ID"]
 	if !ok {
-		return nil, errHeaderXGitHubHookInstallationTargetIDIsRequred
+		return nil, errHeaderXGitHubHookInstallationTargetIDIsRequired
 	}
 	appID, err := strconv.ParseInt(appIDstr, 10, 64)
 	if err != nil {
