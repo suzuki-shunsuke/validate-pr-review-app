@@ -15,6 +15,7 @@ import (
 	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github"
 	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/validation"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 type Handler struct {
@@ -43,6 +44,7 @@ func NewHandler(ctx context.Context, logger *slog.Logger) (*Handler, error) {
 	if err := readConfig(cfg); err != nil {
 		return nil, err
 	}
+	// Read AWS config
 	config, err := NewConfig(ctx)
 	if err != nil {
 		return nil, err
@@ -55,6 +57,7 @@ func NewHandler(ctx context.Context, logger *slog.Logger) (*Handler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get secret from AWS Secrets Manager: %w", err)
 	}
+	// Create GitHub client
 	gh, err := github.New(&github.ParamNewApp{
 		AppID:          cfg.AppID,
 		InstallationID: cfg.InstallationID,
@@ -74,16 +77,17 @@ func (h *Handler) Start(ctx context.Context) {
 	lambda.StartWithOptions(h.do, lambda.WithContext(ctx))
 }
 
-func (h *Handler) do(ctx context.Context, req *Request) error { //nolint:funlen
+func (h *Handler) do(ctx context.Context, req *Request) { //nolint:funlen
 	h.logger.Info("Starting a request", "request", req)
 	defer h.logger.Info("Ending a request", "request", req)
+
+	// Validate the request
 	ev, err := h.validate(h.logger, req)
 	if err != nil {
 		h.logger.Warn("Failed to validate request", "error", err)
-		return err
+		return
 	}
 
-	// Create initial check run
 	checkName := githubv4.String(h.config.CheckName)
 
 	// Get repository ID for GraphQL mutation
@@ -91,34 +95,37 @@ func (h *Handler) do(ctx context.Context, req *Request) error { //nolint:funlen
 	headSha := githubv4.GitObjectID(ev.GetPullRequest().GetHead().GetSHA())
 
 	// Create initial check run with IN_PROGRESS status
-	inProgressStatus := githubv4.RequestableCheckStatusStateInProgress
-	checkRunInput := githubv4.CreateCheckRunInput{
-		RepositoryID: repoID,
-		HeadSha:      headSha,
-		Name:         checkName,
-		Status:       &inProgressStatus,
-		Output: &githubv4.CheckRunOutput{
-			Title:   githubv4.String("Validating PR review requirements"),
-			Summary: githubv4.String("Checking if the PR meets review requirements..."),
-		},
-	}
+	// inProgressStatus := githubv4.RequestableCheckStatusStateInProgress
+	// checkRunInput := githubv4.CreateCheckRunInput{
+	// 	RepositoryID: repoID,
+	// 	HeadSha:      headSha,
+	// 	Name:         checkName,
+	// 	Status:       &inProgressStatus,
+	// 	Output: &githubv4.CheckRunOutput{
+	// 		Title:   githubv4.String("Validating PR review requirements"),
+	// 		Summary: githubv4.String("Checking if the PR meets review requirements..."),
+	// 	},
+	// }
 
-	if err := h.gh.CreateCheckRun(ctx, checkRunInput); err != nil {
-		h.logger.Error("Failed to create initial check run", "error", err)
-		// Continue with validation even if check run creation fails
-	}
+	// if err := h.gh.CreateCheckRun(ctx, checkRunInput); err != nil {
+	// 	h.logger.Error("Failed to create initial check run", "error", err)
+	// 	// Continue with validation even if check run creation fails
+	// }
 
 	// Run validation
-	validationErr := h.run(ctx, ev)
-
-	// Update check run based on validation result
 	var conclusion githubv4.CheckConclusionState
 	var title, summary githubv4.String
-
-	if validationErr != nil {
+	if err := h.validator.Run(ctx, h.logger, &validation.Input{
+		RepoOwner:             ev.GetRepo().GetOwner().GetLogin(),
+		RepoName:              ev.GetRepo().GetName(),
+		PR:                    ev.GetPullRequest().GetNumber(),
+		TrustedApps:           h.config.TrustedApps,
+		UntrustedMachineUsers: h.config.UntrustedMachineUsers,
+	}); err != nil {
+		slogerr.WithError(h.logger, err).Debug("validation failed")
 		conclusion = githubv4.CheckConclusionStateFailure
 		title = githubv4.String("PR review requirements not met")
-		summary = githubv4.String(fmt.Sprintf("Validation failed: %v", validationErr))
+		summary = githubv4.String(fmt.Sprintf("Validation failed: %v", err))
 	} else {
 		conclusion = githubv4.CheckConclusionStateSuccess
 		title = githubv4.String("PR review requirements met")
@@ -142,22 +149,6 @@ func (h *Handler) do(ctx context.Context, req *Request) error { //nolint:funlen
 	if err := h.gh.CreateCheckRun(ctx, finalCheckRunInput); err != nil {
 		h.logger.Error("Failed to create final check run", "error", err)
 	}
-
-	return validationErr
-}
-
-func (h *Handler) run(ctx context.Context, ev *github.PullRequestReviewEvent) error {
-	if err := h.validator.Run(ctx, h.logger, &validation.Input{
-		RepoOwner:             ev.GetRepo().GetOwner().GetLogin(),
-		RepoName:              ev.GetRepo().GetName(),
-		PR:                    ev.GetPullRequest().GetNumber(),
-		TrustedApps:           h.config.TrustedApps,
-		UntrustedMachineUsers: h.config.UntrustedMachineUsers,
-	}); err != nil {
-		h.logger.Error("Failed to run validation", "error", err)
-		return fmt.Errorf("validate: %w", err)
-	}
-	return nil
 }
 
 func readConfig(cfg *config.Config) error {
