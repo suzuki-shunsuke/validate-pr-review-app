@@ -14,11 +14,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/shurcooL/githubv4"
-	"github.com/stretchr/testify/assert/yaml"
 	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github"
 	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/validation"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
+	"gopkg.in/yaml.v3"
 )
 
 type Handler struct {

@@ -11,50 +11,8 @@ import (
 // Run enforces pull request reviews.
 // It gets pull request reviews and committers via GitHub GraphQL API, and checks if people other than committers approve the PR.
 // If the PR isn't approved by people other than committers, it returns an error.
-func (c *Controller) Run(_ *slog.Logger, input *Input) *Result {
+func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop,funlen
 	// Get a pull request reviews and committers via GraphQL API
-	return validatePR(input)
-}
-
-type State string
-
-const (
-	StateTwoApprovals            State = "two_approvals"
-	StateApprovalIsRequired      State = "approval_is_required"
-	StateTwoApprovalsAreRequired State = "two_approvals_are_required"
-)
-
-type Result struct {
-	Error         string
-	State         State
-	Author        *User
-	Approvers     []string
-	SelfApprovers []string
-	// app or untrusted machine user approvals
-	IgnoredApprovers []string
-	// app
-	// untrusted machine user
-	// not linked to any GitHub user
-	// not signed commits
-	UntrustedCommits []*Commit
-	// settings
-	TrustedApps           []string
-	UntrustedMachineUsers []string
-	TrustedMachineUsers   []string
-}
-
-type Commit struct {
-	Login     string
-	SHA       string
-	Signature *github.Signature
-}
-
-type User struct {
-	Login   string
-	Trusted bool
-}
-
-func validatePR(input *Input) *Result { //nolint:cyclop,funlen
 	pr := input.PR
 	result := &Result{
 		TrustedApps:           input.Config.TrustedApps,
@@ -137,6 +95,44 @@ func validatePR(input *Input) *Result { //nolint:cyclop,funlen
 	return result
 }
 
+type State string
+
+const (
+	StateTwoApprovals            State = "two_approvals"
+	StateApprovalIsRequired      State = "approval_is_required"
+	StateTwoApprovalsAreRequired State = "two_approvals_are_required"
+)
+
+type Result struct {
+	Error         string
+	State         State
+	Author        *User
+	Approvers     []string
+	SelfApprovers []string
+	// app or untrusted machine user approvals
+	IgnoredApprovers []string
+	// app
+	// untrusted machine user
+	// not linked to any GitHub user
+	// not signed commits
+	UntrustedCommits []*Commit
+	// settings
+	TrustedApps           []string
+	UntrustedMachineUsers []string
+	TrustedMachineUsers   []string
+}
+
+type Commit struct {
+	Login     string
+	SHA       string
+	Signature *github.Signature
+}
+
+type User struct {
+	Login   string
+	Trusted bool
+}
+
 // checkIfUserRequiresTwoApprovals checks if the user requires two approvals.
 // It returns true if the user is an untrusted app or machine user.
 func checkIfUserRequiresTwoApprovals(user *github.User, input *Input) bool {
@@ -174,5 +170,5 @@ type Review struct {
 }
 
 func isLatestApproval(review *github.Review, headRefOID string) bool {
-	return review.State == "APPROVED" && review.Commit.OID != headRefOID
+	return review.State == "APPROVED" && review.Commit.OID == headRefOID
 }
