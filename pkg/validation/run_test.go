@@ -18,7 +18,7 @@ func TestController_Run(t *testing.T) {
 		expected *validation.Result
 	}{
 		{
-			name: "two_approvals_from_different_users",
+			name: "two approvals from different users",
 			input: &validation.Input{
 				Config: &config.Config{
 					TrustedApps:                 []string{"trusted-bot"},
@@ -84,7 +84,7 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
-			name: "no_approvals",
+			name: "no approvals",
 			input: &validation.Input{
 				Config: &config.Config{
 					TrustedApps:                 []string{},

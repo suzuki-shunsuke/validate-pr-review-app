@@ -17,60 +17,49 @@ func Test_checkIfUserRequiresTwoApprovals(t *testing.T) {
 		expected bool
 	}{
 		{
-			name: "user_with_empty_login_requires_two_approvals",
-			user: &github.User{
-				Login:        "",
-				ResourcePath: "/users/unknown",
-			},
+			name:     "user with empty login requires two approvals",
+			user:     &github.User{},
 			config:   nil,
 			expected: true,
 		},
 		{
-			name: "trusted_app_does_not_require_two_approvals",
+			name: "trusted app does not require two approvals",
 			user: &github.User{
 				Login:        "trusted-bot[bot]",
 				ResourcePath: "/apps/trusted-bot",
 			},
 			config: &config.Config{
-				UniqueTrustedApps:           map[string]struct{}{"trusted-bot[bot]": {}},
-				UniqueUntrustedMachineUsers: map[string]struct{}{},
+				UniqueTrustedApps: map[string]struct{}{"trusted-bot[bot]": {}},
 			},
 			expected: false,
 		},
 		{
-			name: "untrusted_app_requires_two_approvals",
+			name: "untrusted app requires two approvals",
 			user: &github.User{
 				Login:        "untrusted-bot[bot]",
 				ResourcePath: "/apps/untrusted-bot",
 			},
-			config: &config.Config{
-				UniqueTrustedApps:           map[string]struct{}{},
-				UniqueUntrustedMachineUsers: map[string]struct{}{},
-			},
+			config:   &config.Config{},
 			expected: true,
 		},
 		{
-			name: "untrusted_machine_user_requires_two_approvals",
+			name: "untrusted machine user requires two approvals",
 			user: &github.User{
 				Login:        "untrusted-user",
 				ResourcePath: "/users/untrusted-user",
 			},
 			config: &config.Config{
-				UniqueTrustedApps:           map[string]struct{}{},
 				UniqueUntrustedMachineUsers: map[string]struct{}{"untrusted-user": {}},
 			},
 			expected: true,
 		},
 		{
-			name: "regular_user_does_not_require_two_approvals",
+			name: "regular user does not require two approvals",
 			user: &github.User{
 				Login:        "regular-user",
 				ResourcePath: "/users/regular-user",
 			},
-			config: &config.Config{
-				UniqueTrustedApps:           map[string]struct{}{},
-				UniqueUntrustedMachineUsers: map[string]struct{}{},
-			},
+			config:   &config.Config{},
 			expected: false,
 		},
 	}
@@ -96,7 +85,7 @@ func Test_isLatestApproval(t *testing.T) {
 		expected   bool
 	}{
 		{
-			name: "approved_review_for_head_commit",
+			name: "approved review for head commit",
 			review: &github.Review{
 				State: "APPROVED",
 				Commit: &github.ReviewCommit{
@@ -107,7 +96,7 @@ func Test_isLatestApproval(t *testing.T) {
 			expected:   true,
 		},
 		{
-			name: "approved_review_for_old_commit",
+			name: "approved review for old commit",
 			review: &github.Review{
 				State: "APPROVED",
 				Commit: &github.ReviewCommit{
@@ -118,7 +107,7 @@ func Test_isLatestApproval(t *testing.T) {
 			expected:   false,
 		},
 		{
-			name: "non_approved_review",
+			name: "non approved review",
 			review: &github.Review{
 				State: "CHANGES_REQUESTED",
 				Commit: &github.ReviewCommit{
@@ -129,7 +118,7 @@ func Test_isLatestApproval(t *testing.T) {
 			expected:   false,
 		},
 		{
-			name: "dismissed_review",
+			name: "dismissed review",
 			review: &github.Review{
 				State: "DISMISSED",
 				Commit: &github.ReviewCommit{
