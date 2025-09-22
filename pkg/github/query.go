@@ -6,32 +6,51 @@ import "strings"
 query($owner: String!, $repo: String!, $pr: Int!) {
   repository(owner: $owner, name: $repo) {
     pullRequest(number: $pr) {
-      reviews(first: 30) {
-        totalCount
+      headRefOid
+      author {
+        login
+        resourcePath
+      }
+      latestReviews(first: 100) {
         pageInfo {
           hasNextPage
           endCursor
         }
         nodes {
+          state
+          commit {
+            oid
+          }
           author {
             login
+            resourcePath
           }
-          state
         }
       }
-      commits(first: 30) {
-        totalCount
+      commits(first: 100) {
         pageInfo {
           hasNextPage
           endCursor
         }
         nodes {
           commit {
+            oid
             committer {
               user {
                 login
+                resourcePath
               }
             }
+            author {
+              user {
+                login
+                resourcePath
+              }
+            }
+			signature {
+			  isValid
+			  state
+			}
           }
         }
       }
@@ -39,6 +58,13 @@ query($owner: String!, $repo: String!, $pr: Int!) {
   }
 }
 */
+
+type PullRequest struct {
+	HeadRefOID string   `json:"headRefOid"`
+	Author     *User    `json:"author"`
+	Reviews    *Reviews `json:"latestReviews" graphql:"latestReviews(first:30)"`
+	Commits    *Commits `json:"commits" graphql:"commits(first:30)"`
+}
 
 type PageInfo struct {
 	HasNextPage bool   `json:"hasNextPage"`
@@ -90,20 +116,13 @@ type ReviewsRepository struct {
 }
 
 type ReviewsPullRequest struct {
-	Reviews *Reviews `graphql:"reviews(first:30)"`
-}
-
-type PullRequest struct {
-	Author     *User    `json:"author"`
-	HeadRefOID string   `json:"headRefOid"`
-	Reviews    *Reviews `json:"reviews" graphql:"reviews(first:30)"`
-	Commits    *Commits `json:"commits" graphql:"commits(first:30)"`
+	Reviews *Reviews `graphql:"latestReviews(first:30)"`
 }
 
 type Reviews struct {
-	TotalCount int       `json:"totalCount"`
-	PageInfo   *PageInfo `json:"pageInfo"`
-	Nodes      []*Review `json:"nodes"`
+	// TotalCount int       `json:"totalCount"`
+	PageInfo *PageInfo `json:"pageInfo"`
+	Nodes    []*Review `json:"nodes"`
 }
 
 type Review struct {
@@ -117,18 +136,46 @@ type ReviewCommit struct {
 }
 
 type Commits struct {
-	TotalCount int                  `json:"totalCount"`
-	PageInfo   *PageInfo            `json:"pageInfo"`
-	Nodes      []*PullRequestCommit `json:"nodes"`
+	// TotalCount int                  `json:"totalCount"`
+	PageInfo *PageInfo            `json:"pageInfo"`
+	Nodes    []*PullRequestCommit `json:"nodes"`
 }
 
 type PullRequestCommit struct {
 	Commit *Commit `json:"commit"`
 }
 
+func (c *PullRequestCommit) Signature() *Signature {
+	if c == nil || c.Commit == nil {
+		return nil
+	}
+	return c.Commit.Signature
+}
+
+func (c *PullRequestCommit) User() *User {
+	if c == nil || c.Commit == nil {
+		return nil
+	}
+	return c.Commit.User()
+}
+
+func (c *PullRequestCommit) SHA() string {
+	if c == nil || c.Commit == nil {
+		return ""
+	}
+	return c.Commit.OID
+}
+
 type Commit struct {
+	OID       string     `json:"oid"`
 	Committer *Committer `json:"committer"`
 	Author    *Committer `json:"author"`
+	Signature *Signature `json:"signature"`
+}
+
+type Signature struct {
+	IsValid bool   `json:"isValid"`
+	State   string `json:"state"`
 }
 
 func (c *Commit) User() *User {

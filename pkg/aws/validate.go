@@ -18,7 +18,7 @@ var (
 	errHeaderXHubEventIsRequired                        = errors.New("header X-HUB-EVENT is required")
 )
 
-func (h *Handler) validate(logger *slog.Logger, req *Request) (*github.PullRequestReviewEvent, error) {
+func (h *Handler) validateRequest(logger *slog.Logger, req *Request) (*github.PullRequestReviewEvent, error) {
 	headers := req.Params.Headers
 	bodyStr := req.Body
 	appIDstr, ok := headers["X-GITHUB-HOOK-INSTALLATION-TARGET-ID"]

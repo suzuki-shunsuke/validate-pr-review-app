@@ -1,11 +1,9 @@
 package validation
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
 	"log/slog"
+	"maps"
+	"slices"
 
 	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github"
 )
@@ -13,55 +11,130 @@ import (
 // Run enforces pull request reviews.
 // It gets pull request reviews and committers via GitHub GraphQL API, and checks if people other than committers approve the PR.
 // If the PR isn't approved by people other than committers, it returns an error.
-func (c *Controller) Run(ctx context.Context, _ *slog.Logger, input *Input) error {
+func (c *Controller) Run(_ *slog.Logger, input *Input) *Result {
 	// Get a pull request reviews and committers via GraphQL API
-	pr, err := c.gh.GetPR(ctx, input.RepoOwner, input.RepoName, input.PR)
-	if err != nil {
-		return fmt.Errorf("get a pull request: %w", err)
-	}
-	if err := c.output(input, pr); err != nil {
-		return err
-	}
-	return validatePR(input, pr)
+	return validatePR(input)
 }
 
-func validatePR(input *Input, pr *github.PullRequest) error {
-	reviews := ignoreUntrustedReviews(filterReviews(pr.Reviews.Nodes, pr.HeadRefOID), input.UntrustedMachineUsers)
+type State string
 
-	if len(reviews) > 1 {
+const (
+	StateTwoApprovals            State = "two_approvals"
+	StateApprovalIsRequired      State = "approval_is_required"
+	StateTwoApprovalsAreRequired State = "two_approvals_are_required"
+)
+
+type Result struct {
+	Error         string
+	State         State
+	Author        *User
+	Approvers     []string
+	SelfApprovers []string
+	// app or untrusted machine user approvals
+	IgnoredApprovers []string
+	// app
+	// untrusted machine user
+	// not linked to any GitHub user
+	// not signed commits
+	UntrustedCommits []*Commit
+	// settings
+	TrustedApps           []string
+	UntrustedMachineUsers []string
+	TrustedMachineUsers   []string
+}
+
+type Commit struct {
+	Login     string
+	SHA       string
+	Signature *github.Signature
+}
+
+type User struct {
+	Login   string
+	Trusted bool
+}
+
+func validatePR(input *Input) *Result { //nolint:cyclop,funlen
+	pr := input.PR
+	result := &Result{
+		TrustedApps:           input.Config.TrustedApps,
+		UntrustedMachineUsers: input.Config.UntrustedMachineUsers,
+		TrustedMachineUsers:   input.Config.TrustedMachineUsers,
+	}
+	var ignoredApprovers []string
+	approvers := make(map[string]struct{}, len(pr.Reviews.Nodes))
+	for _, review := range pr.Reviews.Nodes {
+		// Exclude reviews other than APPROVED and reviews for non head commits
+		if !isLatestApproval(review, pr.HeadRefOID) {
+			continue
+		}
+		// Exclude approvals from apps
+		if review.Author.IsApp() {
+			ignoredApprovers = append(ignoredApprovers, review.Author.GetLogin())
+			continue
+		}
+		// Exclude approvals from untrusted machine users
+		if _, ok := input.Config.UniqueUntrustedMachineUsers[review.Author.Login]; ok {
+			ignoredApprovers = append(ignoredApprovers, review.Author.GetLogin())
+			continue
+		}
+		approvers[review.Author.GetLogin()] = struct{}{}
+	}
+	// Convert map to sorted slice
+	approversL := slices.Sorted(maps.Keys(approvers))
+
+	if len(approvers) > 1 {
 		// Allow multiple approvals
-		return nil
+		result.Approvers = approversL
+		result.State = StateTwoApprovals
+		return result
 	}
 
-	if len(reviews) == 0 {
+	if len(approvers) == 0 {
 		// Approval is required
-		return errApproval
+		result.State = StateApprovalIsRequired
+		result.IgnoredApprovers = ignoredApprovers
+		return result
 	}
 
-	requiredTwoApprovals := checkIfTwoApprovalsRequired(pr, input)
+	// One approval
+
+	// Check if the PR author is trusted
+	requiredTwoApprovals := checkIfUserRequiresTwoApprovals(pr.Author, input)
+	result.Author = &User{
+		Login: pr.Author.GetLogin(),
+	}
 	if requiredTwoApprovals {
-		if len(reviews) == 1 {
-			return errTwoApproval
-		}
+		result.State = StateTwoApprovalsAreRequired
+		return result
 	}
-
-	committers := getCommitters(convertCommits(pr.Commits.Nodes))
-	// Checks if people other than committers approve the PR
-	return validate(reviews, committers, requiredTwoApprovals)
-}
-
-func checkIfTwoApprovalsRequired(pr *github.PullRequest, input *Input) bool {
-	if checkIfUserRequiresTwoApprovals(pr.Author, input) {
-		return true
-	}
-	// If the pull request has commits from untrusted apps or machine users, require two approvals
+	oneApproval := false
 	for _, commit := range pr.Commits.Nodes {
-		user := commit.Commit.User()
-		if checkIfUserRequiresTwoApprovals(user, input) {
-			return true
+		committer := commit.User()
+		login := committer.GetLogin()
+		if checkIfUserRequiresTwoApprovals(committer, input) {
+			requiredTwoApprovals = true
+			commit := &Commit{
+				Login:     login,
+				SHA:       commit.SHA(),
+				Signature: commit.Signature(),
+			}
+			result.UntrustedCommits = append(result.UntrustedCommits, commit)
+			continue
 		}
+		// TODO check CODEOWNERS
+		if _, ok := approvers[login]; ok {
+			// self-approve
+			result.SelfApprovers = append(result.SelfApprovers, login)
+			continue
+		}
+		result.Approvers = append(result.Approvers, login)
+		if !requiredTwoApprovals || oneApproval {
+			return result
+		}
+		oneApproval = true
 	}
-	return false
+	return result
 }
 
 // checkIfUserRequiresTwoApprovals checks if the user requires two approvals.
@@ -73,41 +146,11 @@ func checkIfUserRequiresTwoApprovals(user *github.User, input *Input) bool {
 	}
 	if user.IsApp() {
 		// Require two approvals for PRs created by trusted apps, excluding trusted apps
-		return !user.Trusted(input.TrustedApps)
+		return !user.Trusted(input.Config.UniqueTrustedApps)
 	}
 	// Require two approvals for PRs created by untrusted machine users
-	_, ok := input.UntrustedMachineUsers[user.Login]
+	_, ok := input.Config.UniqueUntrustedMachineUsers[user.Login]
 	return ok
-}
-
-// convertCommits converts []*PullRequestCommit to []*Commit
-func convertCommits(commits []*github.PullRequestCommit) []*github.Commit {
-	arr := make([]*github.Commit, len(commits))
-	for i, commit := range commits {
-		arr[i] = commit.Commit
-	}
-	return arr
-}
-
-func (c *Controller) output(input *Input, pr *github.PullRequest) error {
-	encoder := json.NewEncoder(c.stdout)
-	encoder.SetIndent("", "  ")
-	if err := encoder.Encode(&Result{
-		PullRequest: &PullRequest{
-			Repo:       fmt.Sprintf("%s/%s", input.RepoOwner, input.RepoName),
-			Number:     input.PR,
-			HeadRefOID: pr.HeadRefOID,
-			Reviews:    pr.Reviews,
-			Commits:    pr.Commits,
-		},
-	}); err != nil {
-		return fmt.Errorf("encode the pull request: %w", err)
-	}
-	return nil
-}
-
-type Result struct {
-	PullRequest *PullRequest `json:"pull_request"`
 }
 
 type PullRequest struct {
@@ -120,72 +163,16 @@ type PullRequest struct {
 
 type Approval struct {
 	Login string
-	ID    string
 }
 
-func getCommitters(commits []*github.Commit) map[string]struct{} {
-	committers := make(map[string]struct{}, len(commits))
-	for _, commit := range commits {
-		login := commit.Login()
-		if login == "" {
-			continue
-		}
-		committers[login] = struct{}{}
-	}
-	return committers
+type Review struct {
+	Review               *github.Review
+	Ignored              bool
+	ApprovalFromApp      bool
+	UntrustedMachineUser bool
+	Message              string
 }
 
-func filterReviews(reviews []*github.Review, headRefOID string) []*github.Review {
-	arr := make([]*github.Review, 0, len(reviews))
-	for _, review := range reviews {
-		if review.State != "APPROVED" || review.Commit.OID != headRefOID {
-			// Ignore reviews other than APPROVED
-			// Ignore reviews for non head commits
-			continue
-		}
-		if review.Author.IsApp() {
-			// Ignore approvals from bots
-			continue
-		}
-		arr = append(arr, review)
-	}
-	return arr
-}
-
-func ignoreUntrustedReviews(reviews []*github.Review, untrustedUsers map[string]struct{}) []*github.Review {
-	arr := make([]*github.Review, 0, len(reviews))
-	for _, review := range reviews {
-		if _, ok := untrustedUsers[review.Author.Login]; ok {
-			// Ignore approvals from untrusted users
-			continue
-		}
-		arr = append(arr, review)
-	}
-	return arr
-}
-
-var (
-	errApproval    = errors.New("pull requests must be approved by people who don't push commits to them")
-	errTwoApproval = errors.New("pull requests created by untrusted apps or machine users must be approved by two people")
-)
-
-// validate validates if committers approve the pull request themselves.
-func validate(reviews []*github.Review, committers map[string]struct{}, requiredTwoApprovals bool) error {
-	oneApproval := false
-	for _, review := range reviews {
-		// TODO check CODEOWNERS
-		if _, ok := committers[review.Author.Login]; ok {
-			// self-approve
-			continue
-		}
-		if !requiredTwoApprovals || oneApproval {
-			// Someone other than committers approved the PR, so this PR is not self-approved.
-			return nil
-		}
-		oneApproval = true
-	}
-	if oneApproval {
-		return errTwoApproval
-	}
-	return errApproval
+func isLatestApproval(review *github.Review, headRefOID string) bool {
+	return review.State == "APPROVED" && review.Commit.OID != headRefOID
 }

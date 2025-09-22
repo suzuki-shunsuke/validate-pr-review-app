@@ -1,13 +1,16 @@
 package aws
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"log/slog"
 	"os"
+	"text/template"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-lambda-go/lambdacontext"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/shurcooL/githubv4"
@@ -34,7 +37,7 @@ type GitHub interface {
 }
 
 type Validator interface {
-	Run(ctx context.Context, logger *slog.Logger, input *validation.Input) error
+	Run(logger *slog.Logger, input *validation.Input) *validation.Result
 }
 
 func NewHandler(ctx context.Context, logger *slog.Logger) (*Handler, error) {
@@ -67,9 +70,10 @@ func NewHandler(ctx context.Context, logger *slog.Logger) (*Handler, error) {
 		return nil, fmt.Errorf("create a GitHub client: %w", err)
 	}
 	return &Handler{
-		logger: logger,
-		config: cfg,
-		gh:     gh,
+		logger:    logger,
+		config:    cfg,
+		gh:        gh,
+		validator: validation.New(),
 	}, nil
 }
 
@@ -77,12 +81,19 @@ func (h *Handler) Start(ctx context.Context) {
 	lambda.StartWithOptions(h.do, lambda.WithContext(ctx))
 }
 
-func (h *Handler) do(ctx context.Context, req *Request) { //nolint:funlen
+func (h *Handler) do(ctx context.Context, req *Request) {
+	lc, ok := lambdacontext.FromContext(ctx)
+	if !ok {
+		h.logger.Warn("lambda context is not found")
+	} else {
+		h.logger = h.logger.With("aws_request_id", lc.AwsRequestID)
+	}
+
 	h.logger.Info("Starting a request", "request", req)
 	defer h.logger.Info("Ending a request", "request", req)
 
 	// Validate the request
-	ev, err := h.validate(h.logger, req)
+	ev, err := h.validateRequest(h.logger, req)
 	if err != nil {
 		h.logger.Warn("Failed to validate request", "error", err)
 		return
@@ -115,22 +126,19 @@ func (h *Handler) do(ctx context.Context, req *Request) { //nolint:funlen
 	// Run validation
 	var conclusion githubv4.CheckConclusionState
 	var title, summary githubv4.String
-	if err := h.validator.Run(ctx, h.logger, &validation.Input{
-		RepoOwner:             ev.GetRepo().GetOwner().GetLogin(),
-		RepoName:              ev.GetRepo().GetName(),
-		PR:                    ev.GetPullRequest().GetNumber(),
-		TrustedApps:           h.config.TrustedApps,
-		UntrustedMachineUsers: h.config.UntrustedMachineUsers,
-	}); err != nil {
-		slogerr.WithError(h.logger, err).Debug("validation failed")
+	result := h.validate(ctx, ev)
+	if result.Error != "" {
 		conclusion = githubv4.CheckConclusionStateFailure
 		title = githubv4.String("PR review requirements not met")
-		summary = githubv4.String(fmt.Sprintf("Validation failed: %v", err))
 	} else {
 		conclusion = githubv4.CheckConclusionStateSuccess
 		title = githubv4.String("PR review requirements met")
-		summary = githubv4.String("All PR review requirements have been satisfied.")
 	}
+	s, err := summarize(result, h.config.BuiltTemplates)
+	if err != nil {
+		slogerr.WithError(h.logger, err).Error("summarize the result")
+	}
+	summary = githubv4.String(s)
 
 	// Create final check run with conclusion
 	completedStatus := githubv4.RequestableCheckStatusStateCompleted
@@ -151,6 +159,31 @@ func (h *Handler) do(ctx context.Context, req *Request) { //nolint:funlen
 	}
 }
 
+func (h *Handler) validate(ctx context.Context, ev *github.PullRequestReviewEvent) *validation.Result {
+	repo := ev.GetRepo()
+	owner := repo.GetOwner().GetLogin()
+	pr, err := h.gh.GetPR(ctx, owner, repo.GetName(), ev.GetPullRequest().GetNumber())
+	if err != nil {
+		return &validation.Result{Error: fmt.Errorf("get a pull request: %w", err).Error()}
+	}
+	return h.validator.Run(h.logger, &validation.Input{
+		PR:     pr,
+		Config: h.config,
+	})
+}
+
+func summarize(result *validation.Result, templates map[string]*template.Template) (string, error) {
+	var buf bytes.Buffer
+	tpl, ok := templates[string(result.State)]
+	if !ok {
+		return "", errors.New("summary template is not found")
+	}
+	if err := tpl.Execute(&buf, result); err != nil {
+		return "", fmt.Errorf("execute summary template: %w", err)
+	}
+	return buf.String(), nil
+}
+
 func readConfig(cfg *config.Config) error {
 	cfgstr := os.Getenv("CONFIG")
 	if cfgstr == "" {
@@ -159,8 +192,8 @@ func readConfig(cfg *config.Config) error {
 	if err := yaml.Unmarshal([]byte(cfgstr), cfg); err != nil {
 		return fmt.Errorf("failed to parse CONFIG environment variable: %w", err)
 	}
-	if cfg.CheckName == "" {
-		cfg.CheckName = "check-approval"
+	if err := cfg.Init(); err != nil {
+		return fmt.Errorf("initialize config: %w", err)
 	}
 	return nil
 }
