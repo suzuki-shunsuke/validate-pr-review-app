@@ -1,7 +1,5 @@
 package github
 
-import "strings"
-
 /*
 query($owner: String!, $repo: String!, $pr: Int!) {
   repository(owner: $owner, name: $repo) {
@@ -66,6 +64,54 @@ type PullRequest struct {
 	Commits    *Commits `json:"commits" graphql:"commits(first:30)"`
 }
 
+type Author struct {
+	Login                string
+	UntrustedMachineUser bool
+	UntrustedApp         bool
+}
+
+// IsTrustedAuthor returns true if the PR author is trusted.
+// The PR author is trusted if he is a trusted app or not untrusted machine user.
+func (pr *PullRequest) ValidateAuthor(trustedApps, trustedMachineUsers, untrustedMachineUsers map[string]struct{}) *Author {
+	if pr.Author.IsApp() {
+		if _, ok := trustedApps[pr.Author.Login]; ok {
+			return nil
+		}
+		return &Author{
+			Login:        pr.Author.Login,
+			UntrustedApp: true,
+		}
+	}
+	if pr.Author.IsTrustedUser(trustedMachineUsers, untrustedMachineUsers) {
+		return nil
+	}
+	return &Author{
+		Login:                pr.Author.Login,
+		UntrustedMachineUser: true,
+	}
+}
+
+type ReasonPRAuthorRequiresTwoApprovals string
+
+const (
+	ReasonPRAuthorRequiresTwoApprovalsOK                   ReasonPRAuthorRequiresTwoApprovals = "ok"
+	ReasonPRAuthorRequiresTwoApprovalsApp                  ReasonPRAuthorRequiresTwoApprovals = "app"
+	ReasonPRAuthorRequiresTwoApprovalsUntrustedMachineUser ReasonPRAuthorRequiresTwoApprovals = "untrusted_machine_user"
+)
+
+func (pr *PullRequest) IsAuthorRequiresTwoApprovals(trustedApps, trustedMachineUsers, untrustedMachineUsers map[string]struct{}) ReasonPRAuthorRequiresTwoApprovals {
+	if pr.Author.IsApp() {
+		if _, ok := trustedApps[pr.Author.Login]; ok {
+			return ReasonPRAuthorRequiresTwoApprovalsOK
+		}
+		return ReasonPRAuthorRequiresTwoApprovalsApp
+	}
+	if pr.Author.IsTrustedUser(trustedMachineUsers, untrustedMachineUsers) {
+		return ReasonPRAuthorRequiresTwoApprovalsOK
+	}
+	return ReasonPRAuthorRequiresTwoApprovalsUntrustedMachineUser
+}
+
 type PageInfo struct {
 	HasNextPage bool   `json:"hasNextPage"`
 	EndCursor   string `json:"endCursor"`
@@ -125,112 +171,16 @@ type Reviews struct {
 	Nodes    []*Review `json:"nodes"`
 }
 
-type Review struct {
-	Author *User         `json:"author"`
-	State  string        `json:"state"`
-	Commit *ReviewCommit `json:"commit"`
-}
-
-type ReviewCommit struct {
-	OID string `json:"oid"`
-}
-
 type Commits struct {
 	// TotalCount int                  `json:"totalCount"`
 	PageInfo *PageInfo            `json:"pageInfo"`
 	Nodes    []*PullRequestCommit `json:"nodes"`
 }
 
-type PullRequestCommit struct {
-	Commit *Commit `json:"commit"`
-}
-
-func (c *PullRequestCommit) Signature() *Signature {
-	if c == nil || c.Commit == nil {
-		return nil
-	}
-	return c.Commit.Signature
-}
-
-func (c *PullRequestCommit) User() *User {
-	if c == nil || c.Commit == nil {
-		return nil
-	}
-	return c.Commit.User()
-}
-
-func (c *PullRequestCommit) SHA() string {
-	if c == nil || c.Commit == nil {
-		return ""
-	}
-	return c.Commit.OID
-}
-
-type Commit struct {
-	OID       string     `json:"oid"`
-	Committer *Committer `json:"committer"`
-	Author    *Committer `json:"author"`
-	Signature *Signature `json:"signature"`
-}
-
-type Signature struct {
-	IsValid bool   `json:"isValid"`
-	State   string `json:"state"`
-}
-
-func (c *Commit) User() *User {
-	if c == nil {
-		return nil
-	}
-	if user := c.Committer.GetUser(); user != nil {
-		return user
-	}
-	return c.Author.GetUser()
-}
-
-func (c *Commit) Login() string {
-	return c.User().GetLogin()
-}
-
-func (c *Commit) Linked() bool {
-	return c.Login() != ""
-}
-
 type Committer struct {
 	User *User `json:"user"`
 }
 
-func (c *Committer) GetUser() *User {
-	if c == nil {
-		return nil
-	}
-	return c.User
-}
-
 func (c *Committer) Login() string {
-	if c == nil {
-		return ""
-	}
-	return c.User.GetLogin()
-}
-
-type User struct {
-	Login        string `json:"login"`
-	ResourcePath string `json:"resourcePath"`
-}
-
-func (u *User) GetLogin() string {
-	if u == nil {
-		return ""
-	}
-	return u.Login
-}
-
-func (u *User) IsApp() bool {
-	return strings.HasPrefix(u.ResourcePath, "/apps/") || strings.HasSuffix(u.Login, "[bot]")
-}
-
-func (u *User) Trusted(reliableBots map[string]struct{}) bool {
-	_, ok := reliableBots[u.Login]
-	return ok
+	return c.User.Login
 }
