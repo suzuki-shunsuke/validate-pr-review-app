@@ -91,27 +91,6 @@ func (pr *PullRequest) ValidateAuthor(trustedApps, trustedMachineUsers, untruste
 	}
 }
 
-type ReasonPRAuthorRequiresTwoApprovals string
-
-const (
-	ReasonPRAuthorRequiresTwoApprovalsOK                   ReasonPRAuthorRequiresTwoApprovals = "ok"
-	ReasonPRAuthorRequiresTwoApprovalsApp                  ReasonPRAuthorRequiresTwoApprovals = "app"
-	ReasonPRAuthorRequiresTwoApprovalsUntrustedMachineUser ReasonPRAuthorRequiresTwoApprovals = "untrusted_machine_user"
-)
-
-func (pr *PullRequest) IsAuthorRequiresTwoApprovals(trustedApps, trustedMachineUsers, untrustedMachineUsers map[string]struct{}) ReasonPRAuthorRequiresTwoApprovals {
-	if pr.Author.IsApp() {
-		if _, ok := trustedApps[pr.Author.Login]; ok {
-			return ReasonPRAuthorRequiresTwoApprovalsOK
-		}
-		return ReasonPRAuthorRequiresTwoApprovalsApp
-	}
-	if pr.Author.IsTrustedUser(trustedMachineUsers, untrustedMachineUsers) {
-		return ReasonPRAuthorRequiresTwoApprovalsOK
-	}
-	return ReasonPRAuthorRequiresTwoApprovalsUntrustedMachineUser
-}
-
 type PageInfo struct {
 	HasNextPage bool   `json:"hasNextPage"`
 	EndCursor   string `json:"endCursor"`
