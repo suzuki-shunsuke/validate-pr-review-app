@@ -70,6 +70,17 @@ func (cfg *Config) Init() error {
 	if cfg.CheckName == "" {
 		cfg.CheckName = "check-approval"
 	}
+	if err := cfg.initTemplates(); err != nil {
+		return err
+	}
+	if err := cfg.testUntrustedMachineUsers(); err != nil {
+		return err
+	}
+	// TODO add test cases
+	return cfg.testTemplate()
+}
+
+func (cfg *Config) initTemplates() error {
 	defaultTemplates := map[string]string{
 		"footer":                string(templateFooter),
 		"settings":              string(templateSettings),
@@ -102,12 +113,19 @@ func (cfg *Config) Init() error {
 		templates[k] = tplParsed
 	}
 	cfg.BuiltTemplates = templates
+	return nil
+}
+
+func (cfg *Config) testUntrustedMachineUsers() error {
 	for pattern := range cfg.UniqueUntrustedMachineUsers {
 		if _, err := path.Match(pattern, "foo"); err != nil {
 			return fmt.Errorf("invalid untrusted machine user pattern %q: %w", pattern, err)
 		}
 	}
-	// TODO add test cases
+	return nil
+}
+
+func (cfg *Config) testTemplate() error {
 	result := &Result{}
 	for key, tpl := range cfg.BuiltTemplates {
 		if err := tpl.Execute(io.Discard, result); err != nil {

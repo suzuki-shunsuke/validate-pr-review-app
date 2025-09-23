@@ -40,7 +40,7 @@ func (h *Handler) validateRequest(logger *slog.Logger, req *Request) (*github.Pu
 		return nil, errHeaderXGitHubHookInstallationTargetIDMustBeInt64
 	}
 	if appID != h.config.AppID {
-		return nil, slogerr.With(errInvalidAppID, "app_id", appID, "expected_app_id", h.config.AppID)
+		return nil, slogerr.With(errInvalidAppID, "app_id", appID, "expected_app_id", h.config.AppID) //nolint:wrapcheck
 	}
 
 	sig, ok := headers[headerXHubSignature]

@@ -1,8 +1,9 @@
+//nolint:funlen
 package aws
 
 import (
 	"crypto/hmac"
-	"crypto/sha1"
+	"crypto/sha1" //nolint:gosec
 	"errors"
 	"fmt"
 	"log/slog"
@@ -20,7 +21,7 @@ func generateSignature(payload string, secret []byte) string {
 	return fmt.Sprintf("sha1=%x", h.Sum(nil))
 }
 
-func TestHandler_validateRequest(t *testing.T) {
+func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop,maintidx
 	t.Parallel()
 
 	// Create a test logger

@@ -1,18 +1,19 @@
-package github
+package github_test
 
 import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github"
 )
 
 func TestListCommitsQuery_PageInfo(t *testing.T) {
 	t.Parallel()
-	query := &ListCommitsQuery{
-		Repository: &CommitsRepository{
-			PullRequest: &CommitsPullRequest{
-				Commits: &Commits{
-					PageInfo: &PageInfo{
+	query := &github.ListCommitsQuery{
+		Repository: &github.CommitsRepository{
+			PullRequest: &github.CommitsPullRequest{
+				Commits: &github.Commits{
+					PageInfo: &github.PageInfo{
 						HasNextPage: true,
 						EndCursor:   "cursor123",
 					},
@@ -22,7 +23,7 @@ func TestListCommitsQuery_PageInfo(t *testing.T) {
 	}
 
 	got := query.PageInfo()
-	want := &PageInfo{
+	want := &github.PageInfo{
 		HasNextPage: true,
 		EndCursor:   "cursor123",
 	}
@@ -34,23 +35,23 @@ func TestListCommitsQuery_PageInfo(t *testing.T) {
 
 func TestListCommitsQuery_Nodes(t *testing.T) {
 	t.Parallel()
-	nodes := []*PullRequestCommit{
+	nodes := []*github.PullRequestCommit{
 		{
-			Commit: &Commit{
+			Commit: &github.Commit{
 				OID: "abc123",
 			},
 		},
 		{
-			Commit: &Commit{
+			Commit: &github.Commit{
 				OID: "def456",
 			},
 		},
 	}
 
-	query := &ListCommitsQuery{
-		Repository: &CommitsRepository{
-			PullRequest: &CommitsPullRequest{
-				Commits: &Commits{
+	query := &github.ListCommitsQuery{
+		Repository: &github.CommitsRepository{
+			PullRequest: &github.CommitsPullRequest{
+				Commits: &github.Commits{
 					Nodes: nodes,
 				},
 			},
@@ -65,11 +66,11 @@ func TestListCommitsQuery_Nodes(t *testing.T) {
 
 func TestListReviewsQuery_PageInfo(t *testing.T) {
 	t.Parallel()
-	query := &ListReviewsQuery{
-		Repository: &ReviewsRepository{
-			PullRequest: &ReviewsPullRequest{
-				Reviews: &Reviews{
-					PageInfo: &PageInfo{
+	query := &github.ListReviewsQuery{
+		Repository: &github.ReviewsRepository{
+			PullRequest: &github.ReviewsPullRequest{
+				Reviews: &github.Reviews{
+					PageInfo: &github.PageInfo{
 						HasNextPage: false,
 						EndCursor:   "cursor456",
 					},
@@ -79,7 +80,7 @@ func TestListReviewsQuery_PageInfo(t *testing.T) {
 	}
 
 	got := query.PageInfo()
-	want := &PageInfo{
+	want := &github.PageInfo{
 		HasNextPage: false,
 		EndCursor:   "cursor456",
 	}
@@ -91,25 +92,25 @@ func TestListReviewsQuery_PageInfo(t *testing.T) {
 
 func TestListReviewsQuery_Nodes(t *testing.T) {
 	t.Parallel()
-	nodes := []*Review{
+	nodes := []*github.Review{
 		{
 			State: "APPROVED",
-			Author: &User{
+			Author: &github.User{
 				Login: "reviewer1",
 			},
 		},
 		{
 			State: "CHANGES_REQUESTED",
-			Author: &User{
+			Author: &github.User{
 				Login: "reviewer2",
 			},
 		},
 	}
 
-	query := &ListReviewsQuery{
-		Repository: &ReviewsRepository{
-			PullRequest: &ReviewsPullRequest{
-				Reviews: &Reviews{
+	query := &github.ListReviewsQuery{
+		Repository: &github.ReviewsRepository{
+			PullRequest: &github.ReviewsPullRequest{
+				Reviews: &github.Reviews{
 					Nodes: nodes,
 				},
 			},
@@ -124,8 +125,8 @@ func TestListReviewsQuery_Nodes(t *testing.T) {
 
 func TestCommitter_Login(t *testing.T) {
 	t.Parallel()
-	committer := &Committer{
-		User: &User{
+	committer := &github.Committer{
+		User: &github.User{
 			Login:        "test-user",
 			ResourcePath: "/users/test-user",
 		},

@@ -1,16 +1,18 @@
-package config
+//nolint:funlen
+package config_test
 
 import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/config"
 )
 
-func TestConfig_Init(t *testing.T) {
+func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 	t.Parallel()
 	tests := []struct {
 		name                                string
-		config                              *Config
+		config                              *config.Config
 		expectedUniqueTrustedApps           map[string]struct{}
 		expectedUniqueTrustedMachineUsers   map[string]struct{}
 		expectedUniqueUntrustedMachineUsers map[string]struct{}
@@ -19,7 +21,7 @@ func TestConfig_Init(t *testing.T) {
 	}{
 		{
 			name: "basic initialization",
-			config: &Config{
+			config: &config.Config{
 				TrustedApps:           []string{"app1[bot]", "app2[bot]"},
 				TrustedMachineUsers:   []string{"trusted-user1", "trusted-user2"},
 				UntrustedMachineUsers: []string{"untrusted-*", "bot-*"},
@@ -42,7 +44,7 @@ func TestConfig_Init(t *testing.T) {
 		},
 		{
 			name: "empty configuration with defaults",
-			config: &Config{
+			config: &config.Config{
 				Templates: map[string]string{},
 			},
 			expectedUniqueTrustedApps:           map[string]struct{}{},
@@ -52,7 +54,7 @@ func TestConfig_Init(t *testing.T) {
 		},
 		{
 			name: "duplicate entries in arrays",
-			config: &Config{
+			config: &config.Config{
 				TrustedApps:           []string{"app1[bot]", "app1[bot]", "app2[bot]"},
 				TrustedMachineUsers:   []string{"user1", "user1", "user2"},
 				UntrustedMachineUsers: []string{"bot-*", "bot-*"},
@@ -135,7 +137,7 @@ func TestConfig_Init(t *testing.T) {
 
 func TestConfig_Init_TemplateParseError(t *testing.T) {
 	t.Parallel()
-	config := &Config{
+	config := &config.Config{
 		Templates: map[string]string{
 			"no_approval": "{{invalid template syntax}}{{end",
 			"footer":      "footer content",
@@ -151,7 +153,7 @@ func TestConfig_Init_TemplateParseError(t *testing.T) {
 
 func TestConfig_Init_NilTemplates(t *testing.T) {
 	t.Parallel()
-	config := &Config{
+	config := &config.Config{
 		TrustedApps: []string{"app1[bot]"},
 		Templates:   nil,
 	}

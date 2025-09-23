@@ -13,31 +13,7 @@ import (
 // Run enforces pull request reviews.
 // It gets pull request reviews and committers via GitHub GraphQL API, and checks if people other than committers approve the PR.
 // If the PR isn't approved by people other than committers, it returns an error.
-func (c *Controller) Run(_ *slog.Logger, input *Input) *config.Result { //nolint:cyclop,funlen
-	// Approval
-	//   ignored
-	//     non approval
-	//     non latest
-	//   mark ignored
-	//      app
-	//      untrusted machine user
-	//   accepted but requires two approvals
-	//     self approval
-	//   accepted
-	// Commits
-	//   untrusted commits require two approvals
-	//     untrusted app
-	//     untrusted machine user
-	//     not linked to user
-	//     not signed
-	// User
-	//   trusted
-	//     trusted app
-	//     normal user
-	//   untrusted
-	//     normal app
-	//     untrusted machine user
-	//   not linked
+func (c *Controller) Run(_ *slog.Logger, input *Input) *config.Result { //nolint:cyclop
 	pr := input.PR
 	result := &config.Result{
 		TrustedApps:           input.Config.TrustedApps,

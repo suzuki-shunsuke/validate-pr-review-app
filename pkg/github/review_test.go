@@ -1,24 +1,26 @@
-package github
+//nolint:funlen
+package github_test
 
 import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github"
 )
 
 func TestReview_Ignored(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name      string
-		review    *Review
+		review    *github.Review
 		latestSHA string
 		want      bool
 	}{
 		{
 			name: "approved review for latest commit",
-			review: &Review{
+			review: &github.Review{
 				State: "APPROVED",
-				Commit: &ReviewCommit{
+				Commit: &github.ReviewCommit{
 					OID: "abc123",
 				},
 			},
@@ -27,9 +29,9 @@ func TestReview_Ignored(t *testing.T) {
 		},
 		{
 			name: "approved review for old commit",
-			review: &Review{
+			review: &github.Review{
 				State: "APPROVED",
-				Commit: &ReviewCommit{
+				Commit: &github.ReviewCommit{
 					OID: "old123",
 				},
 			},
@@ -38,9 +40,9 @@ func TestReview_Ignored(t *testing.T) {
 		},
 		{
 			name: "changes requested for latest commit",
-			review: &Review{
+			review: &github.Review{
 				State: "CHANGES_REQUESTED",
-				Commit: &ReviewCommit{
+				Commit: &github.ReviewCommit{
 					OID: "abc123",
 				},
 			},
@@ -49,9 +51,9 @@ func TestReview_Ignored(t *testing.T) {
 		},
 		{
 			name: "changes requested for old commit",
-			review: &Review{
+			review: &github.Review{
 				State: "CHANGES_REQUESTED",
-				Commit: &ReviewCommit{
+				Commit: &github.ReviewCommit{
 					OID: "old123",
 				},
 			},
@@ -74,29 +76,29 @@ func TestReview_ValidateIgnored(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name                  string
-		review                *Review
+		review                *github.Review
 		trustedMachineUsers   map[string]struct{}
 		untrustedMachineUsers map[string]struct{}
-		want                  *IgnoredApproval
+		want                  *github.IgnoredApproval
 	}{
 		{
 			name: "app user - ignored",
-			review: &Review{
-				Author: &User{
+			review: &github.Review{
+				Author: &github.User{
 					Login:        "github-bot[bot]",
 					ResourcePath: "/apps/github-bot",
 				},
 				State: "APPROVED",
 			},
-			want: &IgnoredApproval{
+			want: &github.IgnoredApproval{
 				Login: "github-bot[bot]",
 				IsApp: true,
 			},
 		},
 		{
 			name: "trusted machine user - not ignored",
-			review: &Review{
-				Author: &User{
+			review: &github.Review{
+				Author: &github.User{
 					Login:        "trusted-bot",
 					ResourcePath: "/users/trusted-bot",
 				},
@@ -109,8 +111,8 @@ func TestReview_ValidateIgnored(t *testing.T) {
 		},
 		{
 			name: "untrusted machine user - ignored",
-			review: &Review{
-				Author: &User{
+			review: &github.Review{
+				Author: &github.User{
 					Login:        "untrusted-bot",
 					ResourcePath: "/users/untrusted-bot",
 				},
@@ -119,15 +121,15 @@ func TestReview_ValidateIgnored(t *testing.T) {
 			untrustedMachineUsers: map[string]struct{}{
 				"untrusted-*": {},
 			},
-			want: &IgnoredApproval{
+			want: &github.IgnoredApproval{
 				Login:                  "untrusted-bot",
 				IsUntrustedMachineUser: true,
 			},
 		},
 		{
 			name: "regular user - not ignored",
-			review: &Review{
-				Author: &User{
+			review: &github.Review{
+				Author: &github.User{
 					Login:        "regular-user",
 					ResourcePath: "/users/regular-user",
 				},
@@ -137,8 +139,8 @@ func TestReview_ValidateIgnored(t *testing.T) {
 		},
 		{
 			name: "app takes precedence over untrusted machine user",
-			review: &Review{
-				Author: &User{
+			review: &github.Review{
+				Author: &github.User{
 					Login:        "bot-app[bot]",
 					ResourcePath: "/apps/bot-app",
 				},
@@ -148,15 +150,15 @@ func TestReview_ValidateIgnored(t *testing.T) {
 			untrustedMachineUsers: map[string]struct{}{
 				"bot-*": {},
 			},
-			want: &IgnoredApproval{
+			want: &github.IgnoredApproval{
 				Login: "bot-app[bot]",
 				IsApp: true,
 			},
 		},
 		{
 			name: "trusted machine user takes precedence over untrusted pattern",
-			review: &Review{
-				Author: &User{
+			review: &github.Review{
+				Author: &github.User{
 					Login:        "special-bot",
 					ResourcePath: "/users/special-bot",
 				},

@@ -1,34 +1,35 @@
 //nolint:funlen
-package github
+package github_test
 
 import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github"
 )
 
 func TestPullRequestCommit_ValidateUntrusted(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name                  string
-		commit                *PullRequestCommit
+		commit                *github.PullRequestCommit
 		trustedApps           map[string]struct{}
 		trustedMachineUsers   map[string]struct{}
 		untrustedMachineUsers map[string]struct{}
-		want                  *UntrustedCommit
+		want                  *github.UntrustedCommit
 	}{
 		{
 			name: "trusted regular user with valid signature",
-			commit: &PullRequestCommit{
-				Commit: &Commit{
+			commit: &github.PullRequestCommit{
+				Commit: &github.Commit{
 					OID: "abc123",
-					Committer: &Committer{
-						User: &User{
+					Committer: &github.Committer{
+						User: &github.User{
 							Login:        "regular-user",
 							ResourcePath: "/users/regular-user",
 						},
 					},
-					Signature: &Signature{
+					Signature: &github.Signature{
 						IsValid: true,
 						State:   "valid",
 					},
@@ -38,40 +39,40 @@ func TestPullRequestCommit_ValidateUntrusted(t *testing.T) {
 		},
 		{
 			name: "not linked to user",
-			commit: &PullRequestCommit{
-				Commit: &Commit{
+			commit: &github.PullRequestCommit{
+				Commit: &github.Commit{
 					OID: "abc123",
-					Committer: &Committer{
-						User: &User{},
+					Committer: &github.Committer{
+						User: &github.User{},
 					},
 				},
 			},
-			want: &UntrustedCommit{
+			want: &github.UntrustedCommit{
 				NotLinkedToUser: true,
 				SHA:             "abc123",
 			},
 		},
 		{
 			name: "invalid signature",
-			commit: &PullRequestCommit{
-				Commit: &Commit{
+			commit: &github.PullRequestCommit{
+				Commit: &github.Commit{
 					OID: "abc123",
-					Committer: &Committer{
-						User: &User{
+					Committer: &github.Committer{
+						User: &github.User{
 							Login:        "user",
 							ResourcePath: "/users/user",
 						},
 					},
-					Signature: &Signature{
+					Signature: &github.Signature{
 						IsValid: false,
 						State:   "invalid",
 					},
 				},
 			},
-			want: &UntrustedCommit{
+			want: &github.UntrustedCommit{
 				Login: "user",
 				SHA:   "abc123",
-				InvalidSign: &Signature{
+				InvalidSign: &github.Signature{
 					IsValid: false,
 					State:   "invalid",
 				},
@@ -79,18 +80,18 @@ func TestPullRequestCommit_ValidateUntrusted(t *testing.T) {
 		},
 		{
 			name: "nil signature",
-			commit: &PullRequestCommit{
-				Commit: &Commit{
+			commit: &github.PullRequestCommit{
+				Commit: &github.Commit{
 					OID: "abc123",
-					Committer: &Committer{
-						User: &User{
+					Committer: &github.Committer{
+						User: &github.User{
 							Login:        "user",
 							ResourcePath: "/users/user",
 						},
 					},
 				},
 			},
-			want: &UntrustedCommit{
+			want: &github.UntrustedCommit{
 				Login:       "user",
 				SHA:         "abc123",
 				InvalidSign: nil,
@@ -98,16 +99,16 @@ func TestPullRequestCommit_ValidateUntrusted(t *testing.T) {
 		},
 		{
 			name: "trusted app",
-			commit: &PullRequestCommit{
-				Commit: &Commit{
+			commit: &github.PullRequestCommit{
+				Commit: &github.Commit{
 					OID: "abc123",
-					Committer: &Committer{
-						User: &User{
+					Committer: &github.Committer{
+						User: &github.User{
 							Login:        "trusted-bot[bot]",
 							ResourcePath: "/apps/trusted-bot",
 						},
 					},
-					Signature: &Signature{
+					Signature: &github.Signature{
 						IsValid: true,
 						State:   "valid",
 					},
@@ -120,22 +121,22 @@ func TestPullRequestCommit_ValidateUntrusted(t *testing.T) {
 		},
 		{
 			name: "untrusted app",
-			commit: &PullRequestCommit{
-				Commit: &Commit{
+			commit: &github.PullRequestCommit{
+				Commit: &github.Commit{
 					OID: "abc123",
-					Committer: &Committer{
-						User: &User{
+					Committer: &github.Committer{
+						User: &github.User{
 							Login:        "untrusted-bot[bot]",
 							ResourcePath: "/apps/untrusted-bot",
 						},
 					},
-					Signature: &Signature{
+					Signature: &github.Signature{
 						IsValid: true,
 						State:   "valid",
 					},
 				},
 			},
-			want: &UntrustedCommit{
+			want: &github.UntrustedCommit{
 				Login:          "untrusted-bot[bot]",
 				SHA:            "abc123",
 				IsUntrustedApp: true,
@@ -143,16 +144,16 @@ func TestPullRequestCommit_ValidateUntrusted(t *testing.T) {
 		},
 		{
 			name: "trusted machine user",
-			commit: &PullRequestCommit{
-				Commit: &Commit{
+			commit: &github.PullRequestCommit{
+				Commit: &github.Commit{
 					OID: "abc123",
-					Committer: &Committer{
-						User: &User{
+					Committer: &github.Committer{
+						User: &github.User{
 							Login:        "trusted-bot",
 							ResourcePath: "/users/trusted-bot",
 						},
 					},
-					Signature: &Signature{
+					Signature: &github.Signature{
 						IsValid: true,
 						State:   "valid",
 					},
@@ -165,16 +166,16 @@ func TestPullRequestCommit_ValidateUntrusted(t *testing.T) {
 		},
 		{
 			name: "untrusted machine user",
-			commit: &PullRequestCommit{
-				Commit: &Commit{
+			commit: &github.PullRequestCommit{
+				Commit: &github.Commit{
 					OID: "abc123",
-					Committer: &Committer{
-						User: &User{
+					Committer: &github.Committer{
+						User: &github.User{
 							Login:        "untrusted-bot",
 							ResourcePath: "/users/untrusted-bot",
 						},
 					},
-					Signature: &Signature{
+					Signature: &github.Signature{
 						IsValid: true,
 						State:   "valid",
 					},
@@ -183,7 +184,7 @@ func TestPullRequestCommit_ValidateUntrusted(t *testing.T) {
 			untrustedMachineUsers: map[string]struct{}{
 				"untrusted-*": {},
 			},
-			want: &UntrustedCommit{
+			want: &github.UntrustedCommit{
 				Login:                  "untrusted-bot",
 				SHA:                    "abc123",
 				IsUntrustedMachineUser: true,
@@ -191,16 +192,16 @@ func TestPullRequestCommit_ValidateUntrusted(t *testing.T) {
 		},
 		{
 			name: "app takes precedence over machine user settings",
-			commit: &PullRequestCommit{
-				Commit: &Commit{
+			commit: &github.PullRequestCommit{
+				Commit: &github.Commit{
 					OID: "abc123",
-					Committer: &Committer{
-						User: &User{
+					Committer: &github.Committer{
+						User: &github.User{
 							Login:        "special-bot[bot]",
 							ResourcePath: "/apps/special-bot",
 						},
 					},
-					Signature: &Signature{
+					Signature: &github.Signature{
 						IsValid: true,
 						State:   "valid",
 					},
@@ -212,7 +213,7 @@ func TestPullRequestCommit_ValidateUntrusted(t *testing.T) {
 			untrustedMachineUsers: map[string]struct{}{
 				"special-*": {},
 			},
-			want: &UntrustedCommit{
+			want: &github.UntrustedCommit{
 				Login:          "special-bot[bot]",
 				SHA:            "abc123",
 				IsUntrustedApp: true,
@@ -220,16 +221,16 @@ func TestPullRequestCommit_ValidateUntrusted(t *testing.T) {
 		},
 		{
 			name: "trusted machine user takes precedence over untrusted pattern",
-			commit: &PullRequestCommit{
-				Commit: &Commit{
+			commit: &github.PullRequestCommit{
+				Commit: &github.Commit{
 					OID: "abc123",
-					Committer: &Committer{
-						User: &User{
+					Committer: &github.Committer{
+						User: &github.User{
 							Login:        "automation-bot",
 							ResourcePath: "/users/automation-bot",
 						},
 					},
-					Signature: &Signature{
+					Signature: &github.Signature{
 						IsValid: true,
 						State:   "valid",
 					},
@@ -245,19 +246,19 @@ func TestPullRequestCommit_ValidateUntrusted(t *testing.T) {
 		},
 		{
 			name: "fallback to author when committer user is nil",
-			commit: &PullRequestCommit{
-				Commit: &Commit{
+			commit: &github.PullRequestCommit{
+				Commit: &github.Commit{
 					OID: "abc123",
-					Committer: &Committer{
+					Committer: &github.Committer{
 						User: nil,
 					},
-					Author: &Committer{
-						User: &User{
+					Author: &github.Committer{
+						User: &github.User{
 							Login:        "author-user",
 							ResourcePath: "/users/author-user",
 						},
 					},
-					Signature: &Signature{
+					Signature: &github.Signature{
 						IsValid: true,
 						State:   "valid",
 					},
@@ -282,44 +283,44 @@ func TestCommit_User(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name   string
-		commit *Commit
-		want   *User
+		commit *github.Commit
+		want   *github.User
 	}{
 		{
 			name: "committer user exists",
-			commit: &Commit{
-				Committer: &Committer{
-					User: &User{
+			commit: &github.Commit{
+				Committer: &github.Committer{
+					User: &github.User{
 						Login:        "committer",
 						ResourcePath: "/users/committer",
 					},
 				},
-				Author: &Committer{
-					User: &User{
+				Author: &github.Committer{
+					User: &github.User{
 						Login:        "author",
 						ResourcePath: "/users/author",
 					},
 				},
 			},
-			want: &User{
+			want: &github.User{
 				Login:        "committer",
 				ResourcePath: "/users/committer",
 			},
 		},
 		{
 			name: "committer user is nil, fallback to author",
-			commit: &Commit{
-				Committer: &Committer{
+			commit: &github.Commit{
+				Committer: &github.Committer{
 					User: nil,
 				},
-				Author: &Committer{
-					User: &User{
+				Author: &github.Committer{
+					User: &github.User{
 						Login:        "author",
 						ResourcePath: "/users/author",
 					},
 				},
 			},
-			want: &User{
+			want: &github.User{
 				Login:        "author",
 				ResourcePath: "/users/author",
 			},
@@ -341,14 +342,14 @@ func TestCommit_Linked(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name   string
-		commit *Commit
+		commit *github.Commit
 		want   bool
 	}{
 		{
 			name: "linked user with login",
-			commit: &Commit{
-				Committer: &Committer{
-					User: &User{
+			commit: &github.Commit{
+				Committer: &github.Committer{
+					User: &github.User{
 						Login:        "user",
 						ResourcePath: "/users/user",
 					},
@@ -358,9 +359,9 @@ func TestCommit_Linked(t *testing.T) {
 		},
 		{
 			name: "not linked user with empty login",
-			commit: &Commit{
-				Committer: &Committer{
-					User: &User{
+			commit: &github.Commit{
+				Committer: &github.Committer{
+					User: &github.User{
 						Login:        "",
 						ResourcePath: "/users/unknown",
 					},
@@ -370,12 +371,12 @@ func TestCommit_Linked(t *testing.T) {
 		},
 		{
 			name: "fallback to author when committer user is nil",
-			commit: &Commit{
-				Committer: &Committer{
+			commit: &github.Commit{
+				Committer: &github.Committer{
 					User: nil,
 				},
-				Author: &Committer{
-					User: &User{
+				Author: &github.Committer{
+					User: &github.User{
 						Login:        "author",
 						ResourcePath: "/users/author",
 					},
@@ -385,12 +386,12 @@ func TestCommit_Linked(t *testing.T) {
 		},
 		{
 			name: "fallback to author with empty login",
-			commit: &Commit{
-				Committer: &Committer{
+			commit: &github.Commit{
+				Committer: &github.Committer{
 					User: nil,
 				},
-				Author: &Committer{
-					User: &User{
+				Author: &github.Committer{
+					User: &github.User{
 						Login:        "",
 						ResourcePath: "/users/unknown",
 					},
