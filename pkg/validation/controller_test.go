@@ -8,12 +8,21 @@ import (
 
 func TestNew(t *testing.T) {
 	t.Parallel()
-	controller := validation.New()
-	if controller == nil {
-		t.Error("New() returned nil")
+	tests := []struct {
+		name string
+	}{
+		{
+			name: "creates new controller",
+		},
 	}
-	// Check if it's the correct type
-	if controller == (*validation.Controller)(nil) {
-		t.Error("New() returned nil Controller")
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := validation.New()
+			if got == nil {
+				t.Error("New() returned nil")
+			}
+		})
 	}
 }

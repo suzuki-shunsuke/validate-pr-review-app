@@ -119,6 +119,7 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 		}
 	}
 	if result.SelfApprover != "" || len(result.UntrustedCommits) > 0 {
+		result.State = StateTwoApprovalsAreRequired
 		return result
 	}
 	// One approval is sufficient
