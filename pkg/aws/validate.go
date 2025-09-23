@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/google/go-github/v74/github"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 var (
@@ -16,12 +17,21 @@ var (
 	errHeaderXHubSignatureIsRequired                    = errors.New("header X-HUB-SIGNATURE is required")
 	errSignatureInvalid                                 = errors.New("signature is invalid")
 	errHeaderXHubEventIsRequired                        = errors.New("header X-HUB-EVENT is required")
+	errInvalidEventType                                 = errors.New("event type is invalid")
+	errInvalidAppID                                     = errors.New("app ID is invalid")
 )
 
-func (h *Handler) validate(logger *slog.Logger, req *Request) (*github.PullRequestReviewEvent, error) {
+const (
+	headerXGitHubHookInstallationTargetID = "X-GITHUB-HOOK-INSTALLATION-TARGET-ID"
+	headerXHubSignature                   = "X-HUB-SIGNATURE"
+	headerXGitHubEvent                    = "X-GITHUB-EVENT"
+	eventPullRequestReview                = "pull_request_review"
+)
+
+func (h *Handler) validateRequest(logger *slog.Logger, req *Request) (*github.PullRequestReviewEvent, error) {
 	headers := req.Params.Headers
 	bodyStr := req.Body
-	appIDstr, ok := headers["X-GITHUB-HOOK-INSTALLATION-TARGET-ID"]
+	appIDstr, ok := headers[headerXGitHubHookInstallationTargetID]
 	if !ok {
 		return nil, errHeaderXGitHubHookInstallationTargetIDIsRequired
 	}
@@ -30,10 +40,10 @@ func (h *Handler) validate(logger *slog.Logger, req *Request) (*github.PullReque
 		return nil, errHeaderXGitHubHookInstallationTargetIDMustBeInt64
 	}
 	if appID != h.config.AppID {
-		return nil, fmt.Errorf("app ID %d is not supported, expected %d", appID, h.config.AppID)
+		return nil, slogerr.With(errInvalidAppID, "app_id", appID, "expected_app_id", h.config.AppID) //nolint:wrapcheck
 	}
 
-	sig, ok := headers["X-HUB-SIGNATURE"]
+	sig, ok := headers[headerXHubSignature]
 	if !ok {
 		return nil, errHeaderXHubSignatureIsRequired
 	}
@@ -44,12 +54,12 @@ func (h *Handler) validate(logger *slog.Logger, req *Request) (*github.PullReque
 		return nil, errSignatureInvalid
 	}
 
-	evType, ok := headers["X-GITHUB-EVENT"]
+	evType, ok := headers[headerXGitHubEvent]
 	if !ok {
 		return nil, errHeaderXHubEventIsRequired
 	}
-	if evType != "pull_request_review" {
-		return nil, fmt.Errorf("event type %q is not supported, expected %q", evType, "pull_request_review")
+	if evType != eventPullRequestReview {
+		return nil, slogerr.With(errInvalidEventType, "event_type", evType) //nolint:wrapcheck
 	}
 
 	payload := &github.PullRequestReviewEvent{}

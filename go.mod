@@ -8,10 +8,11 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.31.8
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.39.4
 	github.com/bradleyfalzon/ghinstallation/v2 v2.16.0
+	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v74 v74.0.0
 	github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
-	github.com/spf13/afero v1.15.0
-	github.com/stretchr/testify v1.11.1
+	github.com/suzuki-shunsuke/slog-error v0.2.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -31,6 +32,4 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/shurcooL/graphql v0.0.0-20230722043721-ed46e5a46466 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
-	golang.org/x/text v0.28.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
