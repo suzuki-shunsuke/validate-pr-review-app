@@ -5,10 +5,6 @@ query($owner: String!, $repo: String!, $pr: Int!) {
   repository(owner: $owner, name: $repo) {
     pullRequest(number: $pr) {
       headRefOid
-      author {
-        login
-        resourcePath
-      }
       latestReviews(first: 100) {
         pageInfo {
           hasNextPage
@@ -59,7 +55,6 @@ query($owner: String!, $repo: String!, $pr: Int!) {
 
 type PullRequest struct {
 	HeadRefOID string   `json:"headRefOid"`
-	Author     *User    `json:"author"`
 	Reviews    *Reviews `json:"latestReviews" graphql:"latestReviews(first:30)"`
 	Commits    *Commits `json:"commits" graphql:"commits(first:30)"`
 }
@@ -68,27 +63,6 @@ type Author struct {
 	Login                string
 	UntrustedMachineUser bool
 	UntrustedApp         bool
-}
-
-// IsTrustedAuthor returns true if the PR author is trusted.
-// The PR author is trusted if he is a trusted app or not untrusted machine user.
-func (pr *PullRequest) ValidateAuthor(trustedApps, trustedMachineUsers, untrustedMachineUsers map[string]struct{}) *Author {
-	if pr.Author.IsApp() {
-		if _, ok := trustedApps[pr.Author.Login]; ok {
-			return nil
-		}
-		return &Author{
-			Login:        pr.Author.Login,
-			UntrustedApp: true,
-		}
-	}
-	if pr.Author.IsTrustedUser(trustedMachineUsers, untrustedMachineUsers) {
-		return nil
-	}
-	return &Author{
-		Login:                pr.Author.Login,
-		UntrustedMachineUser: true,
-	}
 }
 
 type PageInfo struct {

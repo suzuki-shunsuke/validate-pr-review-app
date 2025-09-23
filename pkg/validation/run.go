@@ -45,10 +45,6 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 	//   accepted but requires two approvals
 	//     self approval
 	//   accepted
-	// PR Author
-	//   requires two approvals
-	//     untrusted user
-	//   one approval is sufficient
 	// Commits
 	//   untrusted commits require two approvals
 	//     untrusted app
@@ -100,12 +96,6 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 	// One approval
 
 	// Require two approvals if the PR author is untrusted
-	result.Author = pr.ValidateAuthor(input.Config.UniqueTrustedApps, input.Config.UniqueTrustedMachineUsers, input.Config.UniqueUntrustedMachineUsers)
-	if result.Author != nil {
-		// Two approvals are required as the pr author is untrusted, but one approval is given
-		result.State = StateTwoApprovalsAreRequired
-		return result
-	}
 	for _, commit := range pr.Commits.Nodes {
 		if untrustedCommit := commit.ValidateUntrusted(input.Config.UniqueTrustedApps, input.Config.UniqueTrustedMachineUsers, input.Config.UniqueUntrustedMachineUsers); untrustedCommit != nil {
 			// Two approvals are required as there is an untrusted commit, but one approval is given
@@ -132,7 +122,6 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 type Result struct {
 	Error        string
 	State        State
-	Author       *github.Author
 	Approvers    []string
 	SelfApprover string
 	// app or untrusted machine user approvals
