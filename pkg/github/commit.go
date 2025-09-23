@@ -13,6 +13,28 @@ type UntrustedCommit struct {
 	NotLinkedToUser        bool
 }
 
+func (c *UntrustedCommit) Message() string {
+	if c == nil {
+		return ""
+	}
+	if c.NotLinkedToUser {
+		return "The commit is not linked to any GitHub user."
+	}
+	if c.IsUntrustedApp {
+		return "The committer is an untrusted app."
+	}
+	if c.IsUntrustedMachineUser {
+		return "The committer is an untrusted machine user."
+	}
+	if c.InvalidSign == nil {
+		return "The commit isn't signed."
+	}
+	if !c.InvalidSign.IsValid {
+		return "The commit sign is invalid. " + c.InvalidSign.State
+	}
+	return ""
+}
+
 // ValidateUntrusted checks if the commit is untrusted.
 // It returns nil if the commit is trusted, otherwise returns the reason why it is untrusted.
 // A commit is untrusted if it is not linked to any GitHub user, if its sign is invalid the commiter is untrusted app or untrusted machine user.

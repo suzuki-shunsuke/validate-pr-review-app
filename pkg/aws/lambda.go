@@ -37,7 +37,7 @@ type GitHub interface {
 }
 
 type Validator interface {
-	Run(logger *slog.Logger, input *validation.Input) *validation.Result
+	Run(logger *slog.Logger, input *validation.Input) *config.Result
 }
 
 func NewHandler(ctx context.Context, logger *slog.Logger) (*Handler, error) {
@@ -159,12 +159,12 @@ func (h *Handler) do(ctx context.Context, req *Request) {
 	}
 }
 
-func (h *Handler) validate(ctx context.Context, ev *github.PullRequestReviewEvent) *validation.Result {
+func (h *Handler) validate(ctx context.Context, ev *github.PullRequestReviewEvent) *config.Result {
 	repo := ev.GetRepo()
 	owner := repo.GetOwner().GetLogin()
 	pr, err := h.gh.GetPR(ctx, owner, repo.GetName(), ev.GetPullRequest().GetNumber())
 	if err != nil {
-		return &validation.Result{Error: fmt.Errorf("get a pull request: %w", err).Error()}
+		return &config.Result{Error: fmt.Errorf("get a pull request: %w", err).Error()}
 	}
 	return h.validator.Run(h.logger, &validation.Input{
 		PR:     pr,
@@ -172,7 +172,7 @@ func (h *Handler) validate(ctx context.Context, ev *github.PullRequestReviewEven
 	})
 }
 
-func summarize(result *validation.Result, templates map[string]*template.Template) (string, error) {
+func summarize(result *config.Result, templates map[string]*template.Template) (string, error) {
 	var buf bytes.Buffer
 	tpl, ok := templates[string(result.State)]
 	if !ok {

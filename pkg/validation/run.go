@@ -4,37 +4,16 @@ import (
 	"log/slog"
 	"maps"
 	"slices"
+	"sort"
 
+	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github"
-)
-
-type State string
-
-const (
-	// OK - Two approvals
-	//   approvers
-	StateTwoApprovals State = "two_approvals"
-	// NG - approvals are required but actually no approval
-	//   ignored approvers
-	StateApprovalIsRequired State = "approval_is_required"
-	// NG - two approvals are required but actually one approval
-	//   why two approvals are required
-	//     self approval
-	//     untrusted author
-	//     untrusted commit
-	//   approvers
-	//   self approvers
-	//   ignored approvers
-	StateTwoApprovalsAreRequired State = "two_approvals_are_required"
-	// OK - one approval is sufficient
-	//   approvers
-	StateOneApproval State = "one_approval"
 )
 
 // Run enforces pull request reviews.
 // It gets pull request reviews and committers via GitHub GraphQL API, and checks if people other than committers approve the PR.
 // If the PR isn't approved by people other than committers, it returns an error.
-func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop,funlen
+func (c *Controller) Run(_ *slog.Logger, input *Input) *config.Result { //nolint:cyclop,funlen
 	// Approval
 	//   ignored
 	//     non approval
@@ -60,7 +39,7 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 	//     untrusted machine user
 	//   not linked
 	pr := input.PR
-	result := &Result{
+	result := &config.Result{
 		TrustedApps:           input.Config.TrustedApps,
 		UntrustedMachineUsers: input.Config.UntrustedMachineUsers,
 		TrustedMachineUsers:   input.Config.TrustedMachineUsers,
@@ -82,14 +61,18 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 	if len(approvers) > 1 {
 		// Allow multiple approvals
 		result.Approvers = slices.Sorted(maps.Keys(approvers))
-		result.State = StateTwoApprovals
+		result.State = config.StateTwoApprovals
 		return result
 	}
 
-	result.IgnoredApprovers = ignoredApprovers
+	ignoredApproversSlice := slices.Collect(maps.Values(ignoredApprovers))
+	sort.Slice(ignoredApproversSlice, func(i, j int) bool {
+		return ignoredApproversSlice[i].Login < ignoredApproversSlice[j].Login
+	})
+	result.IgnoredApprovers = ignoredApproversSlice
 	if len(approvers) == 0 {
 		// Approval is required
-		result.State = StateApprovalIsRequired
+		result.State = config.StateApprovalIsRequired
 		return result
 	}
 
@@ -109,30 +92,12 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 		}
 	}
 	if result.SelfApprover != "" || len(result.UntrustedCommits) > 0 {
-		result.State = StateTwoApprovalsAreRequired
+		result.State = config.StateTwoApprovalsAreRequired
 		return result
 	}
 	// One approval is sufficient
 	// author and commits are trusted
 	result.Approvers = slices.Sorted(maps.Keys(approvers))
-	result.State = StateOneApproval
+	result.State = config.StateOneApproval
 	return result
-}
-
-type Result struct {
-	Error        string
-	State        State
-	Approvers    []string
-	SelfApprover string
-	// app or untrusted machine user approvals
-	IgnoredApprovers map[string]*github.IgnoredApproval
-	// app
-	// untrusted machine user
-	// not linked to any GitHub user
-	// not signed commits
-	UntrustedCommits []*github.UntrustedCommit
-	// settings
-	TrustedApps           []string
-	UntrustedMachineUsers []string
-	TrustedMachineUsers   []string
 }

@@ -2,7 +2,7 @@
 
 This commit has more than two approvals.
 
-{{range .Approvals}}
+{{range .Approvers}}
 - {{.Login}}
 {{end}}
 

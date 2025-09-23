@@ -15,7 +15,7 @@ func TestController_Run(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    *validation.Input
-		expected *validation.Result
+		expected *config.Result
 	}{
 		{
 			name: "two approvals - sufficient",
@@ -64,8 +64,8 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &validation.Result{
-				State:     validation.StateTwoApprovals,
+			expected: &config.Result{
+				State:     config.StateTwoApprovals,
 				Approvers: []string{"reviewer1", "reviewer2"},
 			},
 		},
@@ -95,9 +95,9 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &validation.Result{
-				State:            validation.StateApprovalIsRequired,
-				IgnoredApprovers: map[string]*github.IgnoredApproval{},
+			expected: &config.Result{
+				State:            config.StateApprovalIsRequired,
+				IgnoredApprovers: nil,
 			},
 		},
 		{
@@ -141,10 +141,10 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &validation.Result{
-				State:            validation.StateTwoApprovalsAreRequired,
+			expected: &config.Result{
+				State:            config.StateTwoApprovalsAreRequired,
 				SelfApprover:     "committer",
-				IgnoredApprovers: map[string]*github.IgnoredApproval{},
+				IgnoredApprovers: nil,
 			},
 		},
 		{
@@ -188,10 +188,10 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &validation.Result{
-				State:            validation.StateOneApproval,
+			expected: &config.Result{
+				State:            config.StateOneApproval,
 				Approvers:        []string{"reviewer1"},
-				IgnoredApprovers: map[string]*github.IgnoredApproval{},
+				IgnoredApprovers: nil,
 			},
 		},
 		{
@@ -219,10 +219,10 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &validation.Result{
-				State: validation.StateApprovalIsRequired,
-				IgnoredApprovers: map[string]*github.IgnoredApproval{
-					"bot-app[bot]": {
+			expected: &config.Result{
+				State: config.StateApprovalIsRequired,
+				IgnoredApprovers: []*github.IgnoredApproval{
+					{
 						Login: "bot-app[bot]",
 						IsApp: true,
 					},
@@ -270,8 +270,8 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &validation.Result{
-				State: validation.StateTwoApprovalsAreRequired,
+			expected: &config.Result{
+				State: config.StateTwoApprovalsAreRequired,
 				UntrustedCommits: []*github.UntrustedCommit{
 					{
 						Login: "committer",
@@ -282,7 +282,7 @@ func TestController_Run(t *testing.T) {
 						},
 					},
 				},
-				IgnoredApprovers: map[string]*github.IgnoredApproval{},
+				IgnoredApprovers: nil,
 			},
 		},
 	}
