@@ -3,4 +3,3 @@
 {{template "settings" .}}
 
 {{template "footer"}}
-
