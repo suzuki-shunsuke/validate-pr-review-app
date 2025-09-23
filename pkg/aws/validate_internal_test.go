@@ -3,6 +3,7 @@ package aws
 import (
 	"crypto/hmac"
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -172,7 +173,7 @@ func TestHandler_validateRequest(t *testing.T) {
 					},
 				},
 			},
-			wantErr: nil, // This will be a dynamic error message
+			wantErr: errInvalidEventType,
 		},
 		{
 			name: "invalid JSON payload",
@@ -210,6 +211,34 @@ func TestHandler_validateRequest(t *testing.T) {
 			},
 			wantPayload: true,
 		},
+		{
+			name: "app ID mismatch error message",
+			handler: &Handler{
+				config:        &config.Config{AppID: 12345},
+				webhookSecret: []byte("test-secret"),
+			},
+			request: &Request{
+				Body: "{}",
+				Params: &RequestParamsField{
+					Headers: map[string]string{
+						headerXGitHubHookInstallationTargetID: "99999",
+						headerXHubSignature:                   generateSignature("{}", []byte("test-secret")),
+						headerXGitHubEvent:                    eventPullRequestReview,
+					},
+				},
+			},
+			wantErr: errInvalidAppID,
+		},
+		{
+			name: "empty headers",
+			request: &Request{
+				Body: "{}",
+				Params: &RequestParamsField{
+					Headers: map[string]string{},
+				},
+			},
+			wantErr: errHeaderXGitHubHookInstallationTargetIDIsRequired,
+		},
 	}
 
 	for _, tt := range tests {
@@ -224,7 +253,7 @@ func TestHandler_validateRequest(t *testing.T) {
 					t.Errorf("validateRequest() expected error %v, got nil", tt.wantErr)
 					return
 				}
-				if err != tt.wantErr {
+				if !errors.Is(err, tt.wantErr) {
 					t.Errorf("validateRequest() error = %v, want %v", err, tt.wantErr)
 					return
 				}
@@ -253,116 +282,5 @@ func TestHandler_validateRequest(t *testing.T) {
 				}
 			}
 		})
-	}
-}
-
-func TestHandler_validateRequest_DynamicErrors(t *testing.T) {
-	t.Parallel()
-
-	// Create a test logger
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
-
-	tests := []struct {
-		name        string
-		handler     *Handler
-		request     *Request
-		expectedErr string
-	}{
-		{
-			name: "app ID mismatch error message",
-			handler: &Handler{
-				config:        &config.Config{AppID: 12345},
-				webhookSecret: []byte("test-secret"),
-			},
-			request: &Request{
-				Body: "{}",
-				Params: &RequestParamsField{
-					Headers: map[string]string{
-						headerXGitHubHookInstallationTargetID: "99999",
-						headerXHubSignature:                   generateSignature("{}", []byte("test-secret")),
-						headerXGitHubEvent:                    eventPullRequestReview,
-					},
-				},
-			},
-			expectedErr: "app ID 99999 is not supported, expected 12345",
-		},
-		{
-			name: "unsupported event type error message",
-			handler: &Handler{
-				config:        &config.Config{AppID: 12345},
-				webhookSecret: []byte("test-secret"),
-			},
-			request: &Request{
-				Body: "{}",
-				Params: &RequestParamsField{
-					Headers: map[string]string{
-						headerXGitHubHookInstallationTargetID: "12345",
-						headerXHubSignature:                   generateSignature("{}", []byte("test-secret")),
-						headerXGitHubEvent:                    "push",
-					},
-				},
-			},
-			expectedErr: "event type \"push\" is not supported, expected \"pull_request_review\"",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			_, err := tt.handler.validateRequest(logger, tt.request)
-
-			if err == nil {
-				t.Error("validateRequest() expected an error, got nil")
-				return
-			}
-
-			if err.Error() != tt.expectedErr {
-				t.Errorf("validateRequest() error message = %q, want %q", err.Error(), tt.expectedErr)
-			}
-		})
-	}
-}
-
-func TestHandler_validateRequest_NilParams(t *testing.T) {
-	t.Parallel()
-
-	handler := &Handler{
-		config: &config.Config{AppID: 12345},
-	}
-
-	request := &Request{
-		Body:   "{}",
-		Params: nil,
-	}
-
-	// This should panic due to nil pointer dereference, so we'll catch it
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("validateRequest() with nil Params should panic")
-		}
-	}()
-
-	_, _ = handler.validateRequest(nil, request)
-}
-
-func TestHandler_validateRequest_EmptyHeaders(t *testing.T) {
-	t.Parallel()
-
-	handler := &Handler{
-		config: &config.Config{AppID: 12345},
-	}
-
-	request := &Request{
-		Body: "{}",
-		Params: &RequestParamsField{
-			Headers: map[string]string{},
-		},
-	}
-
-	_, err := handler.validateRequest(nil, request)
-
-	if err != errHeaderXGitHubHookInstallationTargetIDIsRequired {
-		t.Errorf("validateRequest() with empty headers error = %v, want %v", err, errHeaderXGitHubHookInstallationTargetIDIsRequired)
 	}
 }

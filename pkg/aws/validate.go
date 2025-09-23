@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/google/go-github/v74/github"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 var (
@@ -16,6 +17,8 @@ var (
 	errHeaderXHubSignatureIsRequired                    = errors.New("header X-HUB-SIGNATURE is required")
 	errSignatureInvalid                                 = errors.New("signature is invalid")
 	errHeaderXHubEventIsRequired                        = errors.New("header X-HUB-EVENT is required")
+	errInvalidEventType                                 = errors.New("event type is invalid")
+	errInvalidAppID                                     = errors.New("app ID is invalid")
 )
 
 const (
@@ -37,7 +40,7 @@ func (h *Handler) validateRequest(logger *slog.Logger, req *Request) (*github.Pu
 		return nil, errHeaderXGitHubHookInstallationTargetIDMustBeInt64
 	}
 	if appID != h.config.AppID {
-		return nil, fmt.Errorf("app ID %d is not supported, expected %d", appID, h.config.AppID)
+		return nil, slogerr.With(errInvalidAppID, "app_id", appID, "expected_app_id", h.config.AppID)
 	}
 
 	sig, ok := headers[headerXHubSignature]
@@ -56,7 +59,7 @@ func (h *Handler) validateRequest(logger *slog.Logger, req *Request) (*github.Pu
 		return nil, errHeaderXHubEventIsRequired
 	}
 	if evType != eventPullRequestReview {
-		return nil, fmt.Errorf("event type %q is not supported, expected %q", evType, "pull_request_review")
+		return nil, slogerr.With(errInvalidEventType, "event_type", evType) //nolint:wrapcheck
 	}
 
 	payload := &github.PullRequestReviewEvent{}
