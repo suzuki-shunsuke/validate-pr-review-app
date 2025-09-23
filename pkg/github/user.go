@@ -10,24 +10,6 @@ type User struct {
 	ResourcePath string `json:"resourcePath"`
 }
 
-type ApprovalMarkIgnoredReason string
-
-const (
-	ApprovalMarkIgnoredReasonOK                   ApprovalMarkIgnoredReason = "ok"
-	ApprovalMarkIgnoredReasonApp                  ApprovalMarkIgnoredReason = "app"
-	ApprovalMarkIgnoredReasonUntrustedMachineUser ApprovalMarkIgnoredReason = "untrusted_machine_user"
-)
-
-func (u *User) MarkIgnored(trustedMachineUsers, untrustedMachineUsers map[string]struct{}) ApprovalMarkIgnoredReason {
-	if u.IsApp() {
-		return ApprovalMarkIgnoredReasonApp
-	}
-	if u.IsTrustedUser(trustedMachineUsers, untrustedMachineUsers) {
-		return ApprovalMarkIgnoredReasonOK
-	}
-	return ApprovalMarkIgnoredReasonUntrustedMachineUser
-}
-
 func (u *User) IsApp() bool {
 	return strings.HasPrefix(u.ResourcePath, "/apps/") || strings.HasSuffix(u.Login, "[bot]")
 }
