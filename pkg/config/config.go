@@ -76,7 +76,6 @@ func (cfg *Config) Init() error {
 	if err := cfg.testUntrustedMachineUsers(); err != nil {
 		return err
 	}
-	// TODO add test cases
 	return cfg.testTemplate()
 }
 
@@ -126,6 +125,7 @@ func (cfg *Config) testUntrustedMachineUsers() error {
 }
 
 func (cfg *Config) testTemplate() error {
+	// TODO add test cases
 	result := &Result{}
 	for key, tpl := range cfg.BuiltTemplates {
 		if err := tpl.Execute(io.Discard, result); err != nil {
