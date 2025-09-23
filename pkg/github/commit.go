@@ -37,7 +37,7 @@ func (c *UntrustedCommit) Message() string {
 
 // ValidateUntrusted checks if the commit is untrusted.
 // It returns nil if the commit is trusted, otherwise returns the reason why it is untrusted.
-// A commit is untrusted if it is not linked to any GitHub user, if its sign is invalid the commiter is untrusted app or untrusted machine user.
+// A commit is untrusted if it is not linked to any GitHub user, if its sign is invalid the committer is untrusted app or untrusted machine user.
 func (c *PullRequestCommit) ValidateUntrusted(trustedApps, trustedMachineUsers, untrustedMachineUsers map[string]struct{}) *UntrustedCommit {
 	commit := c.Commit
 	user := commit.User()
