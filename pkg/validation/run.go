@@ -37,7 +37,7 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *config.Result { //nolint
 	if len(approvers) > 1 {
 		// Allow multiple approvals
 		result.Approvers = slices.Sorted(maps.Keys(approvers))
-		result.State = config.StateTwoApprovals
+		result.State = config.StateApproved
 		return result
 	}
 
@@ -74,6 +74,6 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *config.Result { //nolint
 	// One approval is sufficient
 	// author and commits are trusted
 	result.Approvers = slices.Sorted(maps.Keys(approvers))
-	result.State = config.StateOneApproval
+	result.State = config.StateApproved
 	return result
 }

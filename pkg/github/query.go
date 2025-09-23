@@ -54,9 +54,11 @@ query($owner: String!, $repo: String!, $pr: Int!) {
 */
 
 type PullRequest struct {
-	HeadRefOID string   `json:"headRefOid"`
-	Reviews    *Reviews `json:"latestReviews" graphql:"latestReviews(first:30)"`
-	Commits    *Commits `json:"commits" graphql:"commits(first:30)"`
+	HeadRefOID string `json:"headRefOid"`
+	// latestReviews isn't appropriate.
+	// If someone adds a review comment after approval, the last review is the comment, not the approval.
+	Reviews *Reviews `json:"reviews" graphql:"reviews(first:30, states: [APPROVED, DISMISSED, CHANGES_REQUESTED])"`
+	Commits *Commits `json:"commits" graphql:"commits(first:30)"`
 }
 
 type Author struct {

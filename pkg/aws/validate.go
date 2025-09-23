@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"strconv"
+	"strings"
 
 	"github.com/google/go-github/v74/github"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
@@ -29,19 +29,22 @@ const (
 )
 
 func (h *Handler) validateRequest(logger *slog.Logger, req *Request) (*github.PullRequestReviewEvent, error) {
-	headers := req.Params.Headers
+	headers := make(map[string]string, len(req.Params.Headers))
+	for k, v := range req.Params.Headers {
+		headers[strings.ToUpper(k)] = v
+	}
 	bodyStr := req.Body
-	appIDstr, ok := headers[headerXGitHubHookInstallationTargetID]
-	if !ok {
-		return nil, errHeaderXGitHubHookInstallationTargetIDIsRequired
-	}
-	appID, err := strconv.ParseInt(appIDstr, 10, 64)
-	if err != nil {
-		return nil, errHeaderXGitHubHookInstallationTargetIDMustBeInt64
-	}
-	if appID != h.config.AppID {
-		return nil, slogerr.With(errInvalidAppID, "app_id", appID, "expected_app_id", h.config.AppID) //nolint:wrapcheck
-	}
+	// appIDstr, ok := headers[headerXGitHubHookInstallationTargetID]
+	// if !ok {
+	// 	return nil, errHeaderXGitHubHookInstallationTargetIDIsRequired
+	// }
+	// appID, err := strconv.ParseInt(appIDstr, 10, 64)
+	// if err != nil {
+	// 	return nil, errHeaderXGitHubHookInstallationTargetIDMustBeInt64
+	// }
+	// if appID != h.config.AppID {
+	// 	return nil, slogerr.With(errInvalidAppID, "app_id", appID, "expected_app_id", h.config.AppID) //nolint:wrapcheck
+	// }
 
 	sig, ok := headers[headerXHubSignature]
 	if !ok {

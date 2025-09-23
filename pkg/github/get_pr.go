@@ -38,6 +38,8 @@ func (c *Client) GetPR(ctx context.Context, owner, name string, number int) (*Pu
 			q.Repository.PullRequest.Commits.Nodes = append(q.Repository.PullRequest.Commits.Nodes, commits...)
 		}
 	}
+	// filter reviews
+	// Get the latest review for each user
 	return q.Repository.PullRequest, nil
 }
 

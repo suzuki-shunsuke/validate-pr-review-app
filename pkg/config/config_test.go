@@ -117,7 +117,7 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 			}
 
 			// Verify required templates exist
-			requiredTemplates := []string{"footer", "settings", "two_approvals", "no_approval", "require_two_approvals"}
+			requiredTemplates := []string{"footer", "settings", "approved", "no_approval", "require_two_approvals"}
 			for _, template := range requiredTemplates {
 				if _, exists := tt.config.Templates[template]; !exists {
 					t.Errorf("Required template %s not found", template)
@@ -125,7 +125,7 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 			}
 
 			// Verify built templates exist for main template keys
-			builtTemplateKeys := []string{"no_approval", "require_two_approvals", "two_approvals"}
+			builtTemplateKeys := []string{"no_approval", "require_two_approvals", "approved"}
 			for _, key := range builtTemplateKeys {
 				if _, exists := tt.config.BuiltTemplates[key]; !exists {
 					t.Errorf("Built template %s not found", key)

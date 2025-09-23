@@ -38,11 +38,19 @@ var (
 	templateRequireTwoApprovals []byte
 	//go:embed templates/settings.md
 	templateSettings []byte
-	//go:embed templates/two_approvals.md
-	templateTwoApprovals []byte
+	//go:embed templates/approved.md
+	templateApproved []byte
+	//go:embed templates/error.md
+	templateError []byte
 )
 
 func (cfg *Config) Init() error {
+	if cfg.TrustedApps == nil {
+		cfg.TrustedApps = []string{
+			"dependabot[bot]",
+			"renovate[bot]",
+		}
+	}
 	cfg.UniqueTrustedApps = make(map[string]struct{}, len(cfg.TrustedApps))
 	for _, app := range cfg.TrustedApps {
 		// TODO validate the app name
@@ -68,7 +76,7 @@ func (cfg *Config) Init() error {
 		cfg.UniqueUntrustedMachineUsers[user] = struct{}{}
 	}
 	if cfg.CheckName == "" {
-		cfg.CheckName = "check-approval"
+		cfg.CheckName = "verify-approval"
 	}
 	if err := cfg.initTemplates(); err != nil {
 		return err
@@ -83,9 +91,10 @@ func (cfg *Config) initTemplates() error {
 	defaultTemplates := map[string]string{
 		"footer":                string(templateFooter),
 		"settings":              string(templateSettings),
-		"two_approvals":         string(templateTwoApprovals),
+		"approved":              string(templateApproved),
 		"no_approval":           string(templateNoApproval),
 		"require_two_approvals": string(templateRequireTwoApprovals),
+		"error":                 string(templateError),
 	}
 	if cfg.Templates == nil {
 		cfg.Templates = map[string]string{}
@@ -100,7 +109,10 @@ func (cfg *Config) initTemplates() error {
 		define += `{{define "` + k + `"}}` + v + "{{end}}"
 	}
 	keys := []string{
-		"no_approval", "require_two_approvals", "two_approvals",
+		"no_approval",
+		"approved",
+		"require_two_approvals",
+		"error",
 	}
 	templates := make(map[string]*template.Template, len(keys))
 	for _, k := range keys {
@@ -156,12 +168,12 @@ type Result struct {
 type State string
 
 const (
-	// OK - Two approvals
+	// OK - Approved
 	//   approvers
-	StateTwoApprovals State = "two_approvals"
+	StateApproved State = "approved"
 	// NG - approvals are required but actually no approval
 	//   ignored approvers
-	StateApprovalIsRequired State = "approval_is_required"
+	StateApprovalIsRequired State = "no_approval"
 	// NG - two approvals are required but actually one approval
 	//   why two approvals are required
 	//     self approval
@@ -170,8 +182,5 @@ const (
 	//   approvers
 	//   self approvers
 	//   ignored approvers
-	StateTwoApprovalsAreRequired State = "two_approvals_are_required"
-	// OK - one approval is sufficient
-	//   approvers
-	StateOneApproval State = "one_approval"
+	StateTwoApprovalsAreRequired State = "require_two_approvals"
 )

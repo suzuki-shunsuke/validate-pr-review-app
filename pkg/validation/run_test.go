@@ -65,7 +65,7 @@ func TestController_Run(t *testing.T) {
 				},
 			},
 			expected: &config.Result{
-				State:     config.StateTwoApprovals,
+				State:     config.StateApproved,
 				Approvers: []string{"reviewer1", "reviewer2"},
 			},
 		},
@@ -189,7 +189,7 @@ func TestController_Run(t *testing.T) {
 				},
 			},
 			expected: &config.Result{
-				State:            config.StateOneApproval,
+				State:            config.StateApproved,
 				Approvers:        []string{"reviewer1"},
 				IgnoredApprovers: nil,
 			},

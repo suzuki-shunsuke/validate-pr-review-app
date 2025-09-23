@@ -9,8 +9,6 @@ Trusted Apps:
 Trusted Apps: Nothing.
 {{end}}
 
-Untrusted Machine Users:
-
 {{if .UntrustedMachineUsers}}
 Untrusted Machine Users:
 {{range .UntrustedMachineUsers}}
@@ -19,8 +17,6 @@ Untrusted Machine Users:
 {{else}}
 Untrusted Machine Users: Nothing
 {{end}}
-
-Trusted Machine Users:
 
 {{if .TrustedMachineUsers}}
 Trusted Machine Users:

@@ -1,5 +1,3 @@
-# :x: Two approvals are required
-
 This pull request requires two approvals because:
 
 {{if .SelfApprover}}

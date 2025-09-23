@@ -70,92 +70,28 @@ func NewHandler(ctx context.Context, logger *slog.Logger) (*Handler, error) {
 		return nil, fmt.Errorf("create a GitHub client: %w", err)
 	}
 	return &Handler{
-		logger:    logger,
-		config:    cfg,
-		gh:        gh,
-		validator: validation.New(),
+		logger:        logger,
+		config:        cfg,
+		gh:            gh,
+		validator:     validation.New(),
+		webhookSecret: []byte(secret.WebhookSecret),
 	}, nil
 }
 
 func (h *Handler) Start(ctx context.Context) {
-	lambda.StartWithOptions(h.do, lambda.WithContext(ctx))
+	lambda.StartWithOptions(h.handleFunctionURL, lambda.WithContext(ctx))
 }
 
 func (h *Handler) do(ctx context.Context, req *Request) {
+	logger := h.logger
 	lc, ok := lambdacontext.FromContext(ctx)
 	if !ok {
-		h.logger.Warn("lambda context is not found")
+		logger.Warn("lambda context is not found")
 	} else {
-		h.logger = h.logger.With("aws_request_id", lc.AwsRequestID)
+		logger = logger.With("aws_request_id", lc.AwsRequestID)
 	}
-
-	h.logger.Info("Starting a request", "request", req)
-	defer h.logger.Info("Ending a request", "request", req)
-
-	// Validate the request
-	ev, err := h.validateRequest(h.logger, req)
-	if err != nil {
-		h.logger.Warn("Failed to validate request", "error", err)
-		return
-	}
-
-	checkName := githubv4.String(h.config.CheckName)
-
-	// Get repository ID for GraphQL mutation
-	repoID := githubv4.String(ev.GetRepo().GetNodeID())
-	headSha := githubv4.GitObjectID(ev.GetPullRequest().GetHead().GetSHA())
-
-	// Create initial check run with IN_PROGRESS status
-	// inProgressStatus := githubv4.RequestableCheckStatusStateInProgress
-	// checkRunInput := githubv4.CreateCheckRunInput{
-	// 	RepositoryID: repoID,
-	// 	HeadSha:      headSha,
-	// 	Name:         checkName,
-	// 	Status:       &inProgressStatus,
-	// 	Output: &githubv4.CheckRunOutput{
-	// 		Title:   githubv4.String("Validating PR review requirements"),
-	// 		Summary: githubv4.String("Checking if the PR meets review requirements..."),
-	// 	},
-	// }
-
-	// if err := h.gh.CreateCheckRun(ctx, checkRunInput); err != nil {
-	// 	h.logger.Error("Failed to create initial check run", "error", err)
-	// 	// Continue with validation even if check run creation fails
-	// }
-
-	// Run validation
-	var conclusion githubv4.CheckConclusionState
-	var title, summary githubv4.String
-	result := h.validate(ctx, ev)
-	if result.Error != "" {
-		conclusion = githubv4.CheckConclusionStateFailure
-		title = githubv4.String("PR review requirements not met")
-	} else {
-		conclusion = githubv4.CheckConclusionStateSuccess
-		title = githubv4.String("PR review requirements met")
-	}
-	s, err := summarize(result, h.config.BuiltTemplates)
-	if err != nil {
-		slogerr.WithError(h.logger, err).Error("summarize the result")
-	}
-	summary = githubv4.String(s)
-
-	// Create final check run with conclusion
-	completedStatus := githubv4.RequestableCheckStatusStateCompleted
-	finalCheckRunInput := githubv4.CreateCheckRunInput{
-		RepositoryID: repoID,
-		HeadSha:      headSha,
-		Name:         checkName,
-		Status:       &completedStatus,
-		Conclusion:   &conclusion,
-		Output: &githubv4.CheckRunOutput{
-			Title:   title,
-			Summary: summary,
-		},
-	}
-
-	if err := h.gh.CreateCheckRun(ctx, finalCheckRunInput); err != nil {
-		h.logger.Error("Failed to create final check run", "error", err)
+	if err := h.handle(ctx, logger, req); err != nil {
+		slogerr.WithError(logger, err).Error("handle request")
 	}
 }
 
@@ -166,6 +102,7 @@ func (h *Handler) validate(ctx context.Context, ev *github.PullRequestReviewEven
 	if err != nil {
 		return &config.Result{Error: fmt.Errorf("get a pull request: %w", err).Error()}
 	}
+	h.logger.Info("Fetched a pull request", "pull_request", pr)
 	return h.validator.Run(h.logger, &validation.Input{
 		PR:     pr,
 		Config: h.config,
@@ -173,11 +110,17 @@ func (h *Handler) validate(ctx context.Context, ev *github.PullRequestReviewEven
 }
 
 func summarize(result *config.Result, templates map[string]*template.Template) (string, error) {
-	var buf bytes.Buffer
-	tpl, ok := templates[string(result.State)]
+	var key string
+	if result.Error != "" {
+		key = "error"
+	} else {
+		key = string(result.State)
+	}
+	tpl, ok := templates[key]
 	if !ok {
 		return "", errors.New("summary template is not found")
 	}
+	var buf bytes.Buffer
 	if err := tpl.Execute(&buf, result); err != nil {
 		return "", fmt.Errorf("execute summary template: %w", err)
 	}

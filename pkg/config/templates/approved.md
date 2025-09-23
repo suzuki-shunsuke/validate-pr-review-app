@@ -1,6 +1,6 @@
-# ✅ Approved
+The pull request has been approved.
 
-This commit has more than two approvals.
+Approvers:
 
 {{range .Approvers}}
 - {{.Login}}
