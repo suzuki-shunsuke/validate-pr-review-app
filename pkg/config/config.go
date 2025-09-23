@@ -61,6 +61,9 @@ func (cfg *Config) Init() error {
 		"no_approval":           string(templateNoApproval),
 		"require_two_approvals": string(templateRequireTwoApprovals),
 	}
+	if cfg.Templates == nil {
+		cfg.Templates = map[string]string{}
+	}
 	for name, tpl := range defaultTemplates {
 		if _, ok := cfg.Templates[name]; !ok {
 			cfg.Templates[name] = tpl
@@ -76,7 +79,7 @@ func (cfg *Config) Init() error {
 	templates := make(map[string]*template.Template, len(keys))
 	for _, k := range keys {
 		tpl := cfg.Templates[k] + define
-		tplParsed, err := template.New(k).Parse(tpl)
+		tplParsed, err := template.New("_").Parse(tpl)
 		if err != nil {
 			return fmt.Errorf("parse the template: %w", err)
 		}
