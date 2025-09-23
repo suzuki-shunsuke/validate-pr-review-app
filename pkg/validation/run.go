@@ -111,7 +111,7 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 			// Two approvals are required as there is an untrusted commit, but one approval is given
 			result.UntrustedCommits = append(result.UntrustedCommits, untrustedCommit)
 		}
-		committer := commit.User()
+		committer := commit.Commit.User()
 		login := committer.Login
 		if _, ok := approvers[login]; ok {
 			// Only one approval is given, but it's a self approval

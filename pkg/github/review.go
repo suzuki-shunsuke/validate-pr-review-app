@@ -13,7 +13,7 @@ type ReviewCommit struct {
 // Ignored returns true if the review should be ignored.
 // A review is ignored if it is not an approval or if it is not for the latest commit.
 func (r *Review) Ignored(latestSHA string) bool {
-	return r.State == "APPROVED" || r.Commit.OID != latestSHA
+	return r.State != "APPROVED" || r.Commit.OID != latestSHA
 }
 
 // IgnoredApproval represents an approval that is ignored.

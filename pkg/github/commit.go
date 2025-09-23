@@ -17,49 +17,42 @@ type UntrustedCommit struct {
 // It returns nil if the commit is trusted, otherwise returns the reason why it is untrusted.
 // A commit is untrusted if it is not linked to any GitHub user, if its sign is invalid the commiter is untrusted app or untrusted machine user.
 func (c *PullRequestCommit) ValidateUntrusted(trustedApps, trustedMachineUsers, untrustedMachineUsers map[string]struct{}) *UntrustedCommit {
-	if !c.Commit.Linked() {
+	commit := c.Commit
+	user := commit.User()
+	login := user.Login
+	sha := commit.OID
+	if !commit.Linked() {
 		return &UntrustedCommit{
 			NotLinkedToUser: true,
-			SHA:             c.Commit.OID,
+			SHA:             sha,
 		}
 	}
-	if c.Commit.Signature == nil || !c.Commit.Signature.IsValid {
+	sig := commit.Signature
+	if sig == nil || !sig.IsValid {
 		return &UntrustedCommit{
-			Login:       c.Commit.Login(),
-			SHA:         c.Commit.OID,
-			InvalidSign: c.Commit.Signature,
+			Login:       login,
+			SHA:         sha,
+			InvalidSign: sig,
 		}
 	}
-	if c.Commit.User().IsApp() {
-		if _, ok := trustedApps[c.Commit.Login()]; ok {
+	if user.IsApp() {
+		if _, ok := trustedApps[login]; ok {
 			return nil
 		}
 		return &UntrustedCommit{
-			Login:          c.Commit.Login(),
-			SHA:            c.Commit.OID,
+			Login:          login,
+			SHA:            sha,
 			IsUntrustedApp: true,
 		}
 	}
-	if c.Commit.User().IsTrustedUser(trustedMachineUsers, untrustedMachineUsers) {
+	if user.IsTrustedUser(trustedMachineUsers, untrustedMachineUsers) {
 		return nil
 	}
 	return &UntrustedCommit{
-		Login:                  c.Commit.Login(),
-		SHA:                    c.Commit.OID,
+		Login:                  login,
+		SHA:                    sha,
 		IsUntrustedMachineUser: true,
 	}
-}
-
-func (c *PullRequestCommit) Signature() *Signature {
-	return c.Commit.Signature
-}
-
-func (c *PullRequestCommit) User() *User {
-	return c.Commit.User()
-}
-
-func (c *PullRequestCommit) SHA() string {
-	return c.Commit.OID
 }
 
 type Commit struct {
@@ -81,10 +74,6 @@ func (c *Commit) User() *User {
 	return c.Author.User
 }
 
-func (c *Commit) Login() string {
-	return c.User().Login
-}
-
 func (c *Commit) Linked() bool {
-	return c.Login() != ""
+	return c.User().Login != ""
 }
