@@ -21,7 +21,7 @@ func generateSignature(payload string, secret []byte) string {
 	return fmt.Sprintf("sha1=%x", h.Sum(nil))
 }
 
-func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop,maintidx
+func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 	t.Parallel()
 
 	// Create a test logger

@@ -31,8 +31,8 @@ type Handler struct {
 
 type GitHub interface {
 	GetPR(ctx context.Context, owner, name string, number int) (*github.PullRequest, error)
-	ListReviews(ctx context.Context, owner, name string, number int, cursor string) ([]*github.Review, error)
-	ListCommits(ctx context.Context, owner, name string, number int, cursor string) ([]*github.PullRequestCommit, error)
+	// ListReviews(ctx context.Context, owner, name string, number int, cursor string) ([]*github.Review, error)
+	// ListCommits(ctx context.Context, owner, name string, number int, cursor string) ([]*github.PullRequestCommit, error)
 	CreateCheckRun(ctx context.Context, input githubv4.CreateCheckRunInput) error
 }
 
@@ -70,16 +70,26 @@ func NewHandler(ctx context.Context, logger *slog.Logger) (*Handler, error) {
 		return nil, fmt.Errorf("create a GitHub client: %w", err)
 	}
 	return &Handler{
-		logger:        logger,
-		config:        cfg,
-		gh:            gh,
-		validator:     validation.New(),
+		logger: logger,
+		config: cfg,
+		gh:     gh,
+		validator: validation.New(&validation.InputNew{
+			TrustedApps:           cfg.UniqueTrustedApps,
+			UntrustedMachineUsers: cfg.UniqueUntrustedMachineUsers,
+			TrustedMachineUsers:   cfg.UniqueTrustedMachineUsers,
+		}),
 		webhookSecret: []byte(secret.WebhookSecret),
 	}, nil
 }
 
 func (h *Handler) Start(ctx context.Context) {
-	lambda.StartWithOptions(h.handleFunctionURL, lambda.WithContext(ctx))
+	var handler any
+	if h.config.AWS.UseLambdaFunctionURL {
+		handler = h.handleFunctionURL
+	} else {
+		handler = h.do
+	}
+	lambda.StartWithOptions(handler, lambda.WithContext(ctx))
 }
 
 func (h *Handler) do(ctx context.Context, req *Request) {
@@ -104,8 +114,7 @@ func (h *Handler) validate(ctx context.Context, ev *github.PullRequestReviewEven
 	}
 	h.logger.Info("Fetched a pull request", "pull_request", pr)
 	return h.validator.Run(h.logger, &validation.Input{
-		PR:     pr,
-		Config: h.config,
+		PR: pr,
 	})
 }
 

@@ -47,10 +47,13 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 			config: &config.Config{
 				Templates: map[string]string{},
 			},
-			expectedUniqueTrustedApps:           map[string]struct{}{},
+			expectedUniqueTrustedApps: map[string]struct{}{
+				"dependabot[bot]": {},
+				"renovate[bot]":   {},
+			},
 			expectedUniqueTrustedMachineUsers:   map[string]struct{}{},
 			expectedUniqueUntrustedMachineUsers: map[string]struct{}{},
-			expectedCheckName:                   "check-approval", // default value
+			expectedCheckName:                   "verify-approval", // default value
 		},
 		{
 			name: "duplicate entries in arrays",
@@ -71,7 +74,7 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 			expectedUniqueUntrustedMachineUsers: map[string]struct{}{
 				"bot-*": {},
 			},
-			expectedCheckName: "check-approval",
+			expectedCheckName: "verify-approval",
 		},
 	}
 
@@ -170,5 +173,17 @@ func TestConfig_Init_NilTemplates(t *testing.T) {
 
 	if len(config.Templates) == 0 {
 		t.Error("Templates should be populated with default templates")
+	}
+}
+
+func TestTemplates(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+	}{}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+		})
 	}
 }

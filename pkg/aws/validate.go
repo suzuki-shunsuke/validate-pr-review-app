@@ -12,13 +12,10 @@ import (
 )
 
 var (
-	errHeaderXGitHubHookInstallationTargetIDIsRequired  = errors.New("header X-GITHUB-HOOK-INSTALLATION-TARGET-ID is required")
-	errHeaderXGitHubHookInstallationTargetIDMustBeInt64 = errors.New("header X-GITHUB-HOOK-INSTALLATION-TARGET-ID must be integer")
-	errHeaderXHubSignatureIsRequired                    = errors.New("header X-HUB-SIGNATURE is required")
-	errSignatureInvalid                                 = errors.New("signature is invalid")
-	errHeaderXHubEventIsRequired                        = errors.New("header X-HUB-EVENT is required")
-	errInvalidEventType                                 = errors.New("event type is invalid")
-	errInvalidAppID                                     = errors.New("app ID is invalid")
+	errHeaderXHubSignatureIsRequired = errors.New("header X-HUB-SIGNATURE is required")
+	errSignatureInvalid              = errors.New("signature is invalid")
+	errHeaderXHubEventIsRequired     = errors.New("header X-HUB-EVENT is required")
+	errInvalidEventType              = errors.New("event type is invalid")
 )
 
 const (
