@@ -1,5 +1,4 @@
 {{.Error}}
 
 {{template "settings" .}}
-
-{{template "footer"}}
+{{template "footer" -}}
