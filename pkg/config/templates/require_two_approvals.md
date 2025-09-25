@@ -20,4 +20,4 @@ Approvals from the following approvers are ignored:
 {{end}}
 {{end}}
 {{template "settings" .}}
-{{template "footer" -}}
+{{template "footer" . -}}
