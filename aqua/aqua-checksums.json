@@ -26,28 +26,28 @@
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/crate-ci/typos/v1.36.2/typos-v1.36.2-aarch64-apple-darwin.tar.gz",
-      "checksum": "C784CDB37D9BCFE347A161889EDB28BB07E24FE5828BAC14BDD42A071EA6C983",
+      "id": "github_release/github.com/crate-ci/typos/v1.36.3/typos-v1.36.3-aarch64-apple-darwin.tar.gz",
+      "checksum": "7F6C733BC33C8BFDBA9D684F1985DEAC219BB6E1AEDEB1A7F61132D150629CA3",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/crate-ci/typos/v1.36.2/typos-v1.36.2-aarch64-unknown-linux-musl.tar.gz",
-      "checksum": "2259A6CB7F22271B928F7AF9205045E46EAD98004A0757DF87916F91D4E6B35C",
+      "id": "github_release/github.com/crate-ci/typos/v1.36.3/typos-v1.36.3-aarch64-unknown-linux-musl.tar.gz",
+      "checksum": "60B54649D8B723052F3CC46571B66C49866C4C28AC7FDBF023236A1A0A40146B",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/crate-ci/typos/v1.36.2/typos-v1.36.2-x86_64-apple-darwin.tar.gz",
-      "checksum": "07ED2A25BE9D1CFEDE6AAA93B7758FDC939530C454EFFF35CF4E6CA51F0B12F2",
+      "id": "github_release/github.com/crate-ci/typos/v1.36.3/typos-v1.36.3-x86_64-apple-darwin.tar.gz",
+      "checksum": "52D0BF951FF3BFED2C0D746E036F443E14A037D669CD6FF73FC64BB55E07794F",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/crate-ci/typos/v1.36.2/typos-v1.36.2-x86_64-pc-windows-msvc.zip",
-      "checksum": "7079D16D4D19F973E6F8D45F61EA53C3C7D0D73285D85D5B180D1E384EB0AE12",
+      "id": "github_release/github.com/crate-ci/typos/v1.36.3/typos-v1.36.3-x86_64-pc-windows-msvc.zip",
+      "checksum": "4A39D96D2777C3C0095B0CCE91D429C9F13F23CB2BB75E5E29EC508DCFBC655B",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/crate-ci/typos/v1.36.2/typos-v1.36.2-x86_64-unknown-linux-musl.tar.gz",
-      "checksum": "D255F509ACA7D43A50854CDC5EA94480B13918459992E3B5F2D0D8C4EADDDB49",
+      "id": "github_release/github.com/crate-ci/typos/v1.36.3/typos-v1.36.3-x86_64-unknown-linux-musl.tar.gz",
+      "checksum": "2D51E68CEADE784C36603CD4EE23BB681FE5D808CE193BE45F24124FC0D3BA42",
       "algorithm": "sha256"
     },
     {
@@ -81,28 +81,28 @@
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/goreleaser/goreleaser/v2.12.2/goreleaser_Darwin_all.tar.gz",
-      "checksum": "28E7DB397DC342ED751A91B66CB8F71694BF30FE1F0850E8C7FB225A05435E9D",
+      "id": "github_release/github.com/goreleaser/goreleaser/v2.12.3/goreleaser_Darwin_all.tar.gz",
+      "checksum": "7AF0CE76660556F8A7CEB6C3D1B438E170EE3F551D5408153830697EB25F5962",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/goreleaser/goreleaser/v2.12.2/goreleaser_Linux_arm64.tar.gz",
-      "checksum": "F0F4562928DA5F3CC680752B1DAC9E3B361D4CA65D4F4B5045076C354BFC1854",
+      "id": "github_release/github.com/goreleaser/goreleaser/v2.12.3/goreleaser_Linux_arm64.tar.gz",
+      "checksum": "A841DB4911C1DC32FB8EB1D4AFE91AE218C71BBC3B18379F9CDDB2EE899ACA31",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/goreleaser/goreleaser/v2.12.2/goreleaser_Linux_x86_64.tar.gz",
-      "checksum": "B7C923E1FF208A5AA4C800EE0331D9FDC8D3EA434F1126E43088676B34D5717B",
+      "id": "github_release/github.com/goreleaser/goreleaser/v2.12.3/goreleaser_Linux_x86_64.tar.gz",
+      "checksum": "FD64C4BAEA57043A63CC209E8AD3FA54A7E3EDA88BF0D053D1AF9B577F328EAC",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/goreleaser/goreleaser/v2.12.2/goreleaser_Windows_arm64.zip",
-      "checksum": "557ACA29DC94314DA683320DCE0F86B2B1CC25803ABBAB63C1CF6C838AE1CD7B",
+      "id": "github_release/github.com/goreleaser/goreleaser/v2.12.3/goreleaser_Windows_arm64.zip",
+      "checksum": "D2FF86ED139485397DE82274628D6C1F725AD33614F81F043C798FDA46030D23",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/goreleaser/goreleaser/v2.12.2/goreleaser_Windows_x86_64.zip",
-      "checksum": "278F887C410BD0B2F02E99F77A67D5277B511944BD26108631B8F878BDA53711",
+      "id": "github_release/github.com/goreleaser/goreleaser/v2.12.3/goreleaser_Windows_x86_64.zip",
+      "checksum": "2D7E94D17806ED2EB704870716E66218AC8D062BFDB7DC105E575564AA54ADFE",
       "algorithm": "sha256"
     },
     {
@@ -248,6 +248,61 @@
     {
       "id": "github_release/github.com/suzuki-shunsuke/ghalint/v1.5.3/ghalint_1.5.3_windows_arm64.zip",
       "checksum": "50A45BA46F9E2C51509F83B04C7F1869BD23CA39B2EFD3CA7106E6D0076EF199",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.20.0/terraform-docs-v0.20.0-darwin-amd64.tar.gz",
+      "checksum": "8C7EA42429D7F5E3DAE3DE32F3873FDE0419332932549147F40916D3F613B8F7",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.20.0/terraform-docs-v0.20.0-darwin-arm64.tar.gz",
+      "checksum": "8723013CFE0369C389F4E6CB6E3CFCA1AEBAEFD67871E349E7547F2201564DAD",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.20.0/terraform-docs-v0.20.0-linux-amd64.tar.gz",
+      "checksum": "34AE01772412BB11474E6718EA62113E38FF5964EE570A98C69FAFE3A6DFF286",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.20.0/terraform-docs-v0.20.0-linux-arm64.tar.gz",
+      "checksum": "371B4ED983781D1EFDD8F7DE06264BAAC41B1D80927F7FD718C405A303D863A0",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.20.0/terraform-docs-v0.20.0-windows-amd64.zip",
+      "checksum": "FB372A26F934DC0E163CA914A5AA99FE13D094B1F64F937EFE9DC79BDDDF05A0",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.20.0/terraform-docs-v0.20.0-windows-arm64.zip",
+      "checksum": "1E505EF48AAB1CE00F0F13EFF247AFECAEC57F79A0D7353AF101DE114DE2AAE3",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "http/releases.hashicorp.com/terraform/1.13.3/terraform_1.13.3_darwin_amd64.zip",
+      "checksum": "5EF8E19091106B1921AF26DB5BCEE3CD84A475EAE2FD190FC02B1049B320D042",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "http/releases.hashicorp.com/terraform/1.13.3/terraform_1.13.3_darwin_arm64.zip",
+      "checksum": "8362E7284B38A1194884963DEED83481696D468B42DAB88052775F4280383584",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "http/releases.hashicorp.com/terraform/1.13.3/terraform_1.13.3_linux_amd64.zip",
+      "checksum": "71FC43D92EA09907BE5D416D2405A6A9C2D1CEAED633F5E175C0AF26E8C4B365",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "http/releases.hashicorp.com/terraform/1.13.3/terraform_1.13.3_linux_arm64.zip",
+      "checksum": "FA82FB1B08354573467557F33E6A15E7F9E1BBA74EB15492F151CA27525D2ACC",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "http/releases.hashicorp.com/terraform/1.13.3/terraform_1.13.3_windows_amd64.zip",
+      "checksum": "E75A97238F2DC43AB90FCA1AF554C18F995B16A4B06A4EC27BCDBAB52C1D2DC8",
       "algorithm": "sha256"
     },
     {
