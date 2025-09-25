@@ -55,7 +55,7 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 			},
 			expectedUniqueTrustedMachineUsers:   map[string]struct{}{},
 			expectedUniqueUntrustedMachineUsers: map[string]struct{}{},
-			expectedCheckName:                   "verify-approval", // default value
+			expectedCheckName:                   "validate-review", // default value
 		},
 		{
 			name: "duplicate entries in arrays",
@@ -76,7 +76,7 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 			expectedUniqueUntrustedMachineUsers: map[string]struct{}{
 				"bot-*": {},
 			},
-			expectedCheckName: "verify-approval",
+			expectedCheckName: "validate-review",
 		},
 	}
 

@@ -77,7 +77,7 @@ func (c *Config) Init() error { //nolint:cyclop
 		c.UniqueUntrustedMachineUsers[user] = struct{}{}
 	}
 	if c.CheckName == "" {
-		c.CheckName = "verify-approval"
+		c.CheckName = "validate-review"
 	}
 	if err := c.initTemplates(); err != nil {
 		return err
