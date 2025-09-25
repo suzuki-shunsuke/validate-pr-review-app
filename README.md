@@ -178,6 +178,16 @@ trusted_machine_users:
 - Add a commit yourself and approve → Check fails (self-approval detected).
 - Leave a review comment → No Check update.
 
+## Logging, Monitoring, Security, etc
+
+Please see the following documents:
+
+- AWS Lambda
+  - [Sending Lambda function logs to CloudWatch Logs](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html)
+  - [Monitoring, debugging, and troubleshooting Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/lambda-monitoring.html)
+- GitHub App
+  - [Validating webhook deliveries](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries)
+
 ## License
 
 [MIT](LICENSE)
