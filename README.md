@@ -73,6 +73,21 @@ While GitHub Actions-based validation works for small projects, it doesn’t sca
 5. The App fetches PR reviews and commits using the GitHub API.
 6. The App validates them and updates the Check via the Checks API.
 
+
+```mermaid
+sequenceDiagram
+    participant GitHub
+    participant RequirePRReviewApp as Require PR Review App
+
+    GitHub ->> RequirePRReviewApp: Send Pull Request Review Webhook
+    RequirePRReviewApp ->> RequirePRReviewApp: Validate Webhook (secret)
+    RequirePRReviewApp ->> RequirePRReviewApp: Filter events (ignore comments)
+    RequirePRReviewApp ->> GitHub: Fetch PR reviews and commits (GitHub API)
+    GitHub -->> RequirePRReviewApp: Reviews & commits data
+    RequirePRReviewApp ->> RequirePRReviewApp: Validate Reviews
+    RequirePRReviewApp ->> GitHub: Update Check (Checks API)
+```
+
 ## Supported Platforms
 
 Now only AWS Lambda is supported.

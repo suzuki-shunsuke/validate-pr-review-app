@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/github"
-	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/validation"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
 func TestNew(t *testing.T) {

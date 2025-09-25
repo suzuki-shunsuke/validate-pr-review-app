@@ -1,4 +1,4 @@
-module github.com/suzuki-shunsuke/require-pr-review-app
+module github.com/suzuki-shunsuke/validate-pr-review-app
 
 go 1.24.5
 

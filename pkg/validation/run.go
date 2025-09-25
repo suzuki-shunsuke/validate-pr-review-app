@@ -8,8 +8,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/config"
-	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/github"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
 
 // Run enforces pull request reviews.

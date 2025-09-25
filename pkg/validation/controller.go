@@ -1,7 +1,7 @@
 package validation
 
 import (
-	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/github"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
 
 type Controller struct {
