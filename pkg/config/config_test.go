@@ -192,6 +192,7 @@ func TestTemplates(t *testing.T) {
 			result: &config.Result{
 				State:     config.StateApproved,
 				Approvers: []string{"user1", "user2"},
+				Version:   "v0.0.1",
 			},
 			template: "approved",
 			wantErr:  false,
@@ -212,7 +213,7 @@ Trusted Machine Users: Nothing
 
 ---
 
-[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+[This check is created by Enforce PR Review App (version: v0.0.1)](https://github.com/suzuki-shunsuke/validate-pr-review-app).
 `,
 		},
 		{
@@ -248,7 +249,7 @@ Trusted Machine Users:
 
 ---
 
-[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+[This check is created by Enforce PR Review App (version: unknown)](https://github.com/suzuki-shunsuke/validate-pr-review-app).
 `,
 		},
 		{
@@ -279,7 +280,7 @@ Trusted Machine Users:
 
 ---
 
-[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+[This check is created by Enforce PR Review App (version: unknown)](https://github.com/suzuki-shunsuke/validate-pr-review-app).
 `,
 		},
 		{
@@ -301,7 +302,7 @@ Trusted Machine Users: Nothing
 
 ---
 
-[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+[This check is created by Enforce PR Review App (version: unknown)](https://github.com/suzuki-shunsuke/validate-pr-review-app).
 `,
 		},
 		{
@@ -351,7 +352,7 @@ Trusted Machine Users: Nothing
 
 ---
 
-[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+[This check is created by Enforce PR Review App (version: unknown)](https://github.com/suzuki-shunsuke/validate-pr-review-app).
 `,
 		},
 	}

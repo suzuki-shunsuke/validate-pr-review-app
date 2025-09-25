@@ -40,9 +40,6 @@ func (h *Handler) handle(ctx context.Context, logger *slog.Logger, req *Request)
 	var title githubv4.String
 	result := h.validate(ctx, ev)
 	result.Version = h.version
-	if result.Version == "" {
-		result.Version = "unknown"
-	}
 	switch result.State {
 	case config.StateApproved:
 		conclusion = githubv4.CheckConclusionStateSuccess
