@@ -22,13 +22,17 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *config.Result { //nolint
 	approvers := make(map[string]struct{}, len(pr.Approvers))
 	for approver := range pr.Approvers {
 		if isApp(approver) {
-			ignoredApprovers[approver] = &github.IgnoredApproval{
-				Login: approver,
-				IsApp: true,
+			if !c.VerifyApp(approver) {
+				// Ignore the approval from untrusted apps
+				ignoredApprovers[approver] = &github.IgnoredApproval{
+					Login: approver,
+					IsApp: true,
+				}
 			}
 			continue
 		}
 		if !c.VerifyUser(approver) {
+			// Ignore the approval from untrusted machine users
 			ignoredApprovers[approver] = &github.IgnoredApproval{
 				Login:                  approver,
 				IsUntrustedMachineUser: true,
@@ -84,6 +88,13 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *config.Result { //nolint
 
 func isApp(login string) bool {
 	return strings.HasSuffix(login, "[bot]")
+}
+
+func (c *Controller) VerifyApp(login string) bool {
+	if _, ok := c.input.TrustedApps[login]; ok {
+		return true
+	}
+	return false
 }
 
 func (c *Controller) VerifyUser(login string) bool {
