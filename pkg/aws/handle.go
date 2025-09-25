@@ -9,7 +9,7 @@ import (
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
-func (h *Handler) handle(ctx context.Context, logger *slog.Logger, req *Request) error {
+func (h *Handler) handle(ctx context.Context, logger *slog.Logger, req *Request) error { //nolint:cyclop,funlen
 	logger.Info("Starting a request", "request", req)
 	defer logger.Info("Ending a request", "request", req)
 
@@ -17,6 +17,15 @@ func (h *Handler) handle(ctx context.Context, logger *slog.Logger, req *Request)
 	ev, err := h.validateRequest(logger, req)
 	if err != nil {
 		slogerr.WithError(logger, err).Warn("validate request")
+		return nil
+	}
+	if ev.GetAction() == "edited" {
+		logger.Info("ignore the event because the action is 'edited'")
+		return nil
+	}
+	state := ev.GetReview().GetState()
+	if state == "commented" || state == "pending" {
+		logger.Info("ignore the event because the state is '" + state + "'")
 		return nil
 	}
 
