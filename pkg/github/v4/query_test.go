@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	v4 "github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github/v4"
+	v4 "github.com/suzuki-shunsuke/require-pr-review-app/pkg/github/v4"
 )
 
 func TestListCommitsQuery_PageInfo(t *testing.T) {

@@ -1,6 +1,6 @@
 package github
 
-import v4 "github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github/v4"
+import v4 "github.com/suzuki-shunsuke/require-pr-review-app/pkg/github/v4"
 
 type UntrustedCommit struct {
 	Login                  string

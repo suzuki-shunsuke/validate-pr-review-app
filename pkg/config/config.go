@@ -7,7 +7,7 @@ import (
 	"path"
 	"text/template"
 
-	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github"
+	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/github"
 )
 
 type Config struct {

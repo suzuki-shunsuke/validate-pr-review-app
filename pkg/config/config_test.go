@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/config"
-	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github"
+	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/config"
+	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/github"
 )
 
 func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
@@ -212,7 +212,7 @@ Trusted Machine Users: Nothing
 
 ---
 
-[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/enforce-pr-review-app).
+[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/require-pr-review-app).
 `,
 		},
 		{
@@ -248,7 +248,7 @@ Trusted Machine Users:
 
 ---
 
-[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/enforce-pr-review-app).
+[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/require-pr-review-app).
 `,
 		},
 		{
@@ -279,7 +279,7 @@ Trusted Machine Users:
 
 ---
 
-[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/enforce-pr-review-app).
+[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/require-pr-review-app).
 `,
 		},
 		{
@@ -301,7 +301,7 @@ Trusted Machine Users: Nothing
 
 ---
 
-[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/enforce-pr-review-app).
+[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/require-pr-review-app).
 `,
 		},
 		{
@@ -351,7 +351,7 @@ Trusted Machine Users: Nothing
 
 ---
 
-[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/enforce-pr-review-app).
+[This check is created by Enforce PR Review App](https://github.com/suzuki-shunsuke/require-pr-review-app).
 `,
 		},
 	}
