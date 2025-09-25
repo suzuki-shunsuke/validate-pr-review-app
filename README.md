@@ -1,6 +1,6 @@
-# Require PR Review App
+# Validate PR Review App
 
-**Require PR Review App** is a self-hosted GitHub App that enforces Pull Request reviews.
+**Validate PR Review App** is a self-hosted GitHub App that enforces Pull Request reviews.
 It helps organizations improve governance and security by ensuring PRs cannot be merged without proper approvals while keeping developer experience.
 
 ## :warning: Status
@@ -62,7 +62,7 @@ While GitHub Actions-based validation works for small projects, it doesn’t sca
   - Workflows trigger unnecessarily (e.g., on review comments).
   - Poor error visibility (logs instead of clear feedback).
 
-**Require PR Review App** solves these issues by working as a GitHub App, receiving Webhooks, and updating Checks directly.
+**Validate PR Review App** solves these issues by working as a GitHub App, receiving Webhooks, and updating Checks directly.
 
 ## How It Works
 
@@ -77,7 +77,7 @@ While GitHub Actions-based validation works for small projects, it doesn’t sca
 ```mermaid
 sequenceDiagram
     participant GitHub
-    participant RequirePRReviewApp as Require PR Review App
+    participant RequirePRReviewApp as Validate PR Review App
 
     GitHub ->> RequirePRReviewApp: Send Pull Request Review Webhook
     RequirePRReviewApp ->> RequirePRReviewApp: Validate Webhook (secret)
@@ -105,7 +105,7 @@ Now only AWS Lambda is supported.
     - `pull_requests:read`
     - `contents:read`
   - Private Key (keep safe).
-- Deploy Require PR Review App.
+- Deploy Validate PR Review App.
 - Store Webhook Secret & GitHub App Private Key in **AWS Secrets Manager**.
 - Enable Webhooks in your GitHub App:
   - Set the Webhook Secret.
