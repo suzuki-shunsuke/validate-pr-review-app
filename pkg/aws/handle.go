@@ -5,8 +5,8 @@ import (
 	"log/slog"
 
 	"github.com/shurcooL/githubv4"
-	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 )
 
 func (h *Handler) handle(ctx context.Context, logger *slog.Logger, req *Request) error { //nolint:cyclop,funlen

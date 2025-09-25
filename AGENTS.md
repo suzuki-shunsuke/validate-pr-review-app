@@ -1,6 +1,6 @@
-# AI Assistant Guidelines for require-pr-review-app
+# AI Assistant Guidelines for validate-pr-review-app
 
-This document contains common guidelines for AI assistants working on the require-pr-review-app project.
+This document contains common guidelines for AI assistants working on the validate-pr-review-app project.
 Individual AI-specific documents (like CLAUDE.md, CLINE.md) should reference this guide.
 
 ## Language
@@ -72,7 +72,7 @@ Both commands should pass before committing changes.
 Command-line interface layer that handles command parsing, flag processing, and routing to appropriate subcommands.
 
 ### pkg/config
-Configuration management including reading, parsing, and validating .require-pr-review-app.yaml files.
+Configuration management including reading, parsing, and validating .validate-pr-review-app.yaml files.
 
 ### pkg/controller
 Business logic layer containing:

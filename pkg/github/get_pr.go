@@ -3,7 +3,7 @@ package github
 import (
 	"context"
 
-	v4 "github.com/suzuki-shunsuke/require-pr-review-app/pkg/github/v4"
+	v4 "github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github/v4"
 )
 
 type Signature = v4.Signature
