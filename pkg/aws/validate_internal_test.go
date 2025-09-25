@@ -21,7 +21,7 @@ func generateSignature(payload string, secret []byte) string {
 	return fmt.Sprintf("sha1=%x", h.Sum(nil))
 }
 
-func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop,maintidx
+func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 	t.Parallel()
 
 	// Create a test logger
@@ -56,57 +56,6 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop,mainti
 		wantPayload   bool
 		expectedEvent *github.PullRequestReviewEvent
 	}{
-		{
-			name: "missing X-GITHUB-HOOK-INSTALLATION-TARGET-ID header",
-			handler: &Handler{
-				config: &config.Config{AppID: 12345},
-			},
-			request: &Request{
-				Body: validPayload,
-				Params: &RequestParamsField{
-					Headers: map[string]string{
-						headerXHubSignature: validSignature,
-						headerXGitHubEvent:  eventPullRequestReview,
-					},
-				},
-			},
-			wantErr: errHeaderXGitHubHookInstallationTargetIDIsRequired,
-		},
-		{
-			name: "invalid X-GITHUB-HOOK-INSTALLATION-TARGET-ID header (non-integer)",
-			handler: &Handler{
-				config: &config.Config{AppID: 12345},
-			},
-			request: &Request{
-				Body: validPayload,
-				Params: &RequestParamsField{
-					Headers: map[string]string{
-						headerXGitHubHookInstallationTargetID: "invalid",
-						headerXHubSignature:                   validSignature,
-						headerXGitHubEvent:                    eventPullRequestReview,
-					},
-				},
-			},
-			wantErr: errHeaderXGitHubHookInstallationTargetIDMustBeInt64,
-		},
-		{
-			name: "mismatched app ID",
-			handler: &Handler{
-				config:        &config.Config{AppID: 12345},
-				webhookSecret: validSecret,
-			},
-			request: &Request{
-				Body: validPayload,
-				Params: &RequestParamsField{
-					Headers: map[string]string{
-						headerXGitHubHookInstallationTargetID: "99999",
-						headerXHubSignature:                   validSignature,
-						headerXGitHubEvent:                    eventPullRequestReview,
-					},
-				},
-			},
-			wantErr: nil, // This will be a dynamic error message
-		},
 		{
 			name: "missing X-HUB-SIGNATURE header",
 			handler: &Handler{
@@ -213,24 +162,6 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop,mainti
 			wantPayload: true,
 		},
 		{
-			name: "app ID mismatch error message",
-			handler: &Handler{
-				config:        &config.Config{AppID: 12345},
-				webhookSecret: []byte("test-secret"),
-			},
-			request: &Request{
-				Body: "{}",
-				Params: &RequestParamsField{
-					Headers: map[string]string{
-						headerXGitHubHookInstallationTargetID: "99999",
-						headerXHubSignature:                   generateSignature("{}", []byte("test-secret")),
-						headerXGitHubEvent:                    eventPullRequestReview,
-					},
-				},
-			},
-			wantErr: errInvalidAppID,
-		},
-		{
 			name: "empty headers",
 			request: &Request{
 				Body: "{}",
@@ -238,7 +169,7 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop,mainti
 					Headers: map[string]string{},
 				},
 			},
-			wantErr: errHeaderXGitHubHookInstallationTargetIDIsRequired,
+			wantErr: errHeaderXHubSignatureIsRequired,
 		},
 	}
 

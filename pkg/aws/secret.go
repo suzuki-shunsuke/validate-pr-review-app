@@ -25,6 +25,7 @@ func NewSecretsManager(config aws.Config) *SecretsManager {
 
 type Secret struct {
 	GitHubAppPrivateKey string `json:"github_app_private_key"`
+	WebhookSecret       string `json:"webhook_secret"`
 }
 
 func (sm *SecretsManager) Get(ctx context.Context, input *secretsmanager.GetSecretValueInput) (*Secret, error) {

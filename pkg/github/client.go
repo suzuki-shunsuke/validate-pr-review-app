@@ -1,32 +1,34 @@
 package github
 
 import (
+	"context"
 	"fmt"
-	"net/http"
 
-	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v74/github"
 	"github.com/shurcooL/githubv4"
+	v4 "github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github/v4"
 )
 
 type Client struct {
-	v4Client *githubv4.Client
+	v4Client V4Client
 }
 
-type PullRequestReviewEvent = github.PullRequestReviewEvent
+type V4Client interface {
+	GetPR(ctx context.Context, owner, name string, number int) (*v4.PullRequest, error)
+	CreateCheckRun(ctx context.Context, input githubv4.CreateCheckRunInput) error
+}
 
-func New(param *ParamNewApp) (*Client, error) {
-	itr, err := ghinstallation.New(http.DefaultTransport, param.AppID, param.InstallationID, []byte(param.KeyFile))
+type (
+	PullRequestReviewEvent = github.PullRequestReviewEvent
+	ParamNewApp            = v4.ParamNewApp
+)
+
+func New(param *v4.ParamNewApp) (*Client, error) {
+	v4Client, err := v4.New(param)
 	if err != nil {
-		return nil, fmt.Errorf("create a transport with private key: %w", err)
+		return nil, fmt.Errorf("create GitHub v4 client: %w", err)
 	}
 	return &Client{
-		v4Client: githubv4.NewClient(&http.Client{Transport: itr}),
+		v4Client: v4Client,
 	}, nil
-}
-
-type ParamNewApp struct {
-	AppID          int64
-	KeyFile        string
-	InstallationID int64
 }

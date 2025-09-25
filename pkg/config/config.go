@@ -26,7 +26,8 @@ type Config struct {
 }
 
 type AWS struct {
-	SecretID string `yaml:"secret_id"`
+	SecretID             string `yaml:"secret_id"`
+	UseLambdaFunctionURL bool   `yaml:"use_lambda_function_url"`
 }
 
 var (
@@ -38,85 +39,97 @@ var (
 	templateRequireTwoApprovals []byte
 	//go:embed templates/settings.md
 	templateSettings []byte
-	//go:embed templates/two_approvals.md
-	templateTwoApprovals []byte
+	//go:embed templates/approved.md
+	templateApproved []byte
+	//go:embed templates/error.md
+	templateError []byte
 )
 
-func (cfg *Config) Init() error {
-	cfg.UniqueTrustedApps = make(map[string]struct{}, len(cfg.TrustedApps))
-	for _, app := range cfg.TrustedApps {
+func (c *Config) Init() error { //nolint:cyclop
+	if c.TrustedApps == nil {
+		c.TrustedApps = []string{
+			"dependabot[bot]",
+			"renovate[bot]",
+		}
+	}
+	c.UniqueTrustedApps = make(map[string]struct{}, len(c.TrustedApps))
+	for _, app := range c.TrustedApps {
 		// TODO validate the app name
 		if app == "" {
 			continue
 		}
-		cfg.UniqueTrustedApps[app] = struct{}{}
+		c.UniqueTrustedApps[app] = struct{}{}
 	}
-	cfg.UniqueTrustedMachineUsers = make(map[string]struct{}, len(cfg.TrustedMachineUsers))
-	for _, user := range cfg.TrustedMachineUsers {
+	c.UniqueTrustedMachineUsers = make(map[string]struct{}, len(c.TrustedMachineUsers))
+	for _, user := range c.TrustedMachineUsers {
 		// TODO validate the user name
 		if user == "" {
 			continue
 		}
-		cfg.UniqueTrustedMachineUsers[user] = struct{}{}
+		c.UniqueTrustedMachineUsers[user] = struct{}{}
 	}
-	cfg.UniqueUntrustedMachineUsers = make(map[string]struct{}, len(cfg.UntrustedMachineUsers))
-	for _, user := range cfg.UntrustedMachineUsers {
+	c.UniqueUntrustedMachineUsers = make(map[string]struct{}, len(c.UntrustedMachineUsers))
+	for _, user := range c.UntrustedMachineUsers {
 		// TODO validate the user name
 		if user == "" {
 			continue
 		}
-		cfg.UniqueUntrustedMachineUsers[user] = struct{}{}
+		c.UniqueUntrustedMachineUsers[user] = struct{}{}
 	}
-	if cfg.CheckName == "" {
-		cfg.CheckName = "check-approval"
+	if c.CheckName == "" {
+		c.CheckName = "verify-approval"
 	}
-	if err := cfg.initTemplates(); err != nil {
+	if err := c.initTemplates(); err != nil {
 		return err
 	}
-	if err := cfg.testUntrustedMachineUsers(); err != nil {
+	if err := c.testUntrustedMachineUsers(); err != nil {
 		return err
 	}
-	return cfg.testTemplate()
+	return c.testTemplate()
 }
 
-func (cfg *Config) initTemplates() error {
+func (c *Config) initTemplates() error {
 	defaultTemplates := map[string]string{
 		"footer":                string(templateFooter),
 		"settings":              string(templateSettings),
-		"two_approvals":         string(templateTwoApprovals),
+		"approved":              string(templateApproved),
 		"no_approval":           string(templateNoApproval),
 		"require_two_approvals": string(templateRequireTwoApprovals),
+		"error":                 string(templateError),
 	}
-	if cfg.Templates == nil {
-		cfg.Templates = map[string]string{}
+	if c.Templates == nil {
+		c.Templates = map[string]string{}
 	}
 	for name, tpl := range defaultTemplates {
-		if _, ok := cfg.Templates[name]; !ok {
-			cfg.Templates[name] = tpl
+		if _, ok := c.Templates[name]; !ok {
+			c.Templates[name] = tpl
 		}
 	}
 	var define string
-	for k, v := range cfg.Templates {
+	for k, v := range c.Templates {
 		define += `{{define "` + k + `"}}` + v + "{{end}}"
 	}
 	keys := []string{
-		"no_approval", "require_two_approvals", "two_approvals",
+		"no_approval",
+		"approved",
+		"require_two_approvals",
+		"error",
 	}
 	templates := make(map[string]*template.Template, len(keys))
 	for _, k := range keys {
-		tpl := cfg.Templates[k] + define
+		tpl := c.Templates[k] + define
 		tplParsed, err := template.New("_").Parse(tpl)
 		if err != nil {
 			return fmt.Errorf("parse the template %s: %w", k, err)
 		}
 		templates[k] = tplParsed
 	}
-	cfg.BuiltTemplates = templates
+	c.BuiltTemplates = templates
 	return nil
 }
 
-func (cfg *Config) testUntrustedMachineUsers() error {
-	for pattern := range cfg.UniqueUntrustedMachineUsers {
+func (c *Config) testUntrustedMachineUsers() error {
+	for pattern := range c.UniqueUntrustedMachineUsers {
 		if _, err := path.Match(pattern, "foo"); err != nil {
 			return fmt.Errorf("invalid untrusted machine user pattern %q: %w", pattern, err)
 		}
@@ -124,10 +137,10 @@ func (cfg *Config) testUntrustedMachineUsers() error {
 	return nil
 }
 
-func (cfg *Config) testTemplate() error {
+func (c *Config) testTemplate() error {
 	// TODO add test cases
 	result := &Result{}
-	for key, tpl := range cfg.BuiltTemplates {
+	for key, tpl := range c.BuiltTemplates {
 		if err := tpl.Execute(io.Discard, result); err != nil {
 			return fmt.Errorf("test template %s: %w", key, err)
 		}
@@ -156,22 +169,7 @@ type Result struct {
 type State string
 
 const (
-	// OK - Two approvals
-	//   approvers
-	StateTwoApprovals State = "two_approvals"
-	// NG - approvals are required but actually no approval
-	//   ignored approvers
-	StateApprovalIsRequired State = "approval_is_required"
-	// NG - two approvals are required but actually one approval
-	//   why two approvals are required
-	//     self approval
-	//     untrusted author
-	//     untrusted commit
-	//   approvers
-	//   self approvers
-	//   ignored approvers
-	StateTwoApprovalsAreRequired State = "two_approvals_are_required"
-	// OK - one approval is sufficient
-	//   approvers
-	StateOneApproval State = "one_approval"
+	StateApproved                State = "approved"
+	StateApprovalIsRequired      State = "no_approval"
+	StateTwoApprovalsAreRequired State = "require_two_approvals"
 )

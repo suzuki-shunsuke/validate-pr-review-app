@@ -2,89 +2,61 @@ package github
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/shurcooL/githubv4"
+	v4 "github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github/v4"
 )
+
+type Signature = v4.Signature
 
 // GetPR gets a pull request reviews and committers via GitHub GraphQL API.
 func (c *Client) GetPR(ctx context.Context, owner, name string, number int) (*PullRequest, error) {
-	q := &GetPRQuery{}
-	variables := map[string]any{
-		"repoOwner": githubv4.String(owner),
-		"repoName":  githubv4.String(name),
-		"number":    githubv4.Int(number), //nolint:gosec
+	pr, err := c.v4Client.GetPR(ctx, owner, name, number)
+	if err != nil {
+		return nil, err //nolint:wrapcheck
 	}
-	if err := c.v4Client.Query(ctx, q, variables); err != nil {
-		return nil, fmt.Errorf("get a pull request by GitHub GraphQL API: %w", err)
+	commits := make([]*Commit, len(pr.Commits.Nodes))
+	for i, v := range pr.Commits.Nodes {
+		commits[i] = &Commit{
+			SHA:       v.Commit.OID,
+			Committer: newUser(v.Commit.User()),
+			Signature: v.Commit.Signature,
+		}
 	}
-
-	// TODO Exclude reviews not associated with the latest commit
-	if q.Repository.PullRequest.Reviews.PageInfo.HasNextPage {
-		for range 10 {
-			reviews, err := c.ListReviews(ctx, owner, name, number, q.Repository.PullRequest.Reviews.PageInfo.EndCursor)
-			if err != nil {
-				return nil, fmt.Errorf("list reviews by GitHub GraphQL API: %w", err)
+	// filter reviews
+	// Get the latest review for each user
+	reviews := make(map[string]*v4.Review, len(pr.Reviews.Nodes))
+	for _, node := range pr.Reviews.Nodes {
+		if node.Commit.OID != pr.HeadRefOID {
+			// Exclude reviews for non head commits
+			continue
+		}
+		review := newReview(node)
+		login := review.Author.Login
+		if login == "" {
+			// Skip reviews from deleted users
+			continue
+		}
+		if a, ok := reviews[login]; ok {
+			// Keep the latest review
+			if node.CreatedAt.Before(a.CreatedAt.Time) {
+				continue
 			}
-			q.Repository.PullRequest.Reviews.Nodes = append(q.Repository.PullRequest.Reviews.Nodes, reviews...)
+			reviews[login] = node
+			continue
 		}
+		reviews[login] = node
 	}
-	if q.Repository.PullRequest.Commits.PageInfo.HasNextPage {
-		for range 10 {
-			commits, err := c.ListCommits(ctx, owner, name, number, q.Repository.PullRequest.Commits.PageInfo.EndCursor)
-			if err != nil {
-				return nil, fmt.Errorf("list commits by GitHub GraphQL API: %w", err)
-			}
-			q.Repository.PullRequest.Commits.Nodes = append(q.Repository.PullRequest.Commits.Nodes, commits...)
+	m := make(map[string]struct{}, len(reviews))
+	for k, v := range reviews {
+		if v.State != "APPROVED" {
+			continue
 		}
+		m[k] = struct{}{}
 	}
-	return q.Repository.PullRequest, nil
-}
-
-// ListReviews lists reviews of a pull request via GitHub GraphQL API.
-func (c *Client) ListReviews(ctx context.Context, owner, name string, number int, cursor string) ([]*Review, error) {
-	var reviews []*Review
-	variables := map[string]any{
-		"repoOwner": githubv4.String(owner),
-		"repoName":  githubv4.String(name),
-		"number":    githubv4.Int(number), //nolint:gosec
-		"cursor":    cursor,
+	p := &PullRequest{
+		HeadSHA:   pr.HeadRefOID,
+		Commits:   commits,
+		Approvers: m,
 	}
-	for range 100 {
-		q := &ListReviewsQuery{}
-		if err := c.v4Client.Query(ctx, q, variables); err != nil {
-			return nil, fmt.Errorf("list reviews by GitHub GraphQL API: %w", err)
-		}
-		reviews = append(reviews, q.Nodes()...)
-		pageInfo := q.PageInfo()
-		if !pageInfo.HasNextPage {
-			return reviews, nil
-		}
-		variables["cursor"] = pageInfo.EndCursor
-	}
-	return reviews, nil
-}
-
-// ListCommits lists commits of a pull request via GitHub GraphQL API.
-func (c *Client) ListCommits(ctx context.Context, owner, name string, number int, cursor string) ([]*PullRequestCommit, error) {
-	var commits []*PullRequestCommit
-	variables := map[string]any{
-		"repoOwner": githubv4.String(owner),
-		"repoName":  githubv4.String(name),
-		"number":    githubv4.Int(number), //nolint:gosec
-		"cursor":    cursor,
-	}
-	for range 100 {
-		q := &ListCommitsQuery{}
-		if err := c.v4Client.Query(ctx, q, variables); err != nil {
-			return nil, fmt.Errorf("list commits by GitHub GraphQL API: %w", err)
-		}
-		commits = append(commits, q.Nodes()...)
-		pageInfo := q.PageInfo()
-		if !pageInfo.HasNextPage {
-			return commits, nil
-		}
-		variables["cursor"] = pageInfo.EndCursor
-	}
-	return commits, nil
+	return p, nil
 }
