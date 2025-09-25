@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"strings"
 	"text/template"
 
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
@@ -50,6 +51,13 @@ func (c *Config) Init() error { //nolint:cyclop
 		c.TrustedApps = []string{
 			"dependabot[bot]",
 			"renovate[bot]",
+		}
+	} else {
+		for i, v := range c.TrustedApps {
+			// Append [bot] suffix if not exists
+			if !strings.HasSuffix(v, "[bot]") {
+				c.TrustedApps[i] = v + "[bot]"
+			}
 		}
 	}
 	c.UniqueTrustedApps = make(map[string]struct{}, len(c.TrustedApps))

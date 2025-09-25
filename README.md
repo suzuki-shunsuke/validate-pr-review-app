@@ -25,7 +25,7 @@ Please don't use this yet.
 
 - At least **1 approval** required.
 - If the committer approves → **2 approvals required**.
-- If the PR contains unsigned commits or commits not linked to a GitHub user → **2 approvals required**.
+- If the PR contains [unsigned commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) or [commits not linked to a GitHub user](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/troubleshooting-commits/why-are-my-commits-linked-to-the-wrong-user) → **2 approvals required**.
 - Approvals from untrusted Machine Users or GitHub Apps are ignored.
 - If the PR contains commits from untrusted Machine Users or GitHub Apps → **2 approvals required**.
 
@@ -134,6 +134,11 @@ Configuration consists of **secrets** and **non-secrets**.
 > You should convert the private key and webhook secret into JSON before storing.
 
 ### Example Config
+
+> [!WARNING]
+> Please remove `[bot]` from each app name of `trusted_apps`
+> :o: `dependabot`
+> :x: `dependabot[bot]`
 
 ```yaml
 app_id: 0000 # GitHub App ID
