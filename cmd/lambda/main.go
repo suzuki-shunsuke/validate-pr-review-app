@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/aws"
-	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/log"
+	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/aws"
+	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/log"
 )
 
 var version = ""

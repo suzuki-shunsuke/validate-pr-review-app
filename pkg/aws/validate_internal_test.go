@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/google/go-github/v74/github"
-	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/config"
+	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/config"
 )
 
 // generateSignature creates a valid HMAC-SHA1 signature for testing

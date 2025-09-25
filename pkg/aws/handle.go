@@ -5,7 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/shurcooL/githubv4"
-	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/config"
+	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 

@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/config"
-	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github"
-	"github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/validation"
+	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/config"
+	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/github"
+	"github.com/suzuki-shunsuke/require-pr-review-app/pkg/validation"
 )
 
 func TestController_Run(t *testing.T) {

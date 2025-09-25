@@ -1,8 +1,8 @@
-# enforce-pr-review-app
+# require-pr-review-app
 
 [Contributing](CONTRIBUTING.md) | [MIT](LICENSE)
 
-`enforce-pr-review-app` is a GitHub App to enforce pull request reviews
+`require-pr-review-app` is a GitHub App to enforce pull request reviews
 
 ## :warning: Status
 

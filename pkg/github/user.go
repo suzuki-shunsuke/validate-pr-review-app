@@ -3,7 +3,7 @@ package github
 import (
 	"strings"
 
-	v4 "github.com/suzuki-shunsuke/enforce-pr-review-app/pkg/github/v4"
+	v4 "github.com/suzuki-shunsuke/require-pr-review-app/pkg/github/v4"
 )
 
 type User struct {
