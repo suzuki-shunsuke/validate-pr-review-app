@@ -12,7 +12,7 @@ import (
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
 
-// Run enforces pull request reviews.
+// Run validates pull request reviews.
 // It gets pull request reviews and committers via GitHub GraphQL API, and checks if people other than committers approve the PR.
 // If the PR isn't approved by people other than committers, it returns an error.
 func (c *Controller) Run(_ *slog.Logger, input *Input) *config.Result { //nolint:cyclop
