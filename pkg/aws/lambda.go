@@ -14,10 +14,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/shurcooL/githubv4"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
-	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"gopkg.in/yaml.v3"
 )
 
