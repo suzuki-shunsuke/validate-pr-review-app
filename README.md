@@ -77,15 +77,15 @@ While GitHub Actions-based validation works for small projects, it doesn’t sca
 ```mermaid
 sequenceDiagram
     participant GitHub
-    participant RequirePRReviewApp as Validate PR Review App
+    participant ValidatePRReviewApp as Validate PR Review App
 
-    GitHub ->> RequirePRReviewApp: Send Pull Request Review Webhook
-    RequirePRReviewApp ->> RequirePRReviewApp: Validate Webhook (secret)
-    RequirePRReviewApp ->> RequirePRReviewApp: Filter events (ignore comments)
-    RequirePRReviewApp ->> GitHub: Fetch PR reviews and commits (GitHub API)
-    GitHub -->> RequirePRReviewApp: Reviews & commits data
-    RequirePRReviewApp ->> RequirePRReviewApp: Validate Reviews
-    RequirePRReviewApp ->> GitHub: Update Check (Checks API)
+    GitHub ->> ValidatePRReviewApp: Send Pull Request Review Webhook
+    ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Webhook (secret)
+    ValidatePRReviewApp ->> ValidatePRReviewApp: Filter events (ignore comments)
+    ValidatePRReviewApp ->> GitHub: Fetch PR reviews and commits (GitHub API)
+    GitHub -->> ValidatePRReviewApp: Reviews & commits data
+    ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Reviews
+    ValidatePRReviewApp ->> GitHub: Update Check (Checks API)
 ```
 
 ## Supported Platforms
