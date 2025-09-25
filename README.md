@@ -1,7 +1,11 @@
 # Validate PR Review App
 
-**Validate PR Review App** is a self-hosted GitHub App that validates Pull Request reviews.
+Validate PR Review App is a self-hosted GitHub App that validates Pull Request reviews.
 It helps organizations improve governance and security by ensuring PRs cannot be merged without proper approvals while keeping developer experience.
+
+![image](https://github.com/user-attachments/assets/68e6fd3f-b36a-4d62-a46c-76bbeaf1ebdb)
+
+![image](https://github.com/user-attachments/assets/aa460dc1-375c-46ad-ad05-24cdea7f1c4d)
 
 ## :warning: Status
 
@@ -24,6 +28,30 @@ Please don't use this yet.
 - If the PR contains unsigned commits or commits not linked to a GitHub user → **2 approvals required**.
 - Approvals from untrusted Machine Users or GitHub Apps are ignored.
 - If the PR contains commits from untrusted Machine Users or GitHub Apps → **2 approvals required**.
+
+## How It Works
+
+1. Install the GitHub App in your repositories and [enable Webhook](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/using-webhooks-with-github-apps).
+2. GitHub sends Webhook to the App when pull requests are reviewed.
+3. The App validates if the Webhook is valid.
+4. The App filters irrevant events like review comments.
+5. The App fetches PR reviews and commits using the GitHub API.
+6. The App validates reviews.
+7. The App updates the Check via the Checks API.
+
+```mermaid
+sequenceDiagram
+    participant GitHub
+    participant ValidatePRReviewApp as Validate PR Review App
+
+    GitHub ->> ValidatePRReviewApp: Send Pull Request Review Webhook
+    ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Webhook
+    ValidatePRReviewApp ->> ValidatePRReviewApp: Ignore irrelevant events
+    ValidatePRReviewApp ->> GitHub: Fetch PR reviews and commits (GitHub API)
+    GitHub -->> ValidatePRReviewApp: Reviews & commits data
+    ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Reviews
+    ValidatePRReviewApp ->> GitHub: Update Check (Checks API)
+```
 
 ## Why?
 
@@ -63,30 +91,6 @@ While GitHub Actions-based validation works for small projects, it doesn’t sca
   - Poor error visibility (logs instead of clear feedback).
 
 **Validate PR Review App** solves these issues by working as a GitHub App, receiving Webhooks, and updating Checks directly.
-
-## How It Works
-
-1. Install the App in your repository.
-2. GitHub sends **Pull Request Review Webhook events** to the App.
-3. The App validates the Webhook (secret verification).
-4. The App filters events (ignores irrelevant ones like review comments).
-5. The App fetches PR reviews and commits using the GitHub API.
-6. The App validates them and updates the Check via the Checks API.
-
-
-```mermaid
-sequenceDiagram
-    participant GitHub
-    participant ValidatePRReviewApp as Validate PR Review App
-
-    GitHub ->> ValidatePRReviewApp: Send Pull Request Review Webhook
-    ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Webhook (secret)
-    ValidatePRReviewApp ->> ValidatePRReviewApp: Filter events (ignore comments)
-    ValidatePRReviewApp ->> GitHub: Fetch PR reviews and commits (GitHub API)
-    GitHub -->> ValidatePRReviewApp: Reviews & commits data
-    ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Reviews
-    ValidatePRReviewApp ->> GitHub: Update Check (Checks API)
-```
 
 ## Supported Platforms
 
