@@ -96,6 +96,10 @@ While GitHub Actions-based validation works for small projects, it doesn’t sca
 
 Now only AWS Lambda is supported.
 
+## Getting Started
+
+Coming soon.
+
 ## Setup
 
 > [!WARNING]
