@@ -27,6 +27,7 @@ type Handler struct {
 	validator     Validator
 	config        *config.Config
 	gh            GitHub
+	version       string
 }
 
 type GitHub interface {
@@ -40,7 +41,7 @@ type Validator interface {
 	Run(logger *slog.Logger, input *validation.Input) *config.Result
 }
 
-func NewHandler(ctx context.Context, logger *slog.Logger) (*Handler, error) {
+func NewHandler(ctx context.Context, logger *slog.Logger, version string) (*Handler, error) {
 	// read config from the environment variable
 	// parse config as YAML
 	cfg := &config.Config{}
@@ -79,6 +80,7 @@ func NewHandler(ctx context.Context, logger *slog.Logger) (*Handler, error) {
 			TrustedMachineUsers:   cfg.UniqueTrustedMachineUsers,
 		}),
 		webhookSecret: []byte(secret.WebhookSecret),
+		version:       version,
 	}, nil
 }
 
