@@ -26,7 +26,7 @@ func run(logger *slog.Logger) error {
 	logger.Info("Starting the application")
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	handler, err := aws.NewHandler(ctx, logger)
+	handler, err := aws.NewHandler(ctx, logger, version)
 	if err != nil {
 		return fmt.Errorf("create a new handler: %w", err)
 	}

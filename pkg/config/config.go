@@ -164,6 +164,7 @@ type Result struct {
 	TrustedApps           []string
 	UntrustedMachineUsers []string
 	TrustedMachineUsers   []string
+	Version               string
 }
 
 type State string

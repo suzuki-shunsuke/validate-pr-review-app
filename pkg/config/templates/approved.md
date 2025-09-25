@@ -6,4 +6,4 @@ Approvers:
 {{end}}
 
 {{template "settings" .}}
-{{template "footer" -}}
+{{template "footer" . -}}
