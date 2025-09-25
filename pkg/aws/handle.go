@@ -45,6 +45,9 @@ func (h *Handler) handle(ctx context.Context, logger *slog.Logger, req *Request)
 		conclusion = githubv4.CheckConclusionStateFailure
 		title = githubv4.String("Internal Error")
 	}
+	result.TrustedApps = h.config.TrustedApps
+	result.TrustedMachineUsers = h.config.TrustedMachineUsers
+	result.UntrustedMachineUsers = h.config.UntrustedMachineUsers
 	s, err := summarize(result, h.config.BuiltTemplates)
 	if err != nil {
 		slogerr.WithError(h.logger, err).Error("summarize the result")
