@@ -29,6 +29,30 @@ Please don't use this yet.
 - Approvals from untrusted Machine Users or GitHub Apps are ignored.
 - If the PR contains commits from untrusted Machine Users or GitHub Apps → **2 approvals required**.
 
+## How It Works
+
+1. Install the GitHub App in your repositories and [enable Webhook](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/using-webhooks-with-github-apps).
+2. GitHub sends Webhook to the App when pull requests are reviewed.
+3. The App validates if the Webhook is valid.
+4. The App filters irrevant events like review comments.
+5. The App fetches PR reviews and commits using the GitHub API.
+6. The App validates reviews.
+7. The App updates the Check via the Checks API.
+
+```mermaid
+sequenceDiagram
+    participant GitHub
+    participant ValidatePRReviewApp as Validate PR Review App
+
+    GitHub ->> ValidatePRReviewApp: Send Pull Request Review Webhook
+    ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Webhook
+    ValidatePRReviewApp ->> ValidatePRReviewApp: Ignore irrelevant events
+    ValidatePRReviewApp ->> GitHub: Fetch PR reviews and commits (GitHub API)
+    GitHub -->> ValidatePRReviewApp: Reviews & commits data
+    ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Reviews
+    ValidatePRReviewApp ->> GitHub: Update Check (Checks API)
+```
+
 ## Why?
 
 This project is the successor to the following our OSS Projects:
@@ -67,30 +91,6 @@ While GitHub Actions-based validation works for small projects, it doesn’t sca
   - Poor error visibility (logs instead of clear feedback).
 
 **Validate PR Review App** solves these issues by working as a GitHub App, receiving Webhooks, and updating Checks directly.
-
-## How It Works
-
-1. Install the App in your repository.
-2. GitHub sends **Pull Request Review Webhook events** to the App.
-3. The App validates the Webhook (secret verification).
-4. The App filters events (ignores irrelevant ones like review comments).
-5. The App fetches PR reviews and commits using the GitHub API.
-6. The App validates them and updates the Check via the Checks API.
-
-
-```mermaid
-sequenceDiagram
-    participant GitHub
-    participant ValidatePRReviewApp as Validate PR Review App
-
-    GitHub ->> ValidatePRReviewApp: Send Pull Request Review Webhook
-    ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Webhook (secret)
-    ValidatePRReviewApp ->> ValidatePRReviewApp: Filter events (ignore comments)
-    ValidatePRReviewApp ->> GitHub: Fetch PR reviews and commits (GitHub API)
-    GitHub -->> ValidatePRReviewApp: Reviews & commits data
-    ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Reviews
-    ValidatePRReviewApp ->> GitHub: Update Check (Checks API)
-```
 
 ## Supported Platforms
 
