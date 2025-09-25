@@ -135,6 +135,11 @@ Configuration consists of **secrets** and **non-secrets**.
 
 ### Example Config
 
+> [!WARNING]
+> Please remove `[bot]` from each app name of `trusted_apps`
+> :o: `dependabot`
+> :x: `dependabot[bot]`
+
 ```yaml
 app_id: 0000 # GitHub App ID
 installation_id: 00000000 # GitHub App Installation ID
