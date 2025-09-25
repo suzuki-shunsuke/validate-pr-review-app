@@ -17,10 +17,6 @@ Please don't use this yet.
 - Good Developer Experience
   - Runs quickly and provides clear error feedback through the Checks API, so developers immediately understand why validation failed.
 
-## Supported Platforms
-
-Now only AWS Lambda is supported.
-
 ### Validation Rules
 
 - At least **1 approval** required.
@@ -31,11 +27,28 @@ Now only AWS Lambda is supported.
 
 ## Why?
 
-This project is the successor to:
+This project is the successor to the following our OSS Projects:
 
-1. [deny-self-approve](https://zenn.dev/shunsuke_suzuki/articles/deny-self-approve) (CLI)
-2. [validate-pr-review-action](https://zenn.dev/shunsuke_suzuki/articles/validate-pr-review-action) (GitHub Action)
+1. [deny-self-approve](https://github.com/suzuki-shunsuke/deny-self-approve) (CLI)
+2. [validate-pr-review-action](https://github.com/suzuki-shunsuke/validate-pr-review-action) (GitHub Action)
 
+When developing as a team, it's common to require that pull requests be reviewed by someone other than the author.
+Code reviews help improve code quality, facilitate knowledge sharing among team members, and prevent any single person from making unauthorized changes without approval.
+
+First, you should enable the following branch ruleset on the default branch.
+
+- `Require a pull request before merging`
+  - `Require review from Code Owners`
+  - `Require approval of the most recent reviewable push`
+- `Require status checks to pass`
+
+This rules require pull request reviews, but there are still several ways to improperly merge a pull request without a valid review:
+
+1. Abusing a machine user with `CODEOWNER` privileges to approve the PR.
+2. Adding commits to someone else’s PR and approving it yourself.
+3. Using a machine user or bot to add commits to someone else’s PR, then approving it yourself.
+
+[validate-pr-review-action](https://github.com/suzuki-shunsuke/validate-pr-review-action) validates pull request reviews via `pull_request_review` or `merge_group` events.
 While GitHub Actions-based validation works for small projects, it doesn’t scale well for larger organizations due to:
 
 - **Setup & management cost**
@@ -59,6 +72,10 @@ While GitHub Actions-based validation works for small projects, it doesn’t sca
 4. The App filters events (ignores irrelevant ones like review comments).
 5. The App fetches PR reviews and commits using the GitHub API.
 6. The App validates them and updates the Check via the Checks API.
+
+## Supported Platforms
+
+Now only AWS Lambda is supported.
 
 ## Setup
 
