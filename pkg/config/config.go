@@ -169,19 +169,7 @@ type Result struct {
 type State string
 
 const (
-	// OK - Approved
-	//   approvers
-	StateApproved State = "approved"
-	// NG - approvals are required but actually no approval
-	//   ignored approvers
-	StateApprovalIsRequired State = "no_approval"
-	// NG - two approvals are required but actually one approval
-	//   why two approvals are required
-	//     self approval
-	//     untrusted author
-	//     untrusted commit
-	//   approvers
-	//   self approvers
-	//   ignored approvers
+	StateApproved                State = "approved"
+	StateApprovalIsRequired      State = "no_approval"
 	StateTwoApprovalsAreRequired State = "require_two_approvals"
 )
