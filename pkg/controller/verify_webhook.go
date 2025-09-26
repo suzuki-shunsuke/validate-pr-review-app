@@ -1,4 +1,4 @@
-package aws
+package controller
 
 import (
 	"encoding/json"
@@ -25,23 +25,12 @@ const (
 	eventPullRequestReview                = "pull_request_review"
 )
 
-func (h *Handler) validateRequest(logger *slog.Logger, req *Request) (*github.PullRequestReviewEvent, error) {
+func (c *Controller) validateRequest(logger *slog.Logger, req *Request) (*github.PullRequestReviewEvent, error) {
 	headers := make(map[string]string, len(req.Params.Headers))
 	for k, v := range req.Params.Headers {
 		headers[strings.ToUpper(k)] = v
 	}
 	bodyStr := req.Body
-	// appIDstr, ok := headers[headerXGitHubHookInstallationTargetID]
-	// if !ok {
-	// 	return nil, errHeaderXGitHubHookInstallationTargetIDIsRequired
-	// }
-	// appID, err := strconv.ParseInt(appIDstr, 10, 64)
-	// if err != nil {
-	// 	return nil, errHeaderXGitHubHookInstallationTargetIDMustBeInt64
-	// }
-	// if appID != h.config.AppID {
-	// 	return nil, slogerr.With(errInvalidAppID, "app_id", appID, "expected_app_id", h.config.AppID) //nolint:wrapcheck
-	// }
 
 	sig, ok := headers[headerXHubSignature]
 	if !ok {
@@ -49,7 +38,7 @@ func (h *Handler) validateRequest(logger *slog.Logger, req *Request) (*github.Pu
 	}
 
 	bodyB := []byte(bodyStr)
-	if err := github.ValidateSignature(sig, bodyB, h.webhookSecret); err != nil {
+	if err := github.ValidateSignature(sig, bodyB, c.input.WebhookSecret); err != nil {
 		logger.Warn("validate the webhook signature", "error", err)
 		return nil, errSignatureInvalid
 	}
