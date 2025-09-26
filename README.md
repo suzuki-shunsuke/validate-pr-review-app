@@ -98,7 +98,7 @@ Now only AWS Lambda is supported.
 
 ## Getting Started
 
-In the getting started, we will deploy the app to AWS Lambda using Terraform.
+Deploying the app to AWS Lambda using Terraform.
 
 Requirements:
 
@@ -109,11 +109,6 @@ Requirements:
 - GitHub CLI
 - GitHub Repository where the app is installed.
   - A pull request created by other than you is necessary
-
-Of course, we use these tools in the getting started, but these tools aren't mandatory for the app.
-You can deploy the app without them.
-
-After the getting started, you can destroy all resources using Terraform.
 
 1. Checkout the repository
 
@@ -183,7 +178,7 @@ Then the check fails.
 
 11. Clean up
 
-You can destory resources by `terraform destroy`.
+You can destroy resources by `terraform destroy`.
 
 ```sh
 terraform destroy
