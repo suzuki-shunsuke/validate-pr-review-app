@@ -1,5 +1,5 @@
 //nolint:funlen
-package aws
+package controller
 
 import (
 	"crypto/hmac"
@@ -50,7 +50,7 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 
 	tests := []struct {
 		name          string
-		handler       *Handler
+		controller    *Controller
 		request       *Request
 		wantErr       error
 		wantPayload   bool
@@ -58,8 +58,10 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 	}{
 		{
 			name: "missing X-HUB-SIGNATURE header",
-			handler: &Handler{
-				config: &config.Config{AppID: 12345},
+			controller: &Controller{
+				input: &InputNew{
+					Config: &config.Config{AppID: 12345},
+				},
 			},
 			request: &Request{
 				Body: validPayload,
@@ -74,9 +76,11 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 		},
 		{
 			name: "invalid signature",
-			handler: &Handler{
-				config:        &config.Config{AppID: 12345},
-				webhookSecret: []byte("wrong-secret"),
+			controller: &Controller{
+				input: &InputNew{
+					Config:        &config.Config{AppID: 12345},
+					WebhookSecret: []byte("wrong-secret"),
+				},
 			},
 			request: &Request{
 				Body: validPayload,
@@ -92,9 +96,11 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 		},
 		{
 			name: "missing X-GITHUB-EVENT header",
-			handler: &Handler{
-				config:        &config.Config{AppID: 12345},
-				webhookSecret: validSecret,
+			controller: &Controller{
+				input: &InputNew{
+					Config:        &config.Config{AppID: 12345},
+					WebhookSecret: validSecret,
+				},
 			},
 			request: &Request{
 				Body: validPayload,
@@ -109,9 +115,11 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 		},
 		{
 			name: "unsupported event type",
-			handler: &Handler{
-				config:        &config.Config{AppID: 12345},
-				webhookSecret: validSecret,
+			controller: &Controller{
+				input: &InputNew{
+					Config:        &config.Config{AppID: 12345},
+					WebhookSecret: validSecret,
+				},
 			},
 			request: &Request{
 				Body: validPayload,
@@ -127,9 +135,11 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 		},
 		{
 			name: "invalid JSON payload",
-			handler: &Handler{
-				config:        &config.Config{AppID: 12345},
-				webhookSecret: []byte("test-secret"),
+			controller: &Controller{
+				input: &InputNew{
+					Config:        &config.Config{AppID: 12345},
+					WebhookSecret: []byte("test-secret"),
+				},
 			},
 			request: &Request{
 				Body: "invalid json{",
@@ -145,9 +155,11 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 		},
 		{
 			name: "valid request",
-			handler: &Handler{
-				config:        &config.Config{AppID: 12345},
-				webhookSecret: validSecret,
+			controller: &Controller{
+				input: &InputNew{
+					Config:        &config.Config{AppID: 12345},
+					WebhookSecret: validSecret,
+				},
 			},
 			request: &Request{
 				Body: validPayload,
@@ -177,7 +189,7 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			payload, err := tt.handler.validateRequest(logger, tt.request)
+			payload, err := tt.controller.validateRequest(logger, tt.request)
 
 			// Check error expectations
 			if tt.wantErr != nil {

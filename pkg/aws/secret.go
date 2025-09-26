@@ -46,3 +46,20 @@ func (sm *SecretsManager) Get(ctx context.Context, input *secretsmanager.GetSecr
 	}
 	return secret, nil
 }
+
+func readSecret(ctx context.Context, secretID string) (*Secret, error) {
+	// Read AWS config
+	config, err := NewConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// read secrets from AWS SecretsManager
+	sm := NewSecretsManager(config)
+	secret, err := sm.Get(ctx, &secretsmanager.GetSecretValueInput{
+		SecretId: aws.String(secretID),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get secret from AWS Secrets Manager: %w", err)
+	}
+	return secret, nil
+}

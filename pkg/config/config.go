@@ -3,10 +3,10 @@ package config
 import (
 	_ "embed"
 	"fmt"
+	"html/template"
 	"io"
 	"path"
 	"strings"
-	"text/template"
 
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
