@@ -98,7 +98,94 @@ Now only AWS Lambda is supported.
 
 ## Getting Started
 
-Coming soon.
+Deploying the app to AWS Lambda using Terraform.
+
+Requirements:
+
+- AWS Account
+- Terraform
+- Git
+- bash
+- GitHub CLI
+- GitHub Repository where the app is installed.
+  - A pull request created by other than you is necessary
+
+1. Checkout the repository
+
+```sh
+git clone https://github.com/suzuki-shunsuke/validate-pr-review-app
+```
+
+2. Move to [terraform/aws](terraform/aws).
+
+```sh
+cd validate-pr-review-app/terraform/aws
+```
+
+3. Run `bash init.sh`
+
+```sh
+bash init.sh
+```
+
+4. Create a GitHub App
+
+Permissions:
+
+- `checks:write`
+- `pull_requests:read`
+- `contents:read`
+
+Create a Private Key.
+
+5. Edit [config.yaml](terraform/aws/config.yaml.tmpl) and [secret.yaml](terraform/aws/secret.yaml.tmpl).
+
+At least, you need to add the private key to secret.yaml.
+
+```yaml
+github_app_private_key: |
+  -----BEGIN RSA PRIVATE KEY-----
+  ...
+```
+
+6. Deploy the app by Terraform
+
+```sh
+terraform init
+terraform validate
+terraform plan
+terraform apply
+```
+
+7. Install the app to a repository
+8. [Configure Webhook](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/using-webhooks-with-github-apps)
+
+- Set the Lambda Function URL to the webhook URL
+- Set the secret token `dummy-secret` to the webhook secret
+
+The setup was done.
+You can create reviews and try the app.
+
+9. Approve a pull request
+
+Then the check passes.
+
+If the app doesn't work, please check the AWS CloudWatch Log to check if the request reached to the AWS Lambda.
+
+10. Dismiss the review.
+
+Then the check fails.
+
+11. Clean up
+
+You can destroy resources by `terraform destroy`.
+
+```sh
+terraform destroy
+```
+
+- Uninstall the GitHub App from the repository
+- Delete the GitHub App
 
 ## Setup
 
@@ -179,13 +266,6 @@ untrusted_machine_users:
 trusted_machine_users:
   - my-safe-bot
 ```
-
-## Demo
-
-- Approve a PR created by Renovate or Dependabot → Check passes.
-- Dismiss a review → Check fails.
-- Add a commit yourself and approve → Check fails (self-approval detected).
-- Leave a review comment → No Check update.
 
 ## Logging, Monitoring, Security, etc
 
