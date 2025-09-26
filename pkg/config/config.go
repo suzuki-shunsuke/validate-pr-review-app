@@ -9,11 +9,11 @@ import (
 )
 
 type Config struct {
-	AppID          int64  `yaml:"app_id"`
-	InstallationID int64  `yaml:"installation_id"`
-	AWS            *AWS   `yaml:"aws"`
-	CheckName      string `yaml:"check_name"`
-	Trust          *Trust `yaml:"trust"`
+	AppID          int64                         `yaml:"app_id"`
+	InstallationID int64                         `yaml:"installation_id"`
+	AWS            *AWS                          `yaml:"aws"`
+	CheckName      string                        `yaml:"check_name"`
+	Trust          *Trust                        `yaml:"trust"`
 	Templates      map[string]string             `yaml:"templates"`
 	BuiltTemplates map[string]*template.Template `yaml:"-"`
 	LogLevel       string                        `yaml:"log_level"`
