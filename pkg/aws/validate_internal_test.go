@@ -10,7 +10,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v75/github"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 )
 
