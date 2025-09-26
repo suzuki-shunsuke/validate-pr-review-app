@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
@@ -16,7 +15,7 @@ func TestController_Run(t *testing.T) {
 		name     string
 		inputNew *validation.InputNew
 		input    *validation.Input
-		expected *config.Result
+		expected *validation.Result
 	}{
 		{
 			name: "two approvals - sufficient",
@@ -47,8 +46,8 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &config.Result{
-				State:     config.StateApproved,
+			expected: &validation.Result{
+				State:     validation.StateApproved,
 				Approvers: []string{"reviewer1", "reviewer2"},
 			},
 		},
@@ -74,8 +73,8 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &config.Result{
-				State: config.StateApprovalIsRequired,
+			expected: &validation.Result{
+				State: validation.StateApprovalIsRequired,
 			},
 		},
 		{
@@ -106,8 +105,8 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &config.Result{
-				State:        config.StateTwoApprovalsAreRequired,
+			expected: &validation.Result{
+				State:        validation.StateTwoApprovalsAreRequired,
 				SelfApprover: "committer",
 			},
 		},
@@ -139,8 +138,8 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &config.Result{
-				State:     config.StateApproved,
+			expected: &validation.Result{
+				State:     validation.StateApproved,
 				Approvers: []string{"reviewer1"},
 			},
 		},
@@ -168,8 +167,8 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &config.Result{
-				State: config.StateApprovalIsRequired,
+			expected: &validation.Result{
+				State: validation.StateApprovalIsRequired,
 				IgnoredApprovers: []*github.IgnoredApproval{
 					{
 						Login: "bot-app[bot]",
@@ -202,8 +201,8 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &config.Result{
-				State: config.StateApprovalIsRequired,
+			expected: &validation.Result{
+				State: validation.StateApprovalIsRequired,
 				IgnoredApprovers: []*github.IgnoredApproval{
 					{
 						Login:                  "untrusted-bot",
@@ -240,8 +239,8 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &config.Result{
-				State:     config.StateApproved,
+			expected: &validation.Result{
+				State:     validation.StateApproved,
 				Approvers: []string{"trusted-bot"},
 			},
 		},
@@ -273,8 +272,8 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &config.Result{
-				State: config.StateTwoApprovalsAreRequired,
+			expected: &validation.Result{
+				State: validation.StateTwoApprovalsAreRequired,
 				UntrustedCommits: []*github.UntrustedCommit{
 					{
 						Login: "committer",
@@ -314,8 +313,8 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &config.Result{
-				State: config.StateTwoApprovalsAreRequired,
+			expected: &validation.Result{
+				State: validation.StateTwoApprovalsAreRequired,
 				UntrustedCommits: []*github.UntrustedCommit{
 					{
 						Login:          "untrusted-app[bot]",
@@ -349,8 +348,8 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 			},
-			expected: &config.Result{
-				State: config.StateTwoApprovalsAreRequired,
+			expected: &validation.Result{
+				State: validation.StateTwoApprovalsAreRequired,
 				UntrustedCommits: []*github.UntrustedCommit{
 					{
 						SHA:             "abc123",

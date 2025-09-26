@@ -9,22 +9,22 @@ import (
 
 	"github.com/shurcooL/githubv4"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
-	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
-func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *github.PullRequestReviewEvent, result *config.Result) githubv4.CreateCheckRunInput {
+func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *github.PullRequestReviewEvent, result *validation.Result) githubv4.CreateCheckRunInput {
 	result.Version = c.input.Version
 	var conclusion githubv4.CheckConclusionState
 	var title githubv4.String
 	switch result.State {
-	case config.StateApproved:
+	case validation.StateApproved:
 		conclusion = githubv4.CheckConclusionStateSuccess
 		title = githubv4.String("Approved")
-	case config.StateApprovalIsRequired:
+	case validation.StateApprovalIsRequired:
 		conclusion = githubv4.CheckConclusionStateFailure
 		title = githubv4.String("Approvals are required")
-	case config.StateTwoApprovalsAreRequired:
+	case validation.StateTwoApprovalsAreRequired:
 		conclusion = githubv4.CheckConclusionStateFailure
 		title = githubv4.String("Two approvals are required")
 	}
@@ -58,7 +58,7 @@ func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *github.PullReques
 	}
 }
 
-func summarize(result *config.Result, templates map[string]*template.Template) (string, error) {
+func summarize(result *validation.Result, templates map[string]*template.Template) (string, error) {
 	var key string
 	if result.Error != "" {
 		key = "error"

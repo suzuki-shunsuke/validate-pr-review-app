@@ -8,16 +8,15 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
 
 // Run validates pull request reviews.
 // It gets pull request reviews and committers via GitHub GraphQL API, and checks if people other than committers approve the PR.
 // If the PR isn't approved by people other than committers, it returns an error.
-func (c *Controller) Run(_ *slog.Logger, input *Input) *config.Result { //nolint:cyclop
+func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 	pr := input.PR
-	result := &config.Result{}
+	result := &Result{}
 	ignoredApprovers := make(map[string]*github.IgnoredApproval, len(pr.Approvers))
 	approvers := make(map[string]struct{}, len(pr.Approvers))
 	for approver := range pr.Approvers {
@@ -45,7 +44,7 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *config.Result { //nolint
 	if len(approvers) > 1 {
 		// Allow multiple approvals
 		result.Approvers = slices.Sorted(maps.Keys(approvers))
-		result.State = config.StateApproved
+		result.State = StateApproved
 		return result
 	}
 
@@ -56,7 +55,7 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *config.Result { //nolint
 	result.IgnoredApprovers = ignoredApproversSlice
 	if len(approvers) == 0 {
 		// Approval is required
-		result.State = config.StateApprovalIsRequired
+		result.State = StateApprovalIsRequired
 		return result
 	}
 
@@ -76,13 +75,13 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *config.Result { //nolint
 		}
 	}
 	if result.SelfApprover != "" || len(result.UntrustedCommits) > 0 {
-		result.State = config.StateTwoApprovalsAreRequired
+		result.State = StateTwoApprovalsAreRequired
 		return result
 	}
 	// One approval is sufficient
 	// author and commits are trusted
 	result.Approvers = slices.Sorted(maps.Keys(approvers))
-	result.State = config.StateApproved
+	result.State = StateApproved
 	return result
 }
 
@@ -150,3 +149,30 @@ func (c *Controller) VerifyCommit(commit *github.Commit) *github.UntrustedCommit
 		IsUntrustedMachineUser: true,
 	}
 }
+
+type Result struct {
+	Error        string
+	State        State
+	Approvers    []string
+	SelfApprover string
+	// app or untrusted machine user approvals
+	IgnoredApprovers []*github.IgnoredApproval
+	// app
+	// untrusted machine user
+	// not linked to any GitHub user
+	// not signed commits
+	UntrustedCommits []*github.UntrustedCommit
+	// settings
+	TrustedApps           []string
+	UntrustedMachineUsers []string
+	TrustedMachineUsers   []string
+	Version               string
+}
+
+type State string
+
+const (
+	StateApproved                State = "approved"
+	StateApprovalIsRequired      State = "no_approval"
+	StateTwoApprovalsAreRequired State = "require_two_approvals"
+)

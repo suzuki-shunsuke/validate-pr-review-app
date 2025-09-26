@@ -46,7 +46,7 @@ type InputNew struct {
 }
 
 type Validator interface {
-	Run(logger *slog.Logger, input *validation.Input) *config.Result
+	Run(logger *slog.Logger, input *validation.Input) *validation.Result
 }
 
 type GitHub interface {

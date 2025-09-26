@@ -8,6 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
 func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
@@ -182,15 +183,15 @@ func TestTemplates(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name     string
-		result   *config.Result
+		result   *validation.Result
 		template string
 		wantErr  bool
 		wantText string
 	}{
 		{
 			name: "two approvals",
-			result: &config.Result{
-				State:     config.StateApproved,
+			result: &validation.Result{
+				State:     validation.StateApproved,
 				Approvers: []string{"user1", "user2"},
 				Version:   "v0.0.1",
 			},
@@ -218,8 +219,8 @@ Trusted Machine Users: Nothing
 		},
 		{
 			name: "one approval",
-			result: &config.Result{
-				State:                 config.StateApproved,
+			result: &validation.Result{
+				State:                 validation.StateApproved,
 				Approvers:             []string{"user1"},
 				TrustedApps:           []string{"dependabot[bot]", "renovate[bot]"},
 				TrustedMachineUsers:   []string{"foo-bot"},
@@ -254,7 +255,7 @@ Trusted Machine Users:
 		},
 		{
 			name: "error",
-			result: &config.Result{
+			result: &validation.Result{
 				Error:                 "failed to fetch pr",
 				TrustedApps:           []string{"dependabot[bot]", "renovate[bot]"},
 				TrustedMachineUsers:   []string{"foo-bot"},
@@ -285,8 +286,8 @@ Trusted Machine Users:
 		},
 		{
 			name: "no approval",
-			result: &config.Result{
-				State: config.StateApprovalIsRequired,
+			result: &validation.Result{
+				State: validation.StateApprovalIsRequired,
 			},
 			template: "no_approval",
 			wantText: `This commit has no approvals.
@@ -307,8 +308,8 @@ Trusted Machine Users: Nothing
 		},
 		{
 			name: "require two approvals",
-			result: &config.Result{
-				State:        config.StateTwoApprovalsAreRequired,
+			result: &validation.Result{
+				State:        validation.StateTwoApprovalsAreRequired,
 				SelfApprover: "foo",
 				Approvers:    []string{"user1"},
 				IgnoredApprovers: []*github.IgnoredApproval{
