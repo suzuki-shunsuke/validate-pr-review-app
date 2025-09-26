@@ -49,47 +49,51 @@ var (
 	templateError []byte
 )
 
-func (c *Config) Init() error { //nolint:cyclop
-	if c.Trust == nil {
-		c.Trust = &Trust{}
-	}
-	if c.Trust.TrustedApps == nil {
-		c.Trust.TrustedApps = []string{
+func (t *Trust) Init() {
+	if t.TrustedApps == nil {
+		t.TrustedApps = []string{
 			"dependabot[bot]",
 			"renovate[bot]",
 		}
 	} else {
-		for i, v := range c.Trust.TrustedApps {
+		for i, v := range t.TrustedApps {
 			// Append [bot] suffix if not exists
 			if !strings.HasSuffix(v, "[bot]") {
-				c.Trust.TrustedApps[i] = v + "[bot]"
+				t.TrustedApps[i] = v + "[bot]"
 			}
 		}
 	}
-	c.Trust.UniqueTrustedApps = make(map[string]struct{}, len(c.Trust.TrustedApps))
-	for _, app := range c.Trust.TrustedApps {
+	t.UniqueTrustedApps = make(map[string]struct{}, len(t.TrustedApps))
+	for _, app := range t.TrustedApps {
 		// TODO validate the app name
 		if app == "" {
 			continue
 		}
-		c.Trust.UniqueTrustedApps[app] = struct{}{}
+		t.UniqueTrustedApps[app] = struct{}{}
 	}
-	c.Trust.UniqueTrustedMachineUsers = make(map[string]struct{}, len(c.Trust.TrustedMachineUsers))
-	for _, user := range c.Trust.TrustedMachineUsers {
+	t.UniqueTrustedMachineUsers = make(map[string]struct{}, len(t.TrustedMachineUsers))
+	for _, user := range t.TrustedMachineUsers {
 		// TODO validate the user name
 		if user == "" {
 			continue
 		}
-		c.Trust.UniqueTrustedMachineUsers[user] = struct{}{}
+		t.UniqueTrustedMachineUsers[user] = struct{}{}
 	}
-	c.Trust.UniqueUntrustedMachineUsers = make(map[string]struct{}, len(c.Trust.UntrustedMachineUsers))
-	for _, user := range c.Trust.UntrustedMachineUsers {
+	t.UniqueUntrustedMachineUsers = make(map[string]struct{}, len(t.UntrustedMachineUsers))
+	for _, user := range t.UntrustedMachineUsers {
 		// TODO validate the user name
 		if user == "" {
 			continue
 		}
-		c.Trust.UniqueUntrustedMachineUsers[user] = struct{}{}
+		t.UniqueUntrustedMachineUsers[user] = struct{}{}
 	}
+}
+
+func (c *Config) Init() error {
+	if c.Trust == nil {
+		c.Trust = &Trust{}
+	}
+	c.Trust.Init()
 	if c.CheckName == "" {
 		c.CheckName = "validate-review"
 	}
