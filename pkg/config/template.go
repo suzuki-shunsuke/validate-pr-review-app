@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
 func (c *Config) initTemplates() error {
@@ -48,7 +50,7 @@ func (c *Config) initTemplates() error {
 
 func (c *Config) testTemplate() error {
 	// TODO add test cases
-	result := &Result{}
+	result := &validation.Result{}
 	for key, tpl := range c.BuiltTemplates {
 		if err := tpl.Execute(io.Discard, result); err != nil {
 			return fmt.Errorf("test template %s: %w", key, err)

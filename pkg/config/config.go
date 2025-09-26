@@ -6,8 +6,6 @@ import (
 	"html/template"
 	"path"
 	"strings"
-
-	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
 
 type Config struct {
@@ -104,30 +102,3 @@ func (c *Config) testUntrustedMachineUsers() error {
 	}
 	return nil
 }
-
-type Result struct {
-	Error        string
-	State        State
-	Approvers    []string
-	SelfApprover string
-	// app or untrusted machine user approvals
-	IgnoredApprovers []*github.IgnoredApproval
-	// app
-	// untrusted machine user
-	// not linked to any GitHub user
-	// not signed commits
-	UntrustedCommits []*github.UntrustedCommit
-	// settings
-	TrustedApps           []string
-	UntrustedMachineUsers []string
-	TrustedMachineUsers   []string
-	Version               string
-}
-
-type State string
-
-const (
-	StateApproved                State = "approved"
-	StateApprovalIsRequired      State = "no_approval"
-	StateTwoApprovalsAreRequired State = "require_two_approvals"
-)
