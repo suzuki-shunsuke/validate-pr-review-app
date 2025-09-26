@@ -1,8 +1,10 @@
 ---
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 version: 2
 project_name: validate-pr-review-app
 archives:
   - name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
+    formats: ["zip"]
     files:
       - LICENSE
       - README.md
