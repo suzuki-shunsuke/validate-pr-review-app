@@ -15,7 +15,6 @@ builds:
     goos:
       - linux
     goarch:
-      - amd64
       - arm64
 sboms:
   - id: default
