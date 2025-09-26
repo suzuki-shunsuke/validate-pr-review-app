@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/aws"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/log"
 )
@@ -15,18 +16,25 @@ import (
 var version = ""
 
 func main() {
-	logger := log.New(os.Stderr, version)
-	if err := run(logger); err != nil {
-		logger.Error("failed", "error", err)
-		os.Exit(1)
+	if code := run(); code != 0 {
+		os.Exit(code)
 	}
 }
 
-func run(logger *slog.Logger) error {
-	logger.Info("Starting the application")
+func run() int {
+	logLevel := &slog.LevelVar{}
+	logger := log.New(os.Stderr, version, logLevel)
+	if err := core(logger, logLevel); err != nil {
+		slogerr.WithError(logger, err).Error("failed")
+		return 1
+	}
+	return 0
+}
+
+func core(logger *slog.Logger, logLevel *slog.LevelVar) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	handler, err := aws.NewHandler(ctx, logger, version)
+	handler, err := aws.NewHandler(ctx, logger, version, logLevel)
 	if err != nil {
 		return fmt.Errorf("create a new handler: %w", err)
 	}

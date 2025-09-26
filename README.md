@@ -234,6 +234,7 @@ aws:
   secret_id: request-pr-review-app # Secret ID in AWS Secrets Manager
   use_lambda_function_url: true # true when using Lambda Function URL
 check_name: check-approval # Optional. Default: validate-review
+log_level: info # debug, info, warn, error. Default: info
 trusted_apps:
   - renovate
   - dependabot
