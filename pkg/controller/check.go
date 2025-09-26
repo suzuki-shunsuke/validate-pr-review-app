@@ -32,9 +32,9 @@ func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *github.PullReques
 		conclusion = githubv4.CheckConclusionStateFailure
 		title = githubv4.String("Internal Error")
 	}
-	result.TrustedApps = c.input.Config.TrustedApps
-	result.TrustedMachineUsers = c.input.Config.TrustedMachineUsers
-	result.UntrustedMachineUsers = c.input.Config.UntrustedMachineUsers
+	result.TrustedApps = c.input.Config.Trust.TrustedApps
+	result.TrustedMachineUsers = c.input.Config.Trust.TrustedMachineUsers
+	result.UntrustedMachineUsers = c.input.Config.Trust.UntrustedMachineUsers
 	s, err := summarize(result, c.input.Config.BuiltTemplates)
 	if err != nil {
 		slogerr.WithError(logger, err).Error("summarize the result")

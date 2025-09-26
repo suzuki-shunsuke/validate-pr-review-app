@@ -9,19 +9,24 @@ import (
 )
 
 type Config struct {
-	AppID                       int64                         `yaml:"app_id"`
-	InstallationID              int64                         `yaml:"installation_id"`
-	AWS                         *AWS                          `yaml:"aws"`
-	CheckName                   string                        `yaml:"check_name"`
-	TrustedApps                 []string                      `yaml:"trusted_apps"`
-	TrustedMachineUsers         []string                      `yaml:"trusted_machine_users"`
-	UntrustedMachineUsers       []string                      `yaml:"untrusted_machine_users"`
-	UniqueTrustedApps           map[string]struct{}           `yaml:"-"`
-	UniqueTrustedMachineUsers   map[string]struct{}           `yaml:"-"`
-	UniqueUntrustedMachineUsers map[string]struct{}           `yaml:"-"`
-	Templates                   map[string]string             `yaml:"templates"`
-	BuiltTemplates              map[string]*template.Template `yaml:"-"`
-	LogLevel                    string                        `yaml:"log_level"`
+	AppID          int64  `yaml:"app_id"`
+	InstallationID int64  `yaml:"installation_id"`
+	AWS            *AWS   `yaml:"aws"`
+	CheckName      string `yaml:"check_name"`
+	Trust          *Trust `yaml:"trust"`
+	Templates      map[string]string             `yaml:"templates"`
+	BuiltTemplates map[string]*template.Template `yaml:"-"`
+	LogLevel       string                        `yaml:"log_level"`
+	// Repositories   []*Repository                 `yaml:"repositories"`
+}
+
+type Trust struct {
+	TrustedMachineUsers         []string            `yaml:"trusted_machine_users"`
+	UntrustedMachineUsers       []string            `yaml:"untrusted_machine_users"`
+	TrustedApps                 []string            `yaml:"trusted_apps"`
+	UniqueTrustedMachineUsers   map[string]struct{} `yaml:"-"`
+	UniqueUntrustedMachineUsers map[string]struct{} `yaml:"-"`
+	UniqueTrustedApps           map[string]struct{} `yaml:"-"`
 }
 
 type AWS struct {
@@ -45,42 +50,45 @@ var (
 )
 
 func (c *Config) Init() error { //nolint:cyclop
-	if c.TrustedApps == nil {
-		c.TrustedApps = []string{
+	if c.Trust == nil {
+		c.Trust = &Trust{}
+	}
+	if c.Trust.TrustedApps == nil {
+		c.Trust.TrustedApps = []string{
 			"dependabot[bot]",
 			"renovate[bot]",
 		}
 	} else {
-		for i, v := range c.TrustedApps {
+		for i, v := range c.Trust.TrustedApps {
 			// Append [bot] suffix if not exists
 			if !strings.HasSuffix(v, "[bot]") {
-				c.TrustedApps[i] = v + "[bot]"
+				c.Trust.TrustedApps[i] = v + "[bot]"
 			}
 		}
 	}
-	c.UniqueTrustedApps = make(map[string]struct{}, len(c.TrustedApps))
-	for _, app := range c.TrustedApps {
+	c.Trust.UniqueTrustedApps = make(map[string]struct{}, len(c.Trust.TrustedApps))
+	for _, app := range c.Trust.TrustedApps {
 		// TODO validate the app name
 		if app == "" {
 			continue
 		}
-		c.UniqueTrustedApps[app] = struct{}{}
+		c.Trust.UniqueTrustedApps[app] = struct{}{}
 	}
-	c.UniqueTrustedMachineUsers = make(map[string]struct{}, len(c.TrustedMachineUsers))
-	for _, user := range c.TrustedMachineUsers {
+	c.Trust.UniqueTrustedMachineUsers = make(map[string]struct{}, len(c.Trust.TrustedMachineUsers))
+	for _, user := range c.Trust.TrustedMachineUsers {
 		// TODO validate the user name
 		if user == "" {
 			continue
 		}
-		c.UniqueTrustedMachineUsers[user] = struct{}{}
+		c.Trust.UniqueTrustedMachineUsers[user] = struct{}{}
 	}
-	c.UniqueUntrustedMachineUsers = make(map[string]struct{}, len(c.UntrustedMachineUsers))
-	for _, user := range c.UntrustedMachineUsers {
+	c.Trust.UniqueUntrustedMachineUsers = make(map[string]struct{}, len(c.Trust.UntrustedMachineUsers))
+	for _, user := range c.Trust.UntrustedMachineUsers {
 		// TODO validate the user name
 		if user == "" {
 			continue
 		}
-		c.UniqueUntrustedMachineUsers[user] = struct{}{}
+		c.Trust.UniqueUntrustedMachineUsers[user] = struct{}{}
 	}
 	if c.CheckName == "" {
 		c.CheckName = "validate-review"
@@ -95,7 +103,7 @@ func (c *Config) Init() error { //nolint:cyclop
 }
 
 func (c *Config) testUntrustedMachineUsers() error {
-	for pattern := range c.UniqueUntrustedMachineUsers {
+	for pattern := range c.Trust.UniqueUntrustedMachineUsers {
 		if _, err := path.Match(pattern, "foo"); err != nil {
 			return fmt.Errorf("invalid untrusted machine user pattern %q: %w", pattern, err)
 		}

@@ -31,9 +31,9 @@ func New(input *InputNew) (*Controller, error) {
 		input: input,
 		gh:    gh,
 		validator: validation.New(&validation.InputNew{
-			TrustedApps:           input.Config.UniqueTrustedApps,
-			UntrustedMachineUsers: input.Config.UniqueUntrustedMachineUsers,
-			TrustedMachineUsers:   input.Config.UniqueTrustedMachineUsers,
+			TrustedApps:           input.Config.Trust.UniqueTrustedApps,
+			UntrustedMachineUsers: input.Config.Trust.UniqueUntrustedMachineUsers,
+			TrustedMachineUsers:   input.Config.Trust.UniqueTrustedMachineUsers,
 		}),
 	}, nil
 }

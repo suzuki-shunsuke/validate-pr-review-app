@@ -25,11 +25,13 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 		{
 			name: "basic initialization",
 			config: &config.Config{
-				TrustedApps:           []string{"app1[bot]", "app2[bot]"},
-				TrustedMachineUsers:   []string{"trusted-user1", "trusted-user2"},
-				UntrustedMachineUsers: []string{"untrusted-*", "bot-*"},
-				CheckName:             "custom-check",
-				Templates:             map[string]string{},
+				Trust: &config.Trust{
+					TrustedApps:           []string{"app1[bot]", "app2[bot]"},
+					TrustedMachineUsers:   []string{"trusted-user1", "trusted-user2"},
+					UntrustedMachineUsers: []string{"untrusted-*", "bot-*"},
+				},
+				CheckName: "custom-check",
+				Templates: map[string]string{},
 			},
 			expectedUniqueTrustedApps: map[string]struct{}{
 				"app1[bot]": {},
@@ -61,10 +63,12 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 		{
 			name: "duplicate entries in arrays",
 			config: &config.Config{
-				TrustedApps:           []string{"app1[bot]", "app1[bot]", "app2[bot]"},
-				TrustedMachineUsers:   []string{"user1", "user1", "user2"},
-				UntrustedMachineUsers: []string{"bot-*", "bot-*"},
-				Templates:             map[string]string{},
+				Trust: &config.Trust{
+					TrustedApps:           []string{"app1[bot]", "app1[bot]", "app2[bot]"},
+					TrustedMachineUsers:   []string{"user1", "user1", "user2"},
+					UntrustedMachineUsers: []string{"bot-*", "bot-*"},
+				},
+				Templates: map[string]string{},
 			},
 			expectedUniqueTrustedApps: map[string]struct{}{
 				"app1[bot]": {},
@@ -93,17 +97,17 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 			}
 
 			// Check unique trusted apps
-			if diff := cmp.Diff(tt.expectedUniqueTrustedApps, tt.config.UniqueTrustedApps); diff != "" {
+			if diff := cmp.Diff(tt.expectedUniqueTrustedApps, tt.config.Trust.UniqueTrustedApps); diff != "" {
 				t.Errorf("UniqueTrustedApps mismatch (-want +got):\n%s", diff)
 			}
 
 			// Check unique trusted machine users
-			if diff := cmp.Diff(tt.expectedUniqueTrustedMachineUsers, tt.config.UniqueTrustedMachineUsers); diff != "" {
+			if diff := cmp.Diff(tt.expectedUniqueTrustedMachineUsers, tt.config.Trust.UniqueTrustedMachineUsers); diff != "" {
 				t.Errorf("UniqueTrustedMachineUsers mismatch (-want +got):\n%s", diff)
 			}
 
 			// Check unique untrusted machine users
-			if diff := cmp.Diff(tt.expectedUniqueUntrustedMachineUsers, tt.config.UniqueUntrustedMachineUsers); diff != "" {
+			if diff := cmp.Diff(tt.expectedUniqueUntrustedMachineUsers, tt.config.Trust.UniqueUntrustedMachineUsers); diff != "" {
 				t.Errorf("UniqueUntrustedMachineUsers mismatch (-want +got):\n%s", diff)
 			}
 
@@ -160,8 +164,10 @@ func TestConfig_Init_TemplateParseError(t *testing.T) {
 func TestConfig_Init_NilTemplates(t *testing.T) {
 	t.Parallel()
 	config := &config.Config{
-		TrustedApps: []string{"app1[bot]"},
-		Templates:   nil,
+		Trust: &config.Trust{
+			TrustedApps: []string{"app1[bot]"},
+		},
+		Templates: nil,
 	}
 
 	err := config.Init()
