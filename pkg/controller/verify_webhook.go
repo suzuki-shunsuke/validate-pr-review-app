@@ -20,7 +20,6 @@ const (
 	headerXHubSignature                   = "X-HUB-SIGNATURE"
 	headerXGitHubEvent                    = "X-GITHUB-EVENT"
 	eventPullRequestReview                = "pull_request_review"
-	eventMergeGroup                       = "merge_group"
 	eventInstallation                     = "installation"
 	eventCheckSuite                       = "check_suite"
 )
@@ -62,18 +61,18 @@ func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) *Event {
 			return nil
 		}
 		return newPullRequestReviewEvent(payload)
-	case eventMergeGroup:
-		payload := &github.MergeGroupEvent{}
+	case eventCheckSuite:
+		payload := &github.CheckSuiteEvent{}
 		if err := json.Unmarshal(body, payload); err != nil {
 			logger.Warn("parse a webhook payload", "error", err)
 			return nil
 		}
-		ev, err := newMergeGroupEvent(logger, payload)
+		ev, err := newCheckSuiteEvent(logger, payload)
 		if err != nil {
-			slogerr.WithError(logger, err).Warn("create event from merge group event")
+			slogerr.WithError(logger, err).Warn("create event from check suite event")
 		}
 		return ev
-	case eventCheckSuite, eventInstallation:
+	case eventInstallation:
 		logger.Info("ignore the event", "event_type", evType)
 		return nil
 	default:
@@ -106,12 +105,7 @@ func newPullRequestReviewEvent(ev *github.PullRequestReviewEvent) *Event {
 	}
 }
 
-func getPRNumberFromPushBranch(logger *slog.Logger, ref string) (int, error) {
-	branch, ok := strings.CutPrefix(ref, "refs/heads/")
-	if !ok {
-		logger.Debug("the ref is not a branch", "ref", ref)
-		return 0, nil
-	}
+func getPRNumberFromBranch(logger *slog.Logger, branch string) (int, error) {
 	branch2, ok := strings.CutPrefix(branch, "gh-readonly-queue/")
 	if !ok {
 		logger.Debug("the branch is not a gh-readonly-queue", "branch", branch)
@@ -129,9 +123,9 @@ func getPRNumberFromPushBranch(logger *slog.Logger, ref string) (int, error) {
 	return n, nil
 }
 
-func newMergeGroupEvent(logger *slog.Logger, ev *github.MergeGroupEvent) (*Event, error) {
+func newCheckSuiteEvent(logger *slog.Logger, ev *github.CheckSuiteEvent) (*Event, error) {
 	// e.g. refs/heads/gh-readonly-queue/main/pr-24-a9d10f59f8c051673f45263c42aca8346614e716
-	prNumber, err := getPRNumberFromPushBranch(logger, ev.GetMergeGroup().GetHeadRef())
+	prNumber, err := getPRNumberFromBranch(logger, ev.GetCheckSuite().GetHeadBranch())
 	if err != nil {
 		return nil, fmt.Errorf("get a pull request number from the branch name: %w", err)
 	}
@@ -146,6 +140,6 @@ func newMergeGroupEvent(logger *slog.Logger, ev *github.MergeGroupEvent) (*Event
 		RepoName:     ev.GetRepo().GetName(),
 		PRNumber:     prNumber,
 		RepoID:       ev.GetRepo().GetNodeID(),
-		HeadSHA:      ev.GetMergeGroup().GetHeadSHA(),
+		HeadSHA:      ev.GetCheckSuite().GetHeadSHA(),
 	}, nil
 }
