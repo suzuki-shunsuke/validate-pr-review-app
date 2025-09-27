@@ -15,7 +15,6 @@ import (
 
 var (
 	errHeaderXHubSignatureIsRequired = errors.New("header X-HUB-SIGNATURE is required")
-	errSignatureInvalid              = errors.New("signature is invalid")
 	errHeaderXHubEventIsRequired     = errors.New("header X-HUB-EVENT is required")
 	errInvalidEventType              = errors.New("event type is invalid")
 )
