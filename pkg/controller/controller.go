@@ -28,13 +28,9 @@ func New(input *InputNew) (*Controller, error) {
 		return nil, fmt.Errorf("create GitHub client: %w", err)
 	}
 	return &Controller{
-		input: input,
-		gh:    gh,
-		validator: validation.New(&validation.InputNew{
-			TrustedApps:           input.Config.Trust.UniqueTrustedApps,
-			UntrustedMachineUsers: input.Config.Trust.UniqueUntrustedMachineUsers,
-			TrustedMachineUsers:   input.Config.Trust.UniqueTrustedMachineUsers,
-		}),
+		input:     input,
+		gh:        gh,
+		validator: validation.New(&validation.InputNew{}),
 	}, nil
 }
 
