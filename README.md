@@ -32,7 +32,7 @@ Please don't use this yet.
 ## How It Works
 
 1. Install the GitHub App in your repositories and [enable Webhook](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/using-webhooks-with-github-apps).
-2. GitHub sends Webhook to the App when pull requests are reviewed.
+2. GitHub sends Webhook to the App when pull requests are reviewed or pull requests are added to merge queue.
 3. The App validates if the Webhook is valid.
 4. The App filters irrevant events like review comments.
 5. The App fetches PR reviews and commits using the GitHub API.
@@ -196,9 +196,9 @@ terraform destroy
 - [Generate a Webhook Secret Token](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries).
 - Create a dedicated GitHub App with:
   - Permissions:
-    - `checks:write`
-    - `pull_requests:read`
-    - `contents:read`
+    - `checks:write` To create Check Runs by GitHub API
+    - `pull_requests:read`: To retrieve pull request reviews by GitHub API
+    - `contents:read`: To retrieve pull request commits by GitHub API
   - Private Key (keep safe).
 - Deploy Validate PR Review App.
 - Store Webhook Secret & GitHub App Private Key in **AWS Secrets Manager**.
@@ -206,6 +206,12 @@ terraform destroy
   - Set the Webhook Secret.
   - Point the Webhook URL to your Lambda.
 - Install the App in repositories to validate PRs.
+- [Add the check to Required Checks by GitHub Branch Rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)
+
+## Merge Queue Support
+
+This app supports [Merge Queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue).
+Additional settings aren't necessary.
 
 ## Configuration
 

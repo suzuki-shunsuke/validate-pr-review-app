@@ -20,6 +20,7 @@ type V4Client interface {
 
 type (
 	PullRequestReviewEvent = github.PullRequestReviewEvent
+	CheckSuiteEvent        = github.CheckSuiteEvent
 	ParamNewApp            = v4.ParamNewApp
 )
 

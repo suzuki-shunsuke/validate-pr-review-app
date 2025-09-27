@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"path"
+	"strconv"
 	"strings"
 
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
@@ -12,10 +14,9 @@ import (
 )
 
 var (
-	errHeaderXHubSignatureIsRequired = errors.New("header X-HUB-SIGNATURE is required")
-	errSignatureInvalid              = errors.New("signature is invalid")
-	errHeaderXHubEventIsRequired     = errors.New("header X-HUB-EVENT is required")
-	errInvalidEventType              = errors.New("event type is invalid")
+	errHeaderXHubSignatureIsRequired           = errors.New("header X-HUB-SIGNATURE is required")
+	errGHReadonlyQueueMissingPR                = errors.New("gh-readonly-queue branch is not a valid format. missing 'pr-'")
+	errGHReadonlyQueueMissingDashAfterPRNumber = errors.New("gh-readonly-queue branch is not a valid format. missing '-' after the PR number")
 )
 
 const (
@@ -23,41 +24,65 @@ const (
 	headerXHubSignature                   = "X-HUB-SIGNATURE"
 	headerXGitHubEvent                    = "X-GITHUB-EVENT"
 	eventPullRequestReview                = "pull_request_review"
+	eventInstallation                     = "installation"
+	eventCheckSuite                       = "check_suite"
 )
 
-func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) (*Event, error) {
-	headers := make(map[string]string, len(req.Params.Headers))
-	for k, v := range req.Params.Headers {
-		headers[strings.ToUpper(k)] = v
-	}
-	bodyStr := req.Body
-
+func (c *Controller) verifySignature(body []byte, headers map[string]string) error {
 	sig, ok := headers[headerXHubSignature]
 	if !ok {
-		return nil, errHeaderXHubSignatureIsRequired
+		return errHeaderXHubSignatureIsRequired
 	}
+	return c.validateSignature(sig, body, c.input.WebhookSecret)
+}
 
-	bodyB := []byte(bodyStr)
-	if err := c.validateSignature(sig, bodyB, c.input.WebhookSecret); err != nil {
-		logger.Warn("validate the webhook signature", "error", err)
-		return nil, errSignatureInvalid
+func (c *Controller) normalizeHeaders(headers map[string]string) map[string]string {
+	hs := make(map[string]string, len(headers))
+	for k, v := range headers {
+		hs[strings.ToUpper(k)] = v
+	}
+	return hs
+}
+
+func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) *Event {
+	headers := c.normalizeHeaders(req.Params.Headers)
+	body := []byte(req.Body)
+	if err := c.verifySignature(body, headers); err != nil {
+		slogerr.WithError(logger, err).Warn("validate the webhook signature")
+		return nil
 	}
 
 	evType, ok := headers[headerXGitHubEvent]
 	if !ok {
-		return nil, errHeaderXHubEventIsRequired
+		logger.Warn("header X-GITHUB-EVENT is required")
+		return nil
 	}
-	if evType != eventPullRequestReview {
-		return nil, slogerr.With(errInvalidEventType, "event_type", evType) //nolint:wrapcheck
+	switch evType {
+	case eventPullRequestReview:
+		payload := &github.PullRequestReviewEvent{}
+		if err := json.Unmarshal(body, payload); err != nil {
+			logger.Warn("parse a webhook payload", "error", err)
+			return nil
+		}
+		return newPullRequestReviewEvent(payload)
+	case eventCheckSuite:
+		payload := &github.CheckSuiteEvent{}
+		if err := json.Unmarshal(body, payload); err != nil {
+			logger.Warn("parse a webhook payload", "error", err)
+			return nil
+		}
+		ev, err := newCheckSuiteEvent(logger, payload)
+		if err != nil {
+			slogerr.WithError(logger, err).Warn("create event from check suite event")
+		}
+		return ev
+	case eventInstallation:
+		logger.Info("ignore the event", "event_type", evType)
+		return nil
+	default:
+		logger.Warn("ignore the event", "event_type", evType)
+		return nil
 	}
-
-	payload := &github.PullRequestReviewEvent{}
-	if err := json.Unmarshal(bodyB, payload); err != nil {
-		logger.Warn("parse a webhook payload", "error", err)
-		return nil, fmt.Errorf("parse a webhook payload: %w", err)
-	}
-
-	return newEvent(payload), nil
 }
 
 type Event struct {
@@ -71,7 +96,7 @@ type Event struct {
 	HeadSHA      string
 }
 
-func newEvent(ev *github.PullRequestReviewEvent) *Event {
+func newPullRequestReviewEvent(ev *github.PullRequestReviewEvent) *Event {
 	return &Event{
 		Action:       ev.GetAction(),
 		RepoFullName: ev.GetRepo().GetFullName(),
@@ -82,4 +107,49 @@ func newEvent(ev *github.PullRequestReviewEvent) *Event {
 		RepoID:       ev.GetRepo().GetNodeID(),
 		HeadSHA:      ev.GetPullRequest().GetHead().GetSHA(),
 	}
+}
+
+func getPRNumberFromBranch(logger *slog.Logger, branch string) (int, error) {
+	branch2, ok := strings.CutPrefix(branch, "gh-readonly-queue/")
+	if !ok {
+		logger.Debug("the branch is not a gh-readonly-queue", "branch", branch)
+		return 0, nil
+	}
+	// e.g. pr-24-a9d10f59f8c051673f45263c42aca8346614e716
+	branch3, ok := strings.CutPrefix(path.Base(branch2), "pr-")
+	if !ok {
+		logger.Debug("the branch is not a gh-readonly-queue", "branch", branch)
+		return 0, errGHReadonlyQueueMissingPR
+	}
+
+	s, _, ok := strings.Cut(branch3, "-")
+	if !ok {
+		return 0, errGHReadonlyQueueMissingDashAfterPRNumber
+	}
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, fmt.Errorf("parse pull request number in gh-readonly-queue branch as number: %w", err)
+	}
+	return n, nil
+}
+
+func newCheckSuiteEvent(logger *slog.Logger, ev *github.CheckSuiteEvent) (*Event, error) {
+	// e.g. refs/heads/gh-readonly-queue/main/pr-24-a9d10f59f8c051673f45263c42aca8346614e716
+	prNumber, err := getPRNumberFromBranch(logger, ev.GetCheckSuite().GetHeadBranch())
+	if err != nil {
+		return nil, fmt.Errorf("get a pull request number from the branch name: %w", err)
+	}
+	if prNumber == 0 {
+		// Ignore webhook events not from gh-readonly-queue branches
+		return nil, nil //nolint:nilnil
+	}
+	return &Event{
+		Action:       ev.GetAction(),
+		RepoFullName: ev.GetRepo().GetFullName(),
+		RepoOwner:    ev.GetRepo().GetOwner().GetLogin(),
+		RepoName:     ev.GetRepo().GetName(),
+		PRNumber:     prNumber,
+		RepoID:       ev.GetRepo().GetNodeID(),
+		HeadSHA:      ev.GetCheckSuite().GetHeadSHA(),
+	}, nil
 }

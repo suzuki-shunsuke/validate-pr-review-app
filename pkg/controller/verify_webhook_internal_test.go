@@ -16,7 +16,7 @@ func newMockValidateSignature(err error) func(_ string, _, _ []byte) error {
 	}
 }
 
-func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
+func TestHandler_validateRequest(t *testing.T) {
 	t.Parallel()
 	const dummySignature = "sha256=abcdefghijklmnopqrstuvwxyz0123456789abcdef"
 
@@ -47,7 +47,6 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 		name          string
 		controller    *Controller
 		request       *Request
-		wantErr       error
 		wantPayload   bool
 		expectedEvent *Event
 	}{
@@ -68,7 +67,6 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					},
 				},
 			},
-			wantErr: errHeaderXHubSignatureIsRequired,
 		},
 		{
 			name: "invalid signature",
@@ -89,7 +87,6 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					},
 				},
 			},
-			wantErr: errSignatureInvalid,
 		},
 		{
 			name: "missing X-GITHUB-EVENT header",
@@ -109,7 +106,6 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					},
 				},
 			},
-			wantErr: errHeaderXHubEventIsRequired,
 		},
 		{
 			name: "unsupported event type",
@@ -126,11 +122,10 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					Headers: map[string]string{
 						headerXGitHubHookInstallationTargetID: "12345",
 						headerXHubSignature:                   dummySignature,
-						headerXGitHubEvent:                    "push",
+						headerXGitHubEvent:                    "label",
 					},
 				},
 			},
-			wantErr: errInvalidEventType,
 		},
 		{
 			name: "invalid JSON payload",
@@ -151,7 +146,6 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					},
 				},
 			},
-			wantErr: nil, // This will be a dynamic error message about JSON parsing
 		},
 		{
 			name: "valid request",
@@ -182,7 +176,6 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					Headers: map[string]string{},
 				},
 			},
-			wantErr: errHeaderXHubSignatureIsRequired,
 		},
 	}
 
@@ -190,33 +183,8 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			payload, err := tt.controller.verifyWebhook(logger, tt.request)
-
-			// Check error expectations
-			if tt.wantErr != nil {
-				if err == nil {
-					t.Errorf("validateRequest() expected error %v, got nil", tt.wantErr)
-					return
-				}
-				if !errors.Is(err, tt.wantErr) {
-					t.Errorf("validateRequest() error = %v, want %v", err, tt.wantErr)
-					return
-				}
-				return
-			}
-
-			// For cases where we expect specific error messages but not specific error types
-			if !tt.wantPayload && err == nil {
-				t.Error("validateRequest() expected an error, got nil")
-				return
-			}
-
-			// For valid requests
+			payload := tt.controller.verifyWebhook(logger, tt.request)
 			if tt.wantPayload {
-				if err != nil {
-					t.Errorf("validateRequest() unexpected error = %v", err)
-					return
-				}
 				if payload == nil {
 					t.Error("validateRequest() returned nil payload")
 					return
@@ -225,6 +193,79 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 				if payload.Action == "" {
 					t.Error("verifyWebhook() returned payload without Action field")
 				}
+			}
+		})
+	}
+}
+
+func Test_getPRNumberFromBranch(t *testing.T) {
+	t.Parallel()
+
+	logger := slog.Default()
+
+	tests := []struct {
+		name           string
+		branch         string
+		expectedNumber int
+		wantErr        bool
+	}{
+		{
+			name:           "valid gh-readonly-queue branch",
+			branch:         "gh-readonly-queue/main/pr-24-a9d10f59f8c051673f45263c42aca8346614e716",
+			expectedNumber: 24,
+			wantErr:        false,
+		},
+		{
+			name:           "not a gh-readonly-queue branch",
+			branch:         "main",
+			expectedNumber: 0,
+			wantErr:        false,
+		},
+		{
+			name:           "gh-readonly-queue but invalid format - missing pr prefix",
+			branch:         "gh-readonly-queue/main/24-a9d10f59f8c051673f45263c42aca8346614e716",
+			expectedNumber: 0,
+			wantErr:        true,
+		},
+		{
+			name:           "gh-readonly-queue but invalid format - no dash after pr number",
+			branch:         "gh-readonly-queue/main/pr-24a9d10f59f8c051673f45263c42aca8346614e716",
+			expectedNumber: 0,
+			wantErr:        true,
+		},
+		{
+			name:           "gh-readonly-queue but invalid format - non-numeric PR number",
+			branch:         "gh-readonly-queue/main/pr-abc-a9d10f59f8c051673f45263c42aca8346614e716",
+			expectedNumber: 0,
+			wantErr:        true,
+		},
+		{
+			name:           "gh-readonly-queue but empty PR number",
+			branch:         "gh-readonly-queue/main/pr--a9d10f59f8c051673f45263c42aca8346614e716",
+			expectedNumber: 0,
+			wantErr:        true,
+		},
+		{
+			name:           "gh-readonly-queue with refs/heads prefix",
+			branch:         "refs/heads/gh-readonly-queue/main/pr-42-fedcba9876543210",
+			expectedNumber: 0,
+			wantErr:        false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			number, err := getPRNumberFromBranch(logger, tt.branch)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getPRNumberFromBranch() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if number != tt.expectedNumber {
+				t.Errorf("getPRNumberFromBranch() = %v, want %v", number, tt.expectedNumber)
 			}
 		})
 	}
