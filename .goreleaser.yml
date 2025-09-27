@@ -3,14 +3,17 @@
 version: 2
 project_name: validate-pr-review-app
 archives:
-  - name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
+  - name_template: "{{.ProjectName}}_lambda_{{.Os}}_{{.Arch}}"
     formats: ["zip"]
+    ids:
+      - lambda
     files:
       - LICENSE
       - README.md
       - third_party_licenses/**/*
 builds:
-  - binary: bootstrap
+  - id: lambda
+    binary: bootstrap
     main: cmd/lambda/main.go
     env:
       - CGO_ENABLED=0
