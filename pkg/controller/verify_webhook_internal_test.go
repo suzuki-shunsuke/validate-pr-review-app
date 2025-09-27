@@ -126,7 +126,7 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					Headers: map[string]string{
 						headerXGitHubHookInstallationTargetID: "12345",
 						headerXHubSignature:                   dummySignature,
-						headerXGitHubEvent:                    "push",
+						headerXGitHubEvent:                    "label",
 					},
 				},
 			},
