@@ -12,7 +12,7 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request)
 	defer logger.Info("Ending a request")
 
 	// Validate the request
-	ev, err := c.validateRequest(logger, req)
+	ev, err := c.verifyWebhook(logger, req)
 	if err != nil {
 		slogerr.WithError(logger, err).Warn("validate request")
 		return nil

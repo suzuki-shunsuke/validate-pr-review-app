@@ -25,7 +25,7 @@ const (
 	eventPullRequestReview                = "pull_request_review"
 )
 
-func (c *Controller) validateRequest(logger *slog.Logger, req *Request) (*github.PullRequestReviewEvent, error) {
+func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) (*github.PullRequestReviewEvent, error) {
 	headers := make(map[string]string, len(req.Params.Headers))
 	for k, v := range req.Params.Headers {
 		headers[strings.ToUpper(k)] = v

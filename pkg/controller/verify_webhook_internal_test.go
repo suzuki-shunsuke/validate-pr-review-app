@@ -1,9 +1,9 @@
-//nolint:funlen
 package controller
 
 import (
+	//nolint:gosec
 	"crypto/hmac"
-	"crypto/sha1" //nolint:gosec
+	"crypto/sha1"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -21,7 +21,7 @@ func generateSignature(payload string, secret []byte) string {
 	return fmt.Sprintf("sha1=%x", h.Sum(nil))
 }
 
-func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
+func TestHandler_verifyWebhook(t *testing.T) { //nolint:gocognit,cyclop
 	t.Parallel()
 
 	// Create a test logger
@@ -189,7 +189,7 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			payload, err := tt.controller.validateRequest(logger, tt.request)
+			payload, err := tt.controller.verifyWebhook(logger, tt.request)
 
 			// Check error expectations
 			if tt.wantErr != nil {
