@@ -259,6 +259,7 @@ Or pinning version:
 > :x: `dependabot[bot]`
 
 ```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/validate-pr-review-app/main/json-schema/config.json
 # Required
 app_id: 0000 # GitHub App ID
 installation_id: 00000000 # GitHub App Installation ID
