@@ -108,7 +108,7 @@ Requirements:
 - bash
 - GitHub CLI
 - GitHub Repository where the app is installed.
-  - A pull request created by other than you is necessary
+  - A pull request you haven't pushed any commit is necessary
 
 1. Checkout the repository
 
