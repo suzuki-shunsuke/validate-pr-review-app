@@ -299,6 +299,33 @@ repositories:
         - bot-*
 ```
 
+### :bulb: Customize footer
+
+You can customize the footer of this app's Checks tab.
+
+The default is:
+
+```markdown
+---
+
+[This check is created by Validate PR Review App (version: {{if .Version}}{{.Version}}{{else}}unknown{{end}})](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+```
+
+You can add the guide for developers:
+
+e.g.
+
+```yaml
+templates:
+  footer: |
+    ---
+
+    For more details, see the [document](https://example.com).
+    If you have any questions, please contact the security team.
+```
+
+This template is rendered with [Go's html/template](https://pkg.go.dev/html/template).
+
 ## Trusted vs. Untrusted Users and GitHub Apps
 
 - **Trusted Apps & Users**: properly managed, cannot be abused.
