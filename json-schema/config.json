@@ -21,37 +21,31 @@
     },
     "Config": {
       "properties": {
-        "AppID": {
+        "app_id": {
           "type": "integer"
         },
-        "InstallationID": {
+        "installation_id": {
           "type": "integer"
         },
-        "AWS": {
+        "aws": {
           "$ref": "#/$defs/AWS"
         },
-        "CheckName": {
+        "check_name": {
           "type": "string"
         },
-        "Trust": {
+        "trust": {
           "$ref": "#/$defs/Trust"
         },
-        "Templates": {
+        "templates": {
           "additionalProperties": {
             "type": "string"
           },
           "type": "object"
         },
-        "BuiltTemplates": {
-          "additionalProperties": {
-            "$ref": "#/$defs/Template"
-          },
-          "type": "object"
-        },
-        "LogLevel": {
+        "log_level": {
           "type": "string"
         },
-        "Repositories": {
+        "repositories": {
           "items": {
             "$ref": "#/$defs/Repository"
           },
@@ -61,95 +55,31 @@
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "AppID",
-        "InstallationID",
-        "AWS",
-        "CheckName",
-        "Trust",
-        "Templates",
-        "BuiltTemplates",
-        "LogLevel",
-        "Repositories"
-      ]
-    },
-    "ListNode": {
-      "properties": {
-        "NodeType": {
-          "type": "integer"
-        },
-        "Pos": {
-          "type": "integer"
-        },
-        "Nodes": {
-          "items": true,
-          "type": "array"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "NodeType",
-        "Pos",
-        "Nodes"
+        "app_id",
+        "installation_id",
+        "aws"
       ]
     },
     "Repository": {
       "properties": {
-        "Repositories": {
+        "repositories": {
           "items": {
             "type": "string"
           },
           "type": "array"
         },
-        "Trust": {
+        "trust": {
           "$ref": "#/$defs/Trust"
         },
-        "Ignored": {
+        "ignored": {
           "type": "boolean"
         }
       },
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "Repositories",
-        "Trust",
-        "Ignored"
-      ]
-    },
-    "Template": {
-      "properties": {
-        "Tree": {
-          "$ref": "#/$defs/Tree"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "Tree"
-      ]
-    },
-    "Tree": {
-      "properties": {
-        "Name": {
-          "type": "string"
-        },
-        "ParseName": {
-          "type": "string"
-        },
-        "Root": {
-          "$ref": "#/$defs/ListNode"
-        },
-        "Mode": {
-          "type": "integer"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "Name",
-        "ParseName",
-        "Root",
-        "Mode"
+        "repositories",
+        "trust"
       ]
     },
     "Trust": {
