@@ -10,6 +10,7 @@ jobs:
     with:
       go-version-file: go.mod
       aqua_version: v2.55.0
+      go_licenses_package: ./cmd/lambda
     permissions:
       contents: write
       id-token: write
