@@ -7,8 +7,8 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/google/go-github/v75/github"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
 
 var (
@@ -38,7 +38,7 @@ func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) (*Event, e
 	}
 
 	bodyB := []byte(bodyStr)
-	if err := github.ValidateSignature(sig, bodyB, c.input.WebhookSecret); err != nil {
+	if err := c.validateSignature(sig, bodyB, c.input.WebhookSecret); err != nil {
 		logger.Warn("validate the webhook signature", "error", err)
 		return nil, errSignatureInvalid
 	}

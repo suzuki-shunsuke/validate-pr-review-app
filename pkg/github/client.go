@@ -23,6 +23,8 @@ type (
 	ParamNewApp            = v4.ParamNewApp
 )
 
+var ValidateSignature = github.ValidateSignature //nolint:gochecknoglobals
+
 func New(param *v4.ParamNewApp) (*Client, error) {
 	v4Client, err := v4.New(param)
 	if err != nil {

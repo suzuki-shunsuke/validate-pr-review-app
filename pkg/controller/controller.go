@@ -12,9 +12,10 @@ import (
 )
 
 type Controller struct {
-	input     *InputNew
-	gh        GitHub
-	validator Validator
+	input             *InputNew
+	gh                GitHub
+	validator         Validator
+	validateSignature func(signature string, payload, secretToken []byte) error
 }
 
 func New(input *InputNew) (*Controller, error) {
@@ -28,9 +29,10 @@ func New(input *InputNew) (*Controller, error) {
 		return nil, fmt.Errorf("create GitHub client: %w", err)
 	}
 	return &Controller{
-		input:     input,
-		gh:        gh,
-		validator: validation.New(&validation.InputNew{}),
+		input:             input,
+		gh:                gh,
+		validator:         validation.New(&validation.InputNew{}),
+		validateSignature: github.ValidateSignature,
 	}, nil
 }
 
