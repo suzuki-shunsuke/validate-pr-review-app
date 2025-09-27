@@ -24,6 +24,7 @@ func New(input *InputNew) (*Controller, error) {
 		AppID:          input.Config.AppID,
 		InstallationID: input.Config.InstallationID,
 		KeyFile:        input.GitHubAppPrivateKey,
+		Logger:         input.Logger,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create GitHub client: %w", err)
@@ -41,6 +42,7 @@ type InputNew struct {
 	Version             string
 	WebhookSecret       []byte
 	GitHubAppPrivateKey string
+	Logger              *slog.Logger
 }
 
 type Validator interface {
