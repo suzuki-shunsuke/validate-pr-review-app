@@ -8,9 +8,7 @@ import (
 )
 
 func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request) error {
-	logger.Info("Starting a request", "request", req)
-	defer logger.Info("Ending a request")
-
+	logger.Debug("Starting a request", "request", req)
 	// Validate the request
 	ev := c.verifyWebhook(logger, req)
 	if ev == nil {
