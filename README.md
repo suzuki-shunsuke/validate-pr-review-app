@@ -7,12 +7,6 @@ It helps organizations improve governance and security by ensuring PRs cannot be
 
 ![image](https://github.com/user-attachments/assets/aa460dc1-375c-46ad-ad05-24cdea7f1c4d)
 
-## :warning: Status
-
-This project is still in alpha.
-Probably this doesn't work.
-Please don't use this yet.
-
 ## Features
 
 - Security and Governance
