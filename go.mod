@@ -11,6 +11,7 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v75 v75.0.0
 	github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
+	github.com/suzuki-shunsuke/gen-go-jsonschema v0.1.0
 	github.com/suzuki-shunsuke/slog-error v0.2.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -27,9 +28,14 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.38.5 // indirect
 	github.com/aws/smithy-go v1.23.0 // indirect
+	github.com/bahlo/generic-list-go v0.2.0 // indirect
+	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/google/go-github/v72 v72.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/invopop/jsonschema v0.12.0 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/shurcooL/graphql v0.0.0-20230722043721-ed46e5a46466 // indirect
+	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 )

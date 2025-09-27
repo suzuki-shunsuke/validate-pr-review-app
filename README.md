@@ -220,6 +220,37 @@ Configuration consists of **secrets** and **non-secrets**.
 > When using AWS Secrets Manager Web UI, multi-line values are not supported.
 > You should convert the private key and webhook secret into JSON before storing.
 
+### Non Secret Config
+
+You can configure AWS Lambda Function by environment variable `CONFIG`.
+`CONFIG` is a YAML string.
+
+#### JSON Schema
+
+[json-schema/config.json](json-schema/config.json)
+
+You can validate your config using JSON Schema and tools such as [ajv-cli](https://ajv.js.org/packages/ajv-cli.html).
+
+```sh
+ajv --spec=draft2020 -s json-schema/config.json -d config.yaml
+```
+
+##### Input Complementation by YAML Language Server
+
+[Please see the comment too.](https://github.com/szksh-lab/.github/issues/67#issuecomment-2564960491)
+
+Version: `main`
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/validate-pr-review-app/main/json-schema/config.json
+```
+
+Or pinning version:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/validate-pr-review-app/v0.0.1/json-schema/config.json
+```
+
 ### Example Config
 
 > [!WARNING]
@@ -228,6 +259,7 @@ Configuration consists of **secrets** and **non-secrets**.
 > :x: `dependabot[bot]`
 
 ```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/validate-pr-review-app/main/json-schema/config.json
 # Required
 app_id: 0000 # GitHub App ID
 installation_id: 00000000 # GitHub App Installation ID

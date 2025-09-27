@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config/config",
+  "$ref": "#/$defs/Config",
+  "$defs": {
+    "AWS": {
+      "properties": {
+        "SecretID": {
+          "type": "string"
+        },
+        "UseLambdaFunctionURL": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "SecretID",
+        "UseLambdaFunctionURL"
+      ]
+    },
+    "Config": {
+      "properties": {
+        "app_id": {
+          "type": "integer"
+        },
+        "installation_id": {
+          "type": "integer"
+        },
+        "aws": {
+          "$ref": "#/$defs/AWS"
+        },
+        "check_name": {
+          "type": "string"
+        },
+        "trust": {
+          "$ref": "#/$defs/Trust"
+        },
+        "templates": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "log_level": {
+          "type": "string"
+        },
+        "repositories": {
+          "items": {
+            "$ref": "#/$defs/Repository"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "app_id",
+        "installation_id",
+        "aws"
+      ]
+    },
+    "Repository": {
+      "properties": {
+        "repositories": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "trust": {
+          "$ref": "#/$defs/Trust"
+        },
+        "ignored": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "repositories",
+        "trust"
+      ]
+    },
+    "Trust": {
+      "properties": {
+        "TrustedMachineUsers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "UntrustedMachineUsers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "TrustedApps": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "UniqueTrustedMachineUsers": {
+          "additionalProperties": {
+            "properties": {},
+            "additionalProperties": false,
+            "type": "object"
+          },
+          "type": "object"
+        },
+        "UniqueUntrustedMachineUsers": {
+          "additionalProperties": {
+            "properties": {},
+            "additionalProperties": false,
+            "type": "object"
+          },
+          "type": "object"
+        },
+        "UniqueTrustedApps": {
+          "additionalProperties": {
+            "properties": {},
+            "additionalProperties": false,
+            "type": "object"
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "TrustedMachineUsers",
+        "UntrustedMachineUsers",
+        "TrustedApps",
+        "UniqueTrustedMachineUsers",
+        "UniqueUntrustedMachineUsers",
+        "UniqueTrustedApps"
+      ]
+    }
+  }
+}
