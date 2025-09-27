@@ -28,21 +28,27 @@ const (
 	eventPush                             = "push"
 )
 
-func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) (*Event, error) {
-	headers := make(map[string]string, len(req.Params.Headers))
-	for k, v := range req.Params.Headers {
-		headers[strings.ToUpper(k)] = v
-	}
-	bodyStr := req.Body
-
+func (c *Controller) verifySignature(body []byte, headers map[string]string) error {
 	sig, ok := headers[headerXHubSignature]
 	if !ok {
-		return nil, errHeaderXHubSignatureIsRequired
+		return errHeaderXHubSignatureIsRequired
 	}
+	return c.validateSignature(sig, body, c.input.WebhookSecret)
+}
 
-	bodyB := []byte(bodyStr)
-	if err := c.validateSignature(sig, bodyB, c.input.WebhookSecret); err != nil {
-		logger.Warn("validate the webhook signature", "error", err)
+func (c *Controller) normalizeHeaders(headers map[string]string) map[string]string {
+	hs := make(map[string]string, len(headers))
+	for k, v := range headers {
+		hs[strings.ToUpper(k)] = v
+	}
+	return hs
+}
+
+func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) (*Event, error) {
+	headers := c.normalizeHeaders(req.Params.Headers)
+	body := []byte(req.Body)
+	if err := c.verifySignature(body, headers); err != nil {
+		slogerr.WithError(logger, err).Warn("validate the webhook signature")
 		return nil, errSignatureInvalid
 	}
 
@@ -53,14 +59,14 @@ func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) (*Event, e
 	switch evType {
 	case eventPullRequestReview:
 		payload := &github.PullRequestReviewEvent{}
-		if err := json.Unmarshal(bodyB, payload); err != nil {
+		if err := json.Unmarshal(body, payload); err != nil {
 			logger.Warn("parse a webhook payload", "error", err)
 			return nil, fmt.Errorf("parse a webhook payload: %w", err)
 		}
 		return newPullRequestReviewEvent(payload), nil
 	case eventPush:
 		payload := &github.PushEvent{}
-		if err := json.Unmarshal(bodyB, payload); err != nil {
+		if err := json.Unmarshal(body, payload); err != nil {
 			logger.Warn("parse a webhook payload", "error", err)
 			return nil, fmt.Errorf("parse a webhook payload: %w", err)
 		}
