@@ -13,11 +13,7 @@ import (
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
 
-var (
-	errHeaderXHubSignatureIsRequired = errors.New("header X-HUB-SIGNATURE is required")
-	errHeaderXHubEventIsRequired     = errors.New("header X-HUB-EVENT is required")
-	errInvalidEventType              = errors.New("event type is invalid")
-)
+var errHeaderXHubSignatureIsRequired = errors.New("header X-HUB-SIGNATURE is required")
 
 const (
 	headerXGitHubHookInstallationTargetID = "X-GITHUB-HOOK-INSTALLATION-TARGET-ID"
@@ -25,6 +21,8 @@ const (
 	headerXGitHubEvent                    = "X-GITHUB-EVENT"
 	eventPullRequestReview                = "pull_request_review"
 	eventMergeGroup                       = "merge_group"
+	eventInstallation                     = "installation"
+	eventCheckSuite                       = "check_suite"
 )
 
 func (c *Controller) verifySignature(body []byte, headers map[string]string) error {
@@ -43,35 +41,44 @@ func (c *Controller) normalizeHeaders(headers map[string]string) map[string]stri
 	return hs
 }
 
-func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) (*Event, error) {
+func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) *Event {
 	headers := c.normalizeHeaders(req.Params.Headers)
 	body := []byte(req.Body)
 	if err := c.verifySignature(body, headers); err != nil {
 		slogerr.WithError(logger, err).Warn("validate the webhook signature")
-		return nil, fmt.Errorf("validate the webhook signature: %w", err)
+		return nil
 	}
 
 	evType, ok := headers[headerXGitHubEvent]
 	if !ok {
-		return nil, errHeaderXHubEventIsRequired
+		logger.Warn("header X-GITHUB-EVENT is required")
+		return nil
 	}
 	switch evType {
 	case eventPullRequestReview:
 		payload := &github.PullRequestReviewEvent{}
 		if err := json.Unmarshal(body, payload); err != nil {
 			logger.Warn("parse a webhook payload", "error", err)
-			return nil, fmt.Errorf("parse a webhook payload: %w", err)
+			return nil
 		}
-		return newPullRequestReviewEvent(payload), nil
+		return newPullRequestReviewEvent(payload)
 	case eventMergeGroup:
 		payload := &github.MergeGroupEvent{}
 		if err := json.Unmarshal(body, payload); err != nil {
 			logger.Warn("parse a webhook payload", "error", err)
-			return nil, fmt.Errorf("parse a webhook payload: %w", err)
+			return nil
 		}
-		return newMergeGroupEvent(logger, payload)
+		ev, err := newMergeGroupEvent(logger, payload)
+		if err != nil {
+			slogerr.WithError(logger, err).Warn("create event from merge group event")
+		}
+		return ev
+	case eventCheckSuite, eventInstallation:
+		logger.Info("ignore the event", "event_type", evType)
+		return nil
 	default:
-		return nil, slogerr.With(errInvalidEventType, "event_type", evType) //nolint:wrapcheck
+		logger.Warn("ignore the event", "event_type", evType)
+		return nil
 	}
 }
 
