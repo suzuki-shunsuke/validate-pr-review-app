@@ -2,27 +2,23 @@
 package controller
 
 import (
-	"crypto/hmac"
-	"crypto/sha1" //nolint:gosec
 	"errors"
-	"fmt"
 	"log/slog"
 	"os"
 	"testing"
 
-	"github.com/google/go-github/v75/github"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 )
 
-// generateSignature creates a valid HMAC-SHA1 signature for testing
-func generateSignature(payload string, secret []byte) string {
-	h := hmac.New(sha1.New, secret)
-	h.Write([]byte(payload))
-	return fmt.Sprintf("sha1=%x", h.Sum(nil))
+func newMockValidateSignature(err error) func(_ string, _, _ []byte) error {
+	return func(_ string, _, _ []byte) error {
+		return err
+	}
 }
 
 func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 	t.Parallel()
+	const dummySignature = "sha256=abcdefghijklmnopqrstuvwxyz0123456789abcdef"
 
 	// Create a test logger
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
@@ -46,7 +42,6 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 
 	// Generate valid signature for testing
 	validSecret := []byte("test-secret")
-	validSignature := generateSignature(validPayload, validSecret)
 
 	tests := []struct {
 		name          string
@@ -54,7 +49,7 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 		request       *Request
 		wantErr       error
 		wantPayload   bool
-		expectedEvent *github.PullRequestReviewEvent
+		expectedEvent *Event
 	}{
 		{
 			name: "missing X-HUB-SIGNATURE header",
@@ -62,6 +57,7 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 				input: &InputNew{
 					Config: &config.Config{AppID: 12345},
 				},
+				validateSignature: newMockValidateSignature(nil),
 			},
 			request: &Request{
 				Body: validPayload,
@@ -81,13 +77,14 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					Config:        &config.Config{AppID: 12345},
 					WebhookSecret: []byte("wrong-secret"),
 				},
+				validateSignature: newMockValidateSignature(errors.New("invalid signature")),
 			},
 			request: &Request{
 				Body: validPayload,
 				Params: &RequestParamsField{
 					Headers: map[string]string{
 						headerXGitHubHookInstallationTargetID: "12345",
-						headerXHubSignature:                   validSignature,
+						headerXHubSignature:                   dummySignature,
 						headerXGitHubEvent:                    eventPullRequestReview,
 					},
 				},
@@ -101,13 +98,14 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					Config:        &config.Config{AppID: 12345},
 					WebhookSecret: validSecret,
 				},
+				validateSignature: newMockValidateSignature(nil),
 			},
 			request: &Request{
 				Body: validPayload,
 				Params: &RequestParamsField{
 					Headers: map[string]string{
 						headerXGitHubHookInstallationTargetID: "12345",
-						headerXHubSignature:                   validSignature,
+						headerXHubSignature:                   dummySignature,
 					},
 				},
 			},
@@ -120,13 +118,14 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					Config:        &config.Config{AppID: 12345},
 					WebhookSecret: validSecret,
 				},
+				validateSignature: newMockValidateSignature(nil),
 			},
 			request: &Request{
 				Body: validPayload,
 				Params: &RequestParamsField{
 					Headers: map[string]string{
 						headerXGitHubHookInstallationTargetID: "12345",
-						headerXHubSignature:                   validSignature,
+						headerXHubSignature:                   dummySignature,
 						headerXGitHubEvent:                    "push",
 					},
 				},
@@ -140,13 +139,14 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					Config:        &config.Config{AppID: 12345},
 					WebhookSecret: []byte("test-secret"),
 				},
+				validateSignature: newMockValidateSignature(nil),
 			},
 			request: &Request{
 				Body: "invalid json{",
 				Params: &RequestParamsField{
 					Headers: map[string]string{
 						headerXGitHubHookInstallationTargetID: "12345",
-						headerXHubSignature:                   generateSignature("invalid json{", []byte("test-secret")),
+						headerXHubSignature:                   dummySignature,
 						headerXGitHubEvent:                    eventPullRequestReview,
 					},
 				},
@@ -160,13 +160,14 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					Config:        &config.Config{AppID: 12345},
 					WebhookSecret: validSecret,
 				},
+				validateSignature: newMockValidateSignature(nil),
 			},
 			request: &Request{
 				Body: validPayload,
 				Params: &RequestParamsField{
 					Headers: map[string]string{
 						headerXGitHubHookInstallationTargetID: "12345",
-						headerXHubSignature:                   validSignature,
+						headerXHubSignature:                   dummySignature,
 						headerXGitHubEvent:                    eventPullRequestReview,
 					},
 				},
@@ -189,7 +190,7 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			payload, err := tt.controller.validateRequest(logger, tt.request)
+			payload, err := tt.controller.verifyWebhook(logger, tt.request)
 
 			// Check error expectations
 			if tt.wantErr != nil {
@@ -220,9 +221,9 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					t.Error("validateRequest() returned nil payload")
 					return
 				}
-				// Verify it's a valid PullRequestReviewEvent
-				if payload.Action == nil {
-					t.Error("validateRequest() returned payload without Action field")
+				// Verify it's a valid Event
+				if payload.Action == "" {
+					t.Error("verifyWebhook() returned payload without Action field")
 				}
 			}
 		})

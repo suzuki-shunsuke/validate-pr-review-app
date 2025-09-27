@@ -18,12 +18,8 @@ func TestController_Run(t *testing.T) {
 		expected *validation.Result
 	}{
 		{
-			name: "two approvals - sufficient",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{},
-				UntrustedMachineUsers: map[string]struct{}{},
-			},
+			name:     "two approvals - sufficient",
+			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
@@ -45,6 +41,11 @@ func TestController_Run(t *testing.T) {
 						},
 					},
 				},
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
 			},
 			expected: &validation.Result{
 				State:     validation.StateApproved,
@@ -52,13 +53,14 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
-			name: "no approvals - approval required",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{},
-				UntrustedMachineUsers: map[string]struct{}{},
-			},
+			name:     "no approvals - approval required",
+			inputNew: &validation.InputNew{},
 			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
 				PR: &github.PullRequest{
 					HeadSHA:   "abc123",
 					Approvers: map[string]struct{}{},
@@ -78,13 +80,14 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
-			name: "one approval with self approval - two approvals required",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{},
-				UntrustedMachineUsers: map[string]struct{}{},
-			},
+			name:     "one approval with self approval - two approvals required",
+			inputNew: &validation.InputNew{},
 			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
 					Approvers: map[string]struct{}{
@@ -111,13 +114,14 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
-			name: "one approval from trusted user - sufficient",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{},
-				UntrustedMachineUsers: map[string]struct{}{},
-			},
+			name:     "one approval from trusted user - sufficient",
+			inputNew: &validation.InputNew{},
 			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
 					Approvers: map[string]struct{}{
@@ -144,13 +148,14 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
-			name: "ignored app approval",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{},
-				UntrustedMachineUsers: map[string]struct{}{},
-			},
+			name:     "ignored app approval",
+			inputNew: &validation.InputNew{},
 			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
 					Approvers: map[string]struct{}{
@@ -178,13 +183,14 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
-			name: "ignored untrusted machine user approval",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{},
-				UntrustedMachineUsers: map[string]struct{}{"untrusted-*": {}},
-			},
+			name:     "ignored untrusted machine user approval",
+			inputNew: &validation.InputNew{},
 			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{"untrusted-*": {}},
+				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
 					Approvers: map[string]struct{}{
@@ -212,13 +218,14 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
-			name: "trusted machine user approval - sufficient",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{"trusted-bot": {}},
-				UntrustedMachineUsers: map[string]struct{}{"trusted-*": {}},
-			},
+			name:     "trusted machine user approval - sufficient",
+			inputNew: &validation.InputNew{},
 			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{"trusted-bot": {}},
+					UntrustedMachineUsers: map[string]struct{}{"trusted-*": {}},
+				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
 					Approvers: map[string]struct{}{
@@ -245,13 +252,14 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
-			name: "one approval with untrusted commit - two approvals required",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{},
-				UntrustedMachineUsers: map[string]struct{}{},
-			},
+			name:     "one approval with untrusted commit - two approvals required",
+			inputNew: &validation.InputNew{},
 			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
 					Approvers: map[string]struct{}{
@@ -286,13 +294,14 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
-			name: "one approval with untrusted app commit - two approvals required",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{},
-				UntrustedMachineUsers: map[string]struct{}{},
-			},
+			name:     "one approval with untrusted app commit - two approvals required",
+			inputNew: &validation.InputNew{},
 			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
 					Approvers: map[string]struct{}{
@@ -325,13 +334,14 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
-			name: "one approval with commit not linked to user - two approvals required",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{},
-				UntrustedMachineUsers: map[string]struct{}{},
-			},
+			name:     "one approval with commit not linked to user - two approvals required",
+			inputNew: &validation.InputNew{},
 			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
 					Approvers: map[string]struct{}{
@@ -368,178 +378,6 @@ func TestController_Run(t *testing.T) {
 
 			if diff := cmp.Diff(tt.expected, result); diff != "" {
 				t.Errorf("validation result mismatch (-want +got):\n%s", diff)
-			}
-		})
-	}
-}
-
-func TestIsApp(t *testing.T) { //nolint:gocognit,cyclop
-	t.Parallel()
-	// Since isApp is not exported, we test it indirectly through the Run method
-	tests := []struct {
-		name     string
-		approver string
-		isApp    bool
-	}{
-		{
-			name:     "regular user",
-			approver: "regular-user",
-			isApp:    false,
-		},
-		{
-			name:     "bot user with [bot] suffix",
-			approver: "dependabot[bot]",
-			isApp:    true,
-		},
-		{
-			name:     "app user with [bot] suffix",
-			approver: "github-actions[bot]",
-			isApp:    true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			inputNew := &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{},
-				UntrustedMachineUsers: map[string]struct{}{},
-			}
-			ctrl := validation.New(inputNew)
-
-			input := &validation.Input{
-				PR: &github.PullRequest{
-					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						tt.approver: {},
-					},
-					Commits: []*github.Commit{},
-				},
-			}
-
-			result := ctrl.Run(nil, input)
-
-			if tt.isApp { //nolint:nestif
-				// Should be in ignored approvers
-				found := false
-				for _, ignored := range result.IgnoredApprovers {
-					if ignored.Login == tt.approver && ignored.IsApp {
-						found = true
-						break
-					}
-				}
-				if !found {
-					t.Errorf("Expected %s to be detected as app and ignored", tt.approver)
-				}
-			} else {
-				// Should be in regular approvers (if only one approver) or not in ignored
-				if len(result.Approvers) == 1 && result.Approvers[0] == tt.approver {
-					// Good, detected as regular user
-					return
-				}
-				// Or should not be in ignored approvers as app
-				for _, ignored := range result.IgnoredApprovers {
-					if ignored.Login == tt.approver && ignored.IsApp {
-						t.Errorf("Expected %s to NOT be detected as app", tt.approver)
-					}
-				}
-			}
-		})
-	}
-}
-
-func TestController_VerifyUser(t *testing.T) { //nolint:gocognit,cyclop
-	t.Parallel()
-	tests := []struct {
-		name            string
-		inputNew        *validation.InputNew
-		login           string
-		expectedTrusted bool
-	}{
-		{
-			name: "regular user",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{},
-				UntrustedMachineUsers: map[string]struct{}{},
-			},
-			login:           "regular-user",
-			expectedTrusted: true,
-		},
-		{
-			name: "trusted machine user",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{"trusted-bot": {}},
-				UntrustedMachineUsers: map[string]struct{}{},
-			},
-			login:           "trusted-bot",
-			expectedTrusted: true,
-		},
-		{
-			name: "untrusted machine user by pattern",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{},
-				UntrustedMachineUsers: map[string]struct{}{"untrusted-*": {}},
-			},
-			login:           "untrusted-bot",
-			expectedTrusted: false,
-		},
-		{
-			name: "trusted user takes precedence over untrusted pattern",
-			inputNew: &validation.InputNew{
-				TrustedApps:           map[string]struct{}{},
-				TrustedMachineUsers:   map[string]struct{}{"automation-bot": {}},
-				UntrustedMachineUsers: map[string]struct{}{"automation-*": {}},
-			},
-			login:           "automation-bot",
-			expectedTrusted: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			ctrl := validation.New(tt.inputNew)
-
-			// Test indirectly through Run method
-			input := &validation.Input{
-				PR: &github.PullRequest{
-					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						tt.login: {},
-					},
-					Commits: []*github.Commit{},
-				},
-			}
-
-			result := ctrl.Run(nil, input)
-
-			if tt.expectedTrusted { //nolint:nestif
-				// Should be in approvers (if only one) or not marked as untrusted in ignored
-				if len(result.Approvers) == 1 && result.Approvers[0] == tt.login {
-					return // Good
-				}
-				// Check not in ignored as untrusted machine user
-				for _, ignored := range result.IgnoredApprovers {
-					if ignored.Login == tt.login && ignored.IsUntrustedMachineUser {
-						t.Errorf("Expected %s to be trusted, but was marked as untrusted machine user", tt.login)
-					}
-				}
-			} else {
-				// Should be in ignored approvers as untrusted machine user
-				found := false
-				for _, ignored := range result.IgnoredApprovers {
-					if ignored.Login == tt.login && ignored.IsUntrustedMachineUser {
-						found = true
-						break
-					}
-				}
-				if !found {
-					t.Errorf("Expected %s to be marked as untrusted machine user", tt.login)
-				}
 			}
 		})
 	}

@@ -7,8 +7,8 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/google/go-github/v75/github"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
 
 var (
@@ -25,7 +25,7 @@ const (
 	eventPullRequestReview                = "pull_request_review"
 )
 
-func (c *Controller) validateRequest(logger *slog.Logger, req *Request) (*github.PullRequestReviewEvent, error) {
+func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) (*Event, error) {
 	headers := make(map[string]string, len(req.Params.Headers))
 	for k, v := range req.Params.Headers {
 		headers[strings.ToUpper(k)] = v
@@ -38,7 +38,7 @@ func (c *Controller) validateRequest(logger *slog.Logger, req *Request) (*github
 	}
 
 	bodyB := []byte(bodyStr)
-	if err := github.ValidateSignature(sig, bodyB, c.input.WebhookSecret); err != nil {
+	if err := c.validateSignature(sig, bodyB, c.input.WebhookSecret); err != nil {
 		logger.Warn("validate the webhook signature", "error", err)
 		return nil, errSignatureInvalid
 	}
@@ -57,5 +57,29 @@ func (c *Controller) validateRequest(logger *slog.Logger, req *Request) (*github
 		return nil, fmt.Errorf("parse a webhook payload: %w", err)
 	}
 
-	return payload, nil
+	return newEvent(payload), nil
+}
+
+type Event struct {
+	Action       string
+	RepoFullName string
+	RepoOwner    string
+	RepoName     string
+	PRNumber     int
+	ReviewState  string
+	RepoID       string
+	HeadSHA      string
+}
+
+func newEvent(ev *github.PullRequestReviewEvent) *Event {
+	return &Event{
+		Action:       ev.GetAction(),
+		RepoFullName: ev.GetRepo().GetFullName(),
+		RepoOwner:    ev.GetRepo().GetOwner().GetLogin(),
+		RepoName:     ev.GetRepo().GetName(),
+		PRNumber:     ev.GetPullRequest().GetNumber(),
+		ReviewState:  ev.GetReview().GetState(),
+		RepoID:       ev.GetRepo().GetNodeID(),
+		HeadSHA:      ev.GetPullRequest().GetHead().GetSHA(),
+	}
 }

@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -26,6 +27,19 @@ func NewSecretsManager(config aws.Config) *SecretsManager {
 type Secret struct {
 	GitHubAppPrivateKey string `json:"github_app_private_key"`
 	WebhookSecret       string `json:"webhook_secret"`
+}
+
+func (s *Secret) Validate() error {
+	if s == nil {
+		return errors.New("Secret is nil")
+	}
+	if s.GitHubAppPrivateKey == "" {
+		return errors.New("GitHubAppPrivateKey is required")
+	}
+	if s.WebhookSecret == "" {
+		return errors.New("WebhookSecret is required")
+	}
+	return nil
 }
 
 func (sm *SecretsManager) Get(ctx context.Context, input *secretsmanager.GetSecretValueInput) (*Secret, error) {

@@ -12,7 +12,7 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request)
 	defer logger.Info("Ending a request")
 
 	// Validate the request
-	ev, err := c.validateRequest(logger, req)
+	ev, err := c.verifyWebhook(logger, req)
 	if err != nil {
 		slogerr.WithError(logger, err).Warn("validate request")
 		return nil
@@ -21,11 +21,20 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request)
 	if ignore(logger, ev) {
 		return nil
 	}
+	repo := c.input.Config.GetRepo(ev.RepoFullName)
+	if repo != nil && repo.Ignored {
+		logger.Info("ignore the event because the repository is ignored in the config", "repository", ev.RepoFullName)
+		return nil
+	}
+	trust := c.input.Config.Trust
+	if repo != nil {
+		trust = repo.Trust
+	}
 
 	// Run validation
-	result := c.validate(ctx, logger, ev)
+	result := c.validate(ctx, logger, ev, trust)
 
-	if err := c.gh.CreateCheckRun(ctx, c.newCheckRunInput(logger, ev, result)); err != nil {
+	if err := c.gh.CreateCheckRun(ctx, c.newCheckRunInput(logger, ev, result, trust)); err != nil {
 		slogerr.WithError(logger, err).Error("create final check run")
 	}
 	return nil

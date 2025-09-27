@@ -14,14 +14,14 @@ import (
 // Run validates pull request reviews.
 // It gets pull request reviews and committers via GitHub GraphQL API, and checks if people other than committers approve the PR.
 // If the PR isn't approved by people other than committers, it returns an error.
-func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
+func (c *Validator) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 	pr := input.PR
 	result := &Result{}
 	ignoredApprovers := make(map[string]*github.IgnoredApproval, len(pr.Approvers))
 	approvers := make(map[string]struct{}, len(pr.Approvers))
 	for approver := range pr.Approvers {
 		if isApp(approver) {
-			if !c.VerifyApp(approver) {
+			if !c.VerifyApp(approver, input.Trust.TrustedApps) {
 				// Ignore the approval from untrusted apps
 				ignoredApprovers[approver] = &github.IgnoredApproval{
 					Login: approver,
@@ -30,7 +30,7 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 			}
 			continue
 		}
-		if !c.VerifyUser(approver) {
+		if !c.VerifyUser(approver, input.Trust) {
 			// Ignore the approval from untrusted machine users
 			ignoredApprovers[approver] = &github.IgnoredApproval{
 				Login:                  approver,
@@ -63,7 +63,7 @@ func (c *Controller) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 
 	// Require two approvals if the PR author is untrusted
 	for _, commit := range pr.Commits {
-		if untrustedCommit := c.VerifyCommit(commit); untrustedCommit != nil {
+		if untrustedCommit := c.VerifyCommit(commit, input.Trust); untrustedCommit != nil {
 			// Two approvals are required as there is an untrusted commit, but one approval is given
 			result.UntrustedCommits = append(result.UntrustedCommits, untrustedCommit)
 		}
@@ -89,18 +89,18 @@ func isApp(login string) bool {
 	return strings.HasSuffix(login, "[bot]")
 }
 
-func (c *Controller) VerifyApp(login string) bool {
-	if _, ok := c.input.TrustedApps[login]; ok {
+func (c *Validator) VerifyApp(login string, trustedApps map[string]struct{}) bool {
+	if _, ok := trustedApps[login]; ok {
 		return true
 	}
 	return false
 }
 
-func (c *Controller) VerifyUser(login string) bool {
-	if _, ok := c.input.TrustedMachineUsers[login]; ok {
+func (c *Validator) VerifyUser(login string, trust *Trust) bool {
+	if _, ok := trust.TrustedMachineUsers[login]; ok {
 		return true
 	}
-	for pattern := range c.input.UntrustedMachineUsers {
+	for pattern := range trust.UntrustedMachineUsers {
 		matched, err := path.Match(pattern, login)
 		if err != nil { // TODO error handling
 			continue
@@ -112,7 +112,7 @@ func (c *Controller) VerifyUser(login string) bool {
 	return true
 }
 
-func (c *Controller) VerifyCommit(commit *github.Commit) *github.UntrustedCommit {
+func (c *Validator) VerifyCommit(commit *github.Commit, trust *Trust) *github.UntrustedCommit {
 	user := commit.Committer
 	login := user.Login
 	sha := commit.SHA
@@ -131,7 +131,7 @@ func (c *Controller) VerifyCommit(commit *github.Commit) *github.UntrustedCommit
 		}
 	}
 	if user.IsApp {
-		if _, ok := c.input.TrustedApps[login]; ok {
+		if _, ok := trust.TrustedApps[login]; ok {
 			return nil
 		}
 		return &github.UntrustedCommit{
@@ -140,7 +140,7 @@ func (c *Controller) VerifyCommit(commit *github.Commit) *github.UntrustedCommit
 			IsUntrustedApp: true,
 		}
 	}
-	if c.VerifyUser(login) {
+	if c.VerifyUser(login, trust) {
 		return nil
 	}
 	return &github.UntrustedCommit{

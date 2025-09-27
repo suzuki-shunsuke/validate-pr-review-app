@@ -48,10 +48,14 @@ func NewHandler(ctx context.Context, logger *slog.Logger, version string, logLev
 	if err != nil {
 		return nil, fmt.Errorf("get secret from AWS Secrets Manager: %w", err)
 	}
+	if err := secret.Validate(); err != nil {
+		return nil, fmt.Errorf("validate secret: %w", err)
+	}
 	ctrl, err := controller.New(&controller.InputNew{
-		Config:        cfg,
-		Version:       version,
-		WebhookSecret: []byte(secret.WebhookSecret),
+		Config:              cfg,
+		Version:             version,
+		WebhookSecret:       []byte(secret.WebhookSecret),
+		GitHubAppPrivateKey: secret.GitHubAppPrivateKey,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create controller: %w", err)

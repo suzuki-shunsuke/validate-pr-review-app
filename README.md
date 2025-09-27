@@ -228,21 +228,37 @@ Configuration consists of **secrets** and **non-secrets**.
 > :x: `dependabot[bot]`
 
 ```yaml
+# Required
 app_id: 0000 # GitHub App ID
 installation_id: 00000000 # GitHub App Installation ID
 aws:
   secret_id: request-pr-review-app # Secret ID in AWS Secrets Manager
-  use_lambda_function_url: true # true when using Lambda Function URL
+  use_lambda_function_url: true # Optional. true when using Lambda Function URL. Default: false
+
+# Optional
 check_name: check-approval # Optional. Default: validate-review
 log_level: info # debug, info, warn, error. Default: info
-trusted_apps:
-  - renovate
-  - dependabot
-untrusted_machine_users:
-  - "*-bot"
-  - octocat
-trusted_machine_users:
-  - suzuki-shunsuke-bot
+trust:
+  trusted_apps:
+    - renovate
+    - dependabot
+  untrusted_machine_users:
+    - "*-bot"
+    - octocat
+  trusted_machine_users:
+    - suzuki-shunsuke-bot
+repositories:
+  # Repository specific config
+  # Override the root config
+  # Only the first element matching the repository is used
+  # If no element matches, the root config is used
+  - repositories:
+      # Glob pattern matching repository full names
+      - suzuki-shunsuke/*
+    trust:
+      untrusted_machine_users:
+        - "*-bot"
+        - bot-*
 ```
 
 ## Trusted vs. Untrusted Users and GitHub Apps
