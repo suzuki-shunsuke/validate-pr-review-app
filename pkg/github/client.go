@@ -21,6 +21,7 @@ type V4Client interface {
 type (
 	PullRequestReviewEvent = github.PullRequestReviewEvent
 	PushEvent              = github.PushEvent
+	MergeGroupEvent        = github.MergeGroupEvent
 	ParamNewApp            = v4.ParamNewApp
 )
 

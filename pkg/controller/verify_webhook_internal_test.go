@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
@@ -48,6 +49,7 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 		controller    *Controller
 		request       *Request
 		wantErr       error
+		wantErrMsg    string
 		wantPayload   bool
 		expectedEvent *Event
 	}{
@@ -89,7 +91,7 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 					},
 				},
 			},
-			wantErr: errSignatureInvalid,
+			wantErrMsg: "invalid signature",
 		},
 		{
 			name: "missing X-GITHUB-EVENT header",
@@ -200,6 +202,17 @@ func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 				}
 				if !errors.Is(err, tt.wantErr) {
 					t.Errorf("validateRequest() error = %v, want %v", err, tt.wantErr)
+					return
+				}
+				return
+			}
+			if tt.wantErrMsg != "" {
+				if err == nil {
+					t.Errorf("validateRequest() expected error containing %q, got nil", tt.wantErrMsg)
+					return
+				}
+				if !strings.Contains(err.Error(), tt.wantErrMsg) {
+					t.Errorf("validateRequest() error = %v, want error containing %q", err, tt.wantErrMsg)
 					return
 				}
 				return
