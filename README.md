@@ -128,19 +128,27 @@ cd validate-pr-review-app/terraform/aws
 bash init.sh
 ```
 
-4. Create a GitHub App
+4. [Registering a GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app)
 
-Permissions:
+- Deactivate Webhook for now. We'll enable this after deploying the AWS Lambda Function.
+- Permissions:
+  - Checks: Read and write
+  - Contents: Read-only
+  - Pull requests: Read-only
+- `Where can this GitHub App be installed?` > `Only on this account`
 
-- `checks:write`
-- `pull_requests:read`
-- `contents:read`
+After registering the app, you can get the app id from the setting page.
+Please add it to config.yaml.
 
-Create a Private Key.
+```yaml
+app_id: 0123456
+```
 
-5. Edit [config.yaml](terraform/aws/config.yaml.tmpl) and [secret.yaml](terraform/aws/secret.yaml.tmpl).
+5. [Generate a Private Key of the GitHub App.](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps)
 
-At least, you need to add the private key to secret.yaml.
+6. Add the private key to [secret.yaml](terraform/aws/secret.yaml.tmpl) and remove the downloaded private key file.
+
+secret.yaml
 
 ```yaml
 github_app_private_key: |
@@ -148,7 +156,40 @@ github_app_private_key: |
   ...
 ```
 
-6. Deploy the app by Terraform
+7. [Install the app to your repository](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app)
+
+Please install the app to your repository.
+[If you don't have any repository for this, please create a repository.](https://github.com/new)
+
+After installing the app, you can get the installation id from URL.
+Please add it to config.yaml.
+
+```yaml
+installation_id: 01234567
+```
+
+8. [Create a secret token](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries) and add it to secret.yaml
+
+secret.yaml
+
+```yaml
+webhook_secret: 0123456789abcdefghijklmn
+github_app_private_key: |
+  -----BEGIN RSA PRIVATE KEY-----
+  ...
+```
+
+9. Deploy the app by Terraform
+
+(Optional) If you want to change input variables, please check [variables.tf](terraform/aws/variables.tf) and create a file `terraform.tfvars`.
+
+e.g.
+
+```
+region = "ap-northeast-1" # Default: us-east-1
+```
+
+Then running Terraform commands.
 
 ```sh
 terraform init
@@ -157,26 +198,50 @@ terraform plan
 terraform apply
 ```
 
-7. Install the app to a repository
-8. [Configure Webhook](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/using-webhooks-with-github-apps)
+10. [Configure Webhook](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/using-webhooks-with-github-apps)
+
+You can check the webhook URL by `terraform state show`.
+
+```console
+$ terraform state show aws_lambda_function_url.main
+# aws_lambda_function_url.main:
+resource "aws_lambda_function_url" "main" {
+    # ...
+    function_url       = "https://abcdefghijklmnopqrstuvwxyz012345.lambda-url.us-east-1.on.aws/"
+    # ...
+}
+```
 
 - Set the Lambda Function URL to the webhook URL
-- Set the secret token `dummy-secret` to the webhook secret
+- Set the secret token to the webhook secret
+
+Please don't forget to click `Save changes`.
+
+11. Subscribe Events for GitHub App
+
+Checks the following events.
+
+- Pull request review
+
+And click `Save changes`.
+
+If the button `Save changes` is disabled and you can't clike `Save changes`, please try to change any permission and revert the change.
 
 The setup was done.
 You can create reviews and try the app.
+Please prepare a pull request that you haven't pushed any commit.
 
-9. Approve a pull request
+12. Approve a pull request
 
 Then the check passes.
 
 If the app doesn't work, please check the AWS CloudWatch Log to check if the request reached to the AWS Lambda.
 
-10. Dismiss the review.
+13. Dismiss the review.
 
 Then the check fails.
 
-11. Clean up
+14. Clean up
 
 You can destroy resources by `terraform destroy`.
 
