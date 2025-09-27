@@ -252,27 +252,6 @@ terraform destroy
 - Uninstall the GitHub App from the repository
 - Delete the GitHub App
 
-## Setup
-
-> [!WARNING]
-> We will release pre-built binaries for AWS Lambda to GitHub Releases.
-> Now you need to build them yourself.
-
-- [Generate a Webhook Secret Token](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries).
-- Create a dedicated GitHub App with:
-  - Permissions:
-    - `checks:write` To create Check Runs by GitHub API
-    - `pull_requests:read`: To retrieve pull request reviews by GitHub API
-    - `contents:read`: To retrieve pull request commits by GitHub API
-  - Private Key (keep safe).
-- Deploy Validate PR Review App.
-- Store Webhook Secret & GitHub App Private Key in **AWS Secrets Manager**.
-- Enable Webhooks in your GitHub App:
-  - Set the Webhook Secret.
-  - Point the Webhook URL to your Lambda.
-- Install the App in repositories to validate PRs.
-- [Add the check to Required Checks by GitHub Branch Rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)
-
 ## Merge Queue Support
 
 This app supports [Merge Queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue).
