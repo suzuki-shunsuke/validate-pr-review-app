@@ -197,3 +197,76 @@ func TestHandler_validateRequest(t *testing.T) {
 		})
 	}
 }
+
+func Test_getPRNumberFromBranch(t *testing.T) {
+	t.Parallel()
+
+	logger := slog.Default()
+
+	tests := []struct {
+		name           string
+		branch         string
+		expectedNumber int
+		wantErr        bool
+	}{
+		{
+			name:           "valid gh-readonly-queue branch",
+			branch:         "gh-readonly-queue/main/pr-24-a9d10f59f8c051673f45263c42aca8346614e716",
+			expectedNumber: 24,
+			wantErr:        false,
+		},
+		{
+			name:           "not a gh-readonly-queue branch",
+			branch:         "main",
+			expectedNumber: 0,
+			wantErr:        false,
+		},
+		{
+			name:           "gh-readonly-queue but invalid format - missing pr prefix",
+			branch:         "gh-readonly-queue/main/24-a9d10f59f8c051673f45263c42aca8346614e716",
+			expectedNumber: 0,
+			wantErr:        true,
+		},
+		{
+			name:           "gh-readonly-queue but invalid format - no dash after pr number",
+			branch:         "gh-readonly-queue/main/pr-24a9d10f59f8c051673f45263c42aca8346614e716",
+			expectedNumber: 0,
+			wantErr:        true,
+		},
+		{
+			name:           "gh-readonly-queue but invalid format - non-numeric PR number",
+			branch:         "gh-readonly-queue/main/pr-abc-a9d10f59f8c051673f45263c42aca8346614e716",
+			expectedNumber: 0,
+			wantErr:        true,
+		},
+		{
+			name:           "gh-readonly-queue but empty PR number",
+			branch:         "gh-readonly-queue/main/pr--a9d10f59f8c051673f45263c42aca8346614e716",
+			expectedNumber: 0,
+			wantErr:        true,
+		},
+		{
+			name:           "gh-readonly-queue with refs/heads prefix",
+			branch:         "refs/heads/gh-readonly-queue/main/pr-42-fedcba9876543210",
+			expectedNumber: 0,
+			wantErr:        false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			number, err := getPRNumberFromBranch(logger, tt.branch)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getPRNumberFromBranch() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if number != tt.expectedNumber {
+				t.Errorf("getPRNumberFromBranch() = %v, want %v", number, tt.expectedNumber)
+			}
+		})
+	}
+}

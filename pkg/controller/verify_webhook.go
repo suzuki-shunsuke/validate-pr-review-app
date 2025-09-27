@@ -13,7 +13,11 @@ import (
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
 
-var errHeaderXHubSignatureIsRequired = errors.New("header X-HUB-SIGNATURE is required")
+var (
+	errHeaderXHubSignatureIsRequired           = errors.New("header X-HUB-SIGNATURE is required")
+	errGHReadonlyQueueMissingPR                = errors.New("gh-readonly-queue branch is not a valid format. missing 'pr-'")
+	errGHReadonlyQueueMissingDashAfterPRNumber = errors.New("gh-readonly-queue branch is not a valid format. missing '-' after the PR number")
+)
 
 const (
 	headerXGitHubHookInstallationTargetID = "X-GITHUB-HOOK-INSTALLATION-TARGET-ID"
@@ -112,9 +116,15 @@ func getPRNumberFromBranch(logger *slog.Logger, branch string) (int, error) {
 		return 0, nil
 	}
 	// e.g. pr-24-a9d10f59f8c051673f45263c42aca8346614e716
-	s, _, ok := strings.Cut(strings.TrimPrefix(path.Base(branch2), "pr-"), "-")
+	branch3, ok := strings.CutPrefix(path.Base(branch2), "pr-")
 	if !ok {
-		return 0, errors.New("gh-readonly-queue branch is not a valid format")
+		logger.Debug("the branch is not a gh-readonly-queue", "branch", branch)
+		return 0, errGHReadonlyQueueMissingPR
+	}
+
+	s, _, ok := strings.Cut(branch3, "-")
+	if !ok {
+		return 0, errGHReadonlyQueueMissingDashAfterPRNumber
 	}
 	n, err := strconv.Atoi(s)
 	if err != nil {
