@@ -10,21 +10,21 @@ import (
 )
 
 type Config struct {
-	AppID          int64                         `yaml:"app_id"`
-	InstallationID int64                         `yaml:"installation_id"`
-	AWS            *AWS                          `yaml:"aws"`
-	CheckName      string                        `yaml:"check_name"`
-	Trust          *Trust                        `yaml:"trust"`
-	Templates      map[string]string             `yaml:"templates"`
-	BuiltTemplates map[string]*template.Template `yaml:"-"`
-	LogLevel       string                        `yaml:"log_level"`
-	Repositories   []*Repository                 `yaml:"repositories"`
+	AppID          int64                         `json:"app_id" yaml:"app_id"`
+	InstallationID int64                         `json:"installation_id" yaml:"installation_id"`
+	AWS            *AWS                          `json:"aws" yaml:"aws"`
+	CheckName      string                        `json:"check_name,omitempty" yaml:"check_name"`
+	Trust          *Trust                        `json:"trust,omitempty" yaml:"trust"`
+	Templates      map[string]string             `json:"templates,omitempty" yaml:"templates"`
+	BuiltTemplates map[string]*template.Template `json:"-" yaml:"-"`
+	LogLevel       string                        `json:"log_level,omitempty" yaml:"log_level"`
+	Repositories   []*Repository                 `json:"repositories,omitempty" yaml:"repositories"`
 }
 
 type Repository struct {
-	Repositories []string `yaml:"repositories"`
-	Trust        *Trust   `yaml:"trust"`
-	Ignored      bool     `yaml:"ignored"`
+	Repositories []string `json:"repositories" yaml:"repositories"`
+	Trust        *Trust   `json:"trust" yaml:"trust"`
+	Ignored      bool     `json:"ignored,omitempty" yaml:"ignored"`
 }
 
 func (r *Repository) Validate() error {
