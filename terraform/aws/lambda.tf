@@ -1,5 +1,5 @@
 resource "aws_lambda_function" "main" {
-  filename         = var.zip_path
+filename         = var.zip_path
   function_name    = var.function_name
   role             = aws_iam_role.lambda.arn
   handler          = "bootstrap"
