@@ -29,17 +29,18 @@ func TestController_newCheckRunInput(t *testing.T) {
 		event    *Event
 		result   *validation.Result
 		expected githubv4.CreateCheckRunInput
+		trust    *config.Trust
 	}{
 		{
 			name: "approved state",
 			config: &config.Config{
-				CheckName: "test-check",
-				Trust: &config.Trust{
-					TrustedApps:           []string{"dependabot[bot]"},
-					TrustedMachineUsers:   []string{"trusted-user"},
-					UntrustedMachineUsers: []string{"untrusted-*"},
-				},
+				CheckName:      "test-check",
 				BuiltTemplates: templates,
+			},
+			trust: &config.Trust{
+				TrustedApps:           []string{"dependabot[bot]"},
+				TrustedMachineUsers:   []string{"trusted-user"},
+				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
 				RepoID:  "12345",
@@ -64,13 +65,13 @@ func TestController_newCheckRunInput(t *testing.T) {
 		{
 			name: "approval required state",
 			config: &config.Config{
-				CheckName: "test-check",
-				Trust: &config.Trust{
-					TrustedApps:           []string{"dependabot[bot]"},
-					TrustedMachineUsers:   []string{"trusted-user"},
-					UntrustedMachineUsers: []string{"untrusted-*"},
-				},
+				CheckName:      "test-check",
 				BuiltTemplates: templates,
+			},
+			trust: &config.Trust{
+				TrustedApps:           []string{"dependabot[bot]"},
+				TrustedMachineUsers:   []string{"trusted-user"},
+				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
 				RepoID:  "12345",
@@ -94,13 +95,13 @@ func TestController_newCheckRunInput(t *testing.T) {
 		{
 			name: "two approvals required state",
 			config: &config.Config{
-				CheckName: "test-check",
-				Trust: &config.Trust{
-					TrustedApps:           []string{"dependabot[bot]"},
-					TrustedMachineUsers:   []string{"trusted-user"},
-					UntrustedMachineUsers: []string{"untrusted-*"},
-				},
+				CheckName:      "test-check",
 				BuiltTemplates: templates,
+			},
+			trust: &config.Trust{
+				TrustedApps:           []string{"dependabot[bot]"},
+				TrustedMachineUsers:   []string{"trusted-user"},
+				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
 				RepoID:  "12345",
@@ -124,13 +125,13 @@ func TestController_newCheckRunInput(t *testing.T) {
 		{
 			name: "error state",
 			config: &config.Config{
-				CheckName: "test-check",
-				Trust: &config.Trust{
-					TrustedApps:           []string{"dependabot[bot]"},
-					TrustedMachineUsers:   []string{"trusted-user"},
-					UntrustedMachineUsers: []string{"untrusted-*"},
-				},
+				CheckName:      "test-check",
 				BuiltTemplates: templates,
+			},
+			trust: &config.Trust{
+				TrustedApps:           []string{"dependabot[bot]"},
+				TrustedMachineUsers:   []string{"trusted-user"},
+				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
 				RepoID:  "12345",
@@ -166,7 +167,7 @@ func TestController_newCheckRunInput(t *testing.T) {
 			}
 
 			logger := slog.Default()
-			result := controller.newCheckRunInput(logger, tt.event, tt.result)
+			result := controller.newCheckRunInput(logger, tt.event, tt.result, tt.trust)
 
 			if diff := cmp.Diff(tt.expected, result); diff != "" {
 				t.Errorf("newCheckRunInput() mismatch (-want +got):\n%s", diff)

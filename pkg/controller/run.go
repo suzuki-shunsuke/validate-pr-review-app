@@ -34,7 +34,7 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request)
 	// Run validation
 	result := c.validate(ctx, logger, ev, trust)
 
-	if err := c.gh.CreateCheckRun(ctx, c.newCheckRunInput(logger, ev, result)); err != nil {
+	if err := c.gh.CreateCheckRun(ctx, c.newCheckRunInput(logger, ev, result, trust)); err != nil {
 		slogerr.WithError(logger, err).Error("create final check run")
 	}
 	return nil

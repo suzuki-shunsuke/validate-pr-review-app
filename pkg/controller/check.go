@@ -9,10 +9,11 @@ import (
 
 	"github.com/shurcooL/githubv4"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
-func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *validation.Result) githubv4.CreateCheckRunInput {
+func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *validation.Result, trust *config.Trust) githubv4.CreateCheckRunInput {
 	result.Version = c.input.Version
 	var conclusion githubv4.CheckConclusionState
 	var title githubv4.String
@@ -31,9 +32,9 @@ func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *va
 		conclusion = githubv4.CheckConclusionStateFailure
 		title = githubv4.String("Internal Error")
 	}
-	result.TrustedApps = c.input.Config.Trust.TrustedApps
-	result.TrustedMachineUsers = c.input.Config.Trust.TrustedMachineUsers
-	result.UntrustedMachineUsers = c.input.Config.Trust.UntrustedMachineUsers
+	result.TrustedApps = trust.TrustedApps
+	result.TrustedMachineUsers = trust.TrustedMachineUsers
+	result.UntrustedMachineUsers = trust.UntrustedMachineUsers
 	s, err := summarize(result, c.input.Config.BuiltTemplates)
 	if err != nil {
 		slogerr.WithError(logger, err).Error("summarize the result")
