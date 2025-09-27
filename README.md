@@ -316,6 +316,24 @@ trusted_machine_users:
   - my-safe-bot
 ```
 
+## Using CSM Actions For Secure Automatic Code Fixes and Approvals
+
+By using the **Validate PR Review App**, you can prevent commits and approvals made by untrusted Apps or Machine Users.
+However, requiring two approvals every time CI automatically fixes code can hurt developer productivity.
+
+[**CSM Actions**](https://github.com/csm-actions/docs) solves this problem.
+CSM Actions is a collection of GitHub Actions that securely handle code modifications and approvals through a **Client/Server Model**.
+With this model, sensitive credentials such as a GitHub App’s Private Key or a Machine User’s Personal Access Token never need to be passed to the client side (regular GitHub Actions workflows). Instead, they are securely managed on the server side (a centrally managed GitHub repository and workflow).
+
+Here are some available Actions:
+
+- [**Securefix Action**](https://github.com/csm-actions/securefix-action): Securely create commits and pull requests.
+- [**Approve PR Action**](https://github.com/csm-actions/approve-pr-action): Securely approve PRs using a Machine User.
+- [**Update Branch Action**](https://github.com/csm-actions/update-branch-action): Securely update PR branches.
+  - If a reviewer updates a branch from the GitHub Web UI, another reviewer’s approval is required to prevent self-approval. With Update Branch Action, the branch is updated securely using a GitHub App.
+
+By registering the Apps or Machine Users used with CSM Actions in `trusted_apps` or `untrusted_machine_users`, you can achieve automatic code fixes and auto-merge without additional PR reviews.
+
 ## Logging, Monitoring, Security, etc
 
 Please see the following documents:
