@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config/config",
+  "$ref": "#/$defs/Config",
+  "$defs": {
+    "AWS": {
+      "properties": {
+        "SecretID": {
+          "type": "string"
+        },
+        "UseLambdaFunctionURL": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "SecretID",
+        "UseLambdaFunctionURL"
+      ]
+    },
+    "Config": {
+      "properties": {
+        "AppID": {
+          "type": "integer"
+        },
+        "InstallationID": {
+          "type": "integer"
+        },
+        "AWS": {
+          "$ref": "#/$defs/AWS"
+        },
+        "CheckName": {
+          "type": "string"
+        },
+        "Trust": {
+          "$ref": "#/$defs/Trust"
+        },
+        "Templates": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "BuiltTemplates": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Template"
+          },
+          "type": "object"
+        },
+        "LogLevel": {
+          "type": "string"
+        },
+        "Repositories": {
+          "items": {
+            "$ref": "#/$defs/Repository"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "AppID",
+        "InstallationID",
+        "AWS",
+        "CheckName",
+        "Trust",
+        "Templates",
+        "BuiltTemplates",
+        "LogLevel",
+        "Repositories"
+      ]
+    },
+    "ListNode": {
+      "properties": {
+        "NodeType": {
+          "type": "integer"
+        },
+        "Pos": {
+          "type": "integer"
+        },
+        "Nodes": {
+          "items": true,
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "NodeType",
+        "Pos",
+        "Nodes"
+      ]
+    },
+    "Repository": {
+      "properties": {
+        "Repositories": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Trust": {
+          "$ref": "#/$defs/Trust"
+        },
+        "Ignored": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "Repositories",
+        "Trust",
+        "Ignored"
+      ]
+    },
+    "Template": {
+      "properties": {
+        "Tree": {
+          "$ref": "#/$defs/Tree"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "Tree"
+      ]
+    },
+    "Tree": {
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "ParseName": {
+          "type": "string"
+        },
+        "Root": {
+          "$ref": "#/$defs/ListNode"
+        },
+        "Mode": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "Name",
+        "ParseName",
+        "Root",
+        "Mode"
+      ]
+    },
+    "Trust": {
+      "properties": {
+        "TrustedMachineUsers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "UntrustedMachineUsers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "TrustedApps": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "UniqueTrustedMachineUsers": {
+          "additionalProperties": {
+            "properties": {},
+            "additionalProperties": false,
+            "type": "object"
+          },
+          "type": "object"
+        },
+        "UniqueUntrustedMachineUsers": {
+          "additionalProperties": {
+            "properties": {},
+            "additionalProperties": false,
+            "type": "object"
+          },
+          "type": "object"
+        },
+        "UniqueTrustedApps": {
+          "additionalProperties": {
+            "properties": {},
+            "additionalProperties": false,
+            "type": "object"
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "TrustedMachineUsers",
+        "UntrustedMachineUsers",
+        "TrustedApps",
+        "UniqueTrustedMachineUsers",
+        "UniqueUntrustedMachineUsers",
+        "UniqueTrustedApps"
+      ]
+    }
+  }
+}
