@@ -5,15 +5,12 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/google/go-github/v75/github"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
-func (c *Controller) validate(ctx context.Context, logger *slog.Logger, ev *github.PullRequestReviewEvent, trust *config.Trust) *validation.Result {
-	repo := ev.GetRepo()
-	owner := repo.GetOwner().GetLogin()
-	pr, err := c.gh.GetPR(ctx, owner, repo.GetName(), ev.GetPullRequest().GetNumber())
+func (c *Controller) validate(ctx context.Context, logger *slog.Logger, ev *Event, trust *config.Trust) *validation.Result {
+	pr, err := c.gh.GetPR(ctx, ev.RepoOwner, ev.RepoName, ev.PRNumber)
 	if err != nil {
 		return &validation.Result{Error: fmt.Errorf("get a pull request: %w", err).Error()}
 	}

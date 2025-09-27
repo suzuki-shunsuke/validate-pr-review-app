@@ -10,7 +10,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/go-github/v75/github"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 )
 
@@ -21,7 +20,7 @@ func generateSignature(payload string, secret []byte) string {
 	return fmt.Sprintf("sha1=%x", h.Sum(nil))
 }
 
-func TestHandler_verifyWebhook(t *testing.T) { //nolint:gocognit,cyclop
+func TestHandler_validateRequest(t *testing.T) { //nolint:gocognit,cyclop
 	t.Parallel()
 
 	// Create a test logger
@@ -54,7 +53,7 @@ func TestHandler_verifyWebhook(t *testing.T) { //nolint:gocognit,cyclop
 		request       *Request
 		wantErr       error
 		wantPayload   bool
-		expectedEvent *github.PullRequestReviewEvent
+		expectedEvent *Event
 	}{
 		{
 			name: "missing X-HUB-SIGNATURE header",
@@ -220,9 +219,9 @@ func TestHandler_verifyWebhook(t *testing.T) { //nolint:gocognit,cyclop
 					t.Error("validateRequest() returned nil payload")
 					return
 				}
-				// Verify it's a valid PullRequestReviewEvent
-				if payload.Action == nil {
-					t.Error("validateRequest() returned payload without Action field")
+				// Verify it's a valid Event
+				if payload.Action == "" {
+					t.Error("verifyWebhook() returned payload without Action field")
 				}
 			}
 		})

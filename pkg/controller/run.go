@@ -21,9 +21,9 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request)
 	if ignore(logger, ev) {
 		return nil
 	}
-	repo := c.input.Config.GetRepo(ev.GetRepo().GetFullName())
+	repo := c.input.Config.GetRepo(ev.RepoFullName)
 	if repo != nil && repo.Ignored {
-		logger.Info("ignore the event because the repository is ignored in the config", "repository", ev.GetRepo().GetFullName())
+		logger.Info("ignore the event because the repository is ignored in the config", "repository", ev.RepoFullName)
 		return nil
 	}
 	trust := c.input.Config.Trust

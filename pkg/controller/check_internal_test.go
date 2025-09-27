@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v75/github"
 	"github.com/shurcooL/githubv4"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
@@ -27,7 +26,7 @@ func TestController_newCheckRunInput(t *testing.T) {
 	tests := []struct {
 		name     string
 		config   *config.Config
-		event    *github.PullRequestReviewEvent
+		event    *Event
 		result   *validation.Result
 		expected githubv4.CreateCheckRunInput
 	}{
@@ -42,22 +41,16 @@ func TestController_newCheckRunInput(t *testing.T) {
 				},
 				BuiltTemplates: templates,
 			},
-			event: &github.PullRequestReviewEvent{
-				Repo: &github.Repository{
-					NodeID: github.String("repo-node-id"),
-				},
-				PullRequest: &github.PullRequest{
-					Head: &github.PullRequestBranch{
-						SHA: github.String("abc123"),
-					},
-				},
+			event: &Event{
+				RepoID:  "12345",
+				HeadSHA: "abc123",
 			},
 			result: &validation.Result{
 				State:     validation.StateApproved,
 				Approvers: []string{"user1", "user2"},
 			},
 			expected: githubv4.CreateCheckRunInput{
-				RepositoryID: githubv4.String("repo-node-id"),
+				RepositoryID: githubv4.String("12345"),
 				HeadSha:      githubv4.GitObjectID("abc123"),
 				Name:         githubv4.String("test-check"),
 				Status:       &[]githubv4.RequestableCheckStatusState{githubv4.RequestableCheckStatusStateCompleted}[0],
@@ -79,21 +72,15 @@ func TestController_newCheckRunInput(t *testing.T) {
 				},
 				BuiltTemplates: templates,
 			},
-			event: &github.PullRequestReviewEvent{
-				Repo: &github.Repository{
-					NodeID: github.String("repo-node-id"),
-				},
-				PullRequest: &github.PullRequest{
-					Head: &github.PullRequestBranch{
-						SHA: github.String("abc123"),
-					},
-				},
+			event: &Event{
+				RepoID:  "12345",
+				HeadSHA: "abc123",
 			},
 			result: &validation.Result{
 				State: validation.StateApprovalIsRequired,
 			},
 			expected: githubv4.CreateCheckRunInput{
-				RepositoryID: githubv4.String("repo-node-id"),
+				RepositoryID: githubv4.String("12345"),
 				HeadSha:      githubv4.GitObjectID("abc123"),
 				Name:         githubv4.String("test-check"),
 				Status:       &[]githubv4.RequestableCheckStatusState{githubv4.RequestableCheckStatusStateCompleted}[0],
@@ -115,21 +102,15 @@ func TestController_newCheckRunInput(t *testing.T) {
 				},
 				BuiltTemplates: templates,
 			},
-			event: &github.PullRequestReviewEvent{
-				Repo: &github.Repository{
-					NodeID: github.String("repo-node-id"),
-				},
-				PullRequest: &github.PullRequest{
-					Head: &github.PullRequestBranch{
-						SHA: github.String("abc123"),
-					},
-				},
+			event: &Event{
+				RepoID:  "12345",
+				HeadSHA: "abc123",
 			},
 			result: &validation.Result{
 				State: validation.StateTwoApprovalsAreRequired,
 			},
 			expected: githubv4.CreateCheckRunInput{
-				RepositoryID: githubv4.String("repo-node-id"),
+				RepositoryID: githubv4.String("12345"),
 				HeadSha:      githubv4.GitObjectID("abc123"),
 				Name:         githubv4.String("test-check"),
 				Status:       &[]githubv4.RequestableCheckStatusState{githubv4.RequestableCheckStatusStateCompleted}[0],
@@ -151,22 +132,16 @@ func TestController_newCheckRunInput(t *testing.T) {
 				},
 				BuiltTemplates: templates,
 			},
-			event: &github.PullRequestReviewEvent{
-				Repo: &github.Repository{
-					NodeID: github.String("repo-node-id"),
-				},
-				PullRequest: &github.PullRequest{
-					Head: &github.PullRequestBranch{
-						SHA: github.String("abc123"),
-					},
-				},
+			event: &Event{
+				RepoID:  "12345",
+				HeadSHA: "abc123",
 			},
 			result: &validation.Result{
 				State: validation.StateApproved,
 				Error: "test error message",
 			},
 			expected: githubv4.CreateCheckRunInput{
-				RepositoryID: githubv4.String("repo-node-id"),
+				RepositoryID: githubv4.String("12345"),
 				HeadSha:      githubv4.GitObjectID("abc123"),
 				Name:         githubv4.String("test-check"),
 				Status:       &[]githubv4.RequestableCheckStatusState{githubv4.RequestableCheckStatusStateCompleted}[0],

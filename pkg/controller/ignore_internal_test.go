@@ -4,8 +4,6 @@ package controller
 import (
 	"log/slog"
 	"testing"
-
-	"github.com/google/go-github/v75/github"
 )
 
 func Test_ignore(t *testing.T) {
@@ -13,94 +11,78 @@ func Test_ignore(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		event    *github.PullRequestReviewEvent
+		event    *Event
 		expected bool
 	}{
 		{
 			name: "ignore edited action",
-			event: &github.PullRequestReviewEvent{
-				Action: github.Ptr("edited"),
-				Review: &github.PullRequestReview{
-					State: github.Ptr("approved"),
-				},
+			event: &Event{
+				Action:      "edited",
+				ReviewState: "approved",
 			},
 			expected: true,
 		},
 		{
 			name: "ignore commented state",
-			event: &github.PullRequestReviewEvent{
-				Action: github.Ptr("submitted"),
-				Review: &github.PullRequestReview{
-					State: github.Ptr("commented"),
-				},
+			event: &Event{
+				Action:      "submitted",
+				ReviewState: "commented",
 			},
 			expected: true,
 		},
 		{
 			name: "ignore pending state",
-			event: &github.PullRequestReviewEvent{
-				Action: github.Ptr("submitted"),
-				Review: &github.PullRequestReview{
-					State: github.Ptr("pending"),
-				},
+			event: &Event{
+				Action:      "submitted",
+				ReviewState: "pending",
 			},
 			expected: true,
 		},
 		{
 			name: "do not ignore approved state",
-			event: &github.PullRequestReviewEvent{
-				Action: github.Ptr("submitted"),
-				Review: &github.PullRequestReview{
-					State: github.Ptr("approved"),
-				},
+			event: &Event{
+				Action:      "submitted",
+				ReviewState: "approved",
 			},
 			expected: false,
 		},
 		{
 			name: "do not ignore changes_requested state",
-			event: &github.PullRequestReviewEvent{
-				Action: github.Ptr("submitted"),
-				Review: &github.PullRequestReview{
-					State: github.Ptr("changes_requested"),
-				},
+			event: &Event{
+				Action:      "submitted",
+				ReviewState: "changes_requested",
 			},
 			expected: false,
 		},
 		{
 			name: "do not ignore dismissed state",
-			event: &github.PullRequestReviewEvent{
-				Action: github.Ptr("dismissed"),
-				Review: &github.PullRequestReview{
-					State: github.Ptr("dismissed"),
-				},
+			event: &Event{
+				Action:      "dismissed",
+				ReviewState: "dismissed",
 			},
 			expected: false,
 		},
 		{
-			name: "handle nil action",
-			event: &github.PullRequestReviewEvent{
-				Action: nil,
-				Review: &github.PullRequestReview{
-					State: github.Ptr("approved"),
-				},
+			name: "handle empty action",
+			event: &Event{
+				Action:      "",
+				ReviewState: "approved",
 			},
 			expected: false,
 		},
 		{
-			name: "handle nil review state",
-			event: &github.PullRequestReviewEvent{
-				Action: github.Ptr("submitted"),
-				Review: &github.PullRequestReview{
-					State: nil,
-				},
+			name: "handle empty review state",
+			event: &Event{
+				Action:      "submitted",
+				ReviewState: "",
 			},
 			expected: false,
 		},
 		{
-			name: "handle nil review",
-			event: &github.PullRequestReviewEvent{
-				Action: github.Ptr("submitted"),
-				Review: nil,
+			name: "handle empty fields",
+			event: &Event{
+				Action:      "",
+				ReviewState: "",
 			},
 			expected: false,
 		},

@@ -9,11 +9,10 @@ import (
 
 	"github.com/shurcooL/githubv4"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
-	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
-func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *github.PullRequestReviewEvent, result *validation.Result) githubv4.CreateCheckRunInput {
+func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *validation.Result) githubv4.CreateCheckRunInput {
 	result.Version = c.input.Version
 	var conclusion githubv4.CheckConclusionState
 	var title githubv4.String
@@ -46,8 +45,8 @@ func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *github.PullReques
 	// Create final check run with conclusion
 	completedStatus := githubv4.RequestableCheckStatusStateCompleted
 	return githubv4.CreateCheckRunInput{
-		RepositoryID: githubv4.String(ev.GetRepo().GetNodeID()),
-		HeadSha:      githubv4.GitObjectID(ev.GetPullRequest().GetHead().GetSHA()),
+		RepositoryID: githubv4.String(ev.RepoID),
+		HeadSha:      githubv4.GitObjectID(ev.HeadSHA),
 		Name:         githubv4.String(c.input.Config.CheckName),
 		Status:       &completedStatus,
 		Conclusion:   &conclusion,
