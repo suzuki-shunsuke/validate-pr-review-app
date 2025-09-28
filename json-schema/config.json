@@ -5,18 +5,17 @@
   "$defs": {
     "AWS": {
       "properties": {
-        "SecretID": {
+        "secret_id": {
           "type": "string"
         },
-        "UseLambdaFunctionURL": {
+        "use_lambda_function_url": {
           "type": "boolean"
         }
       },
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "SecretID",
-        "UseLambdaFunctionURL"
+        "secret_id"
       ]
     },
     "Config": {
@@ -29,6 +28,9 @@
         },
         "aws": {
           "$ref": "#/$defs/AWS"
+        },
+        "google_cloud": {
+          "$ref": "#/$defs/GoogleCloud"
         },
         "check_name": {
           "type": "string"
@@ -56,8 +58,19 @@
       "type": "object",
       "required": [
         "app_id",
-        "installation_id",
-        "aws"
+        "installation_id"
+      ]
+    },
+    "GoogleCloud": {
+      "properties": {
+        "secret_name": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "secret_name"
       ]
     },
     "Repository": {
