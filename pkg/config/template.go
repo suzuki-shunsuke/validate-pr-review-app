@@ -1,11 +1,27 @@
 package config
 
 import (
+	_ "embed"
 	"fmt"
 	"html/template"
 	"io"
 
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
+)
+
+var (
+	//go:embed templates/footer.md
+	templateFooter []byte
+	//go:embed templates/no_approval.md
+	templateNoApproval []byte
+	//go:embed templates/require_two_approvals.md
+	templateRequireTwoApprovals []byte
+	//go:embed templates/settings.md
+	templateSettings []byte
+	//go:embed templates/approved.md
+	templateApproved []byte
+	//go:embed templates/error.md
+	templateError []byte
 )
 
 func (c *Config) initTemplates() error {
