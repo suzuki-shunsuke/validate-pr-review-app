@@ -50,7 +50,7 @@ func (h *Handler) Start(ctx context.Context) {
 }
 
 func (h *Handler) Run(w http.ResponseWriter, r *http.Request) {
-	logger := h.newLogger(r)
+	logger, requestID := h.newLogger(r)
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		slogerr.WithError(logger, err).Error("read request body")
@@ -58,20 +58,21 @@ func (h *Handler) Run(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.controller.Run(r.Context(), logger, &controller.Request{
-		Body:    string(body),
-		Headers: convertHeaders(r.Header),
+		Body:      string(body),
+		Headers:   convertHeaders(r.Header),
+		RequestID: requestID,
 	}); err != nil {
 		slogerr.WithError(logger, err).Error("handle request")
 	}
 }
 
-func (h *Handler) newLogger(r *http.Request) *slog.Logger {
+func (h *Handler) newLogger(r *http.Request) (*slog.Logger, string) {
 	logger := h.logger
 	if requestID := r.Header.Get("X-Cloud-Trace-Context"); requestID != "" {
-		return logger.With("request_id", requestID)
+		return logger.With("request_id", requestID), requestID
 	}
 	logger.Warn("X-Cloud-Trace-Context header is not set")
-	return logger
+	return logger, ""
 }
 
 func convertHeaders(headers http.Header) map[string]string {

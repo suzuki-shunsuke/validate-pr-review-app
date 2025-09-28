@@ -53,7 +53,7 @@ func (p *ProxyRequest) unmarshalJSON(b []byte) error {
 }
 
 func (h *Handler) handleProxy(ctx context.Context, req *ProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	logger := h.newLogger(ctx)
+	logger, requestID := h.newLogger(ctx)
 	if req.err != nil {
 		if req.payload == nil {
 			slogerr.WithError(logger, req.err).Warn("invalid request")
@@ -66,8 +66,9 @@ func (h *Handler) handleProxy(ctx context.Context, req *ProxyRequest) (*events.A
 		}, nil
 	}
 	if err := h.controller.Run(ctx, logger, &controller.Request{
-		Body:    req.request.Body,
-		Headers: req.request.Headers,
+		Body:      req.request.Body,
+		Headers:   req.request.Headers,
+		RequestID: requestID,
 	}); err != nil {
 		slogerr.WithError(logger, err).Error("handle request")
 	}
