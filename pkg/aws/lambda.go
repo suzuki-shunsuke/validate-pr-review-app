@@ -56,6 +56,7 @@ func NewHandler(ctx context.Context, logger *slog.Logger, version string, logLev
 		Version:             version,
 		WebhookSecret:       []byte(secret.WebhookSecret),
 		GitHubAppPrivateKey: secret.GitHubAppPrivateKey,
+		Logger:              logger,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create controller: %w", err)
