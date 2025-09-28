@@ -72,10 +72,32 @@ Both commands should pass before committing changes.
 Command-line interface layer that handles command parsing, flag processing, and routing to appropriate subcommands.
 
 ### pkg/config
-Configuration management including reading, parsing, and validating .validate-pr-review-app.yaml files.
+Configuration management including:
+- Reading and parsing configuration
+- Validating configuration structure and constraints
+- Managing Trust settings for repositories and users
+- Template processing and validation
 
 ### pkg/controller
-Business logic layer containing:
+HTTP request handling and webhook processing:
+- Webhook signature verification and validation
+- GitHub event parsing (pull request reviews, check suites)
+- Branch name parsing for merge queue integration
+- Event routing and processing logic
+
+### pkg/validation
+Core business logic for PR review validation:
+- Analyzing PR reviews and approvals
+- Checking trusted/untrusted users and apps
+- Validating commit signatures and authorship
+- Implementing approval requirement logic
+
+### pkg/github
+GitHub API integration layer:
+- GraphQL API client for fetching PR data
+- Pull request and commit information retrieval
+- Check run creation and status reporting
+- GitHub App authentication handling
 
 ## Testing
 
