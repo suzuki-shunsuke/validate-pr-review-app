@@ -1,6 +1,11 @@
-variable "region" {
+variable "use_api_gateway" {
+  type    = bool
+  default = false
+}
+
+variable "api_gateway_name" {
   type    = string
-  default = "us-east-1"
+  default = "validate-pr-review-app"
 }
 
 variable "secretsmanager_secret_name_main" {

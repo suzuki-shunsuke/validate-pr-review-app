@@ -1,5 +1,5 @@
 resource "aws_secretsmanager_secret" "main" {
-  name = var.secretsmanager_secret_name_main
+  name = yamldecode(file("${path.module}/config.yaml")).aws.secret_id
 }
 
 resource "aws_secretsmanager_secret_version" "main" {

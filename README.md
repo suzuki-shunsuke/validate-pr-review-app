@@ -246,6 +246,27 @@ terraform destroy
 - Uninstall the GitHub App from the repository
 - Delete the GitHub App
 
+## Using Amazon API Gateway instead of Lambda Function URL
+
+Amazon API Gateway is also available instead of Lambda Function URL.
+ref. [Select a method to invoke your Lambda function using an HTTP request](https://docs.aws.amazon.com/lambda/latest/dg/furls-http-invoke-decision.html).
+
+1. Remove `use_lambda_function_url` from [config.yaml](terraform/aws/config.yaml.tmpl).
+
+```yaml
+aws:
+  secret_id: validate-pr-review-app
+  # use_lambda_function_url: true
+```
+
+2. Set `use_api_gateway` to `true` in [terraform/aws](terraform/aws)
+
+terraform.tfvars:
+
+```tf
+use_api_gateway = true
+```
+
 ## Merge Queue Support
 
 This app supports [Merge Queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue).
