@@ -5,7 +5,7 @@ query($owner: String!, $repo: String!, $pr: Int!) {
   repository(owner: $owner, name: $repo) {
     pullRequest(number: $pr) {
       headRefOid
-      latestReviews(first: 100) {
+      reviews(first: 100) {
         pageInfo {
           hasNextPage
           endCursor
@@ -76,40 +76,8 @@ type GetPRQuery struct {
 	Repository *Repository `graphql:"repository(owner: $repoOwner, name: $repoName)"`
 }
 
-type ListCommitsQuery struct {
-	Repository *CommitsRepository `graphql:"repository(owner: $repoOwner, name: $repoName)"`
-}
-
-func (q *ListCommitsQuery) PageInfo() *PageInfo {
-	return q.Repository.PullRequest.Commits.PageInfo
-}
-
-func (q *ListCommitsQuery) Nodes() []*PullRequestCommit {
-	return q.Repository.PullRequest.Commits.Nodes
-}
-
-type ListReviewsQuery struct {
-	Repository *ReviewsRepository `graphql:"repository(owner: $repoOwner, name: $repoName)"`
-}
-
-func (q *ListReviewsQuery) Nodes() []*Review {
-	return q.Repository.PullRequest.Reviews.Nodes
-}
-
-func (q *ListReviewsQuery) PageInfo() *PageInfo {
-	return q.Repository.PullRequest.Reviews.PageInfo
-}
-
 type Repository struct {
 	PullRequest *PullRequest `graphql:"pullRequest(number: $number)"`
-}
-
-type CommitsRepository struct {
-	PullRequest *CommitsPullRequest `graphql:"pullRequest(number: $number)"`
-}
-
-type CommitsPullRequest struct {
-	Commits *Commits `graphql:"commits(first:30)"`
 }
 
 type ReviewsRepository struct {
@@ -117,7 +85,7 @@ type ReviewsRepository struct {
 }
 
 type ReviewsPullRequest struct {
-	Reviews *Reviews `graphql:"latestReviews(first:30)"`
+	Reviews *Reviews `graphql:"reviews(first:30, after:$cursor)"`
 }
 
 type Reviews struct {

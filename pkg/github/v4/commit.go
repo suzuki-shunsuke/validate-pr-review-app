@@ -22,3 +22,23 @@ func (c *Commit) User() *User {
 	}
 	return c.Author.User
 }
+
+type ListCommitsQuery struct {
+	Repository *CommitsRepository `graphql:"repository(owner: $repoOwner, name: $repoName)"`
+}
+
+func (q *ListCommitsQuery) PageInfo() *PageInfo {
+	return q.Repository.PullRequest.Commits.PageInfo
+}
+
+func (q *ListCommitsQuery) Nodes() []*PullRequestCommit {
+	return q.Repository.PullRequest.Commits.Nodes
+}
+
+type CommitsRepository struct {
+	PullRequest *CommitsPullRequest `graphql:"pullRequest(number: $number)"`
+}
+
+type CommitsPullRequest struct {
+	Commits *Commits `graphql:"commits(first:30, after:$cursor)"`
+}

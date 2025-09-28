@@ -20,28 +20,38 @@ No modules.
 
 | Name | Type |
 |------|------|
+| [aws_api_gateway_deployment.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_deployment) | resource |
+| [aws_api_gateway_integration.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_integration) | resource |
+| [aws_api_gateway_method.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_method) | resource |
+| [aws_api_gateway_resource.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_resource) | resource |
+| [aws_api_gateway_rest_api.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_rest_api) | resource |
+| [aws_api_gateway_stage.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_stage) | resource |
 | [aws_cloudwatch_log_group.lambda_log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_iam_role.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy.lambda_log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.read_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_lambda_function.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_lambda_function_url.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function_url) | resource |
+| [aws_lambda_permission.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
 | [aws_secretsmanager_secret.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret_version.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_iam_policy_document.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.lambda_log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.read_secret](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_api_gateway_name"></a> [api\_gateway\_name](#input\_api\_gateway\_name) | n/a | `string` | `"validate-pr-review-app"` | no |
 | <a name="input_function_name"></a> [function\_name](#input\_function\_name) | Lambda Function Name | `string` | `"validate-pr-review-app"` | no |
 | <a name="input_lambda_architecture"></a> [lambda\_architecture](#input\_lambda\_architecture) | Lambda Architecture | `string` | `"arm64"` | no |
 | <a name="input_lambda_role_name"></a> [lambda\_role\_name](#input\_lambda\_role\_name) | Lambda Role Name | `string` | `"validate-pr-review-app"` | no |
 | <a name="input_lambda_role_path"></a> [lambda\_role\_path](#input\_lambda\_role\_path) | Lambda Role Path | `string` | `"/service-role/"` | no |
-| <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-east-1"` | no |
 | <a name="input_secretsmanager_secret_name_main"></a> [secretsmanager\_secret\_name\_main](#input\_secretsmanager\_secret\_name\_main) | n/a | `string` | `"validate-pr-review-app"` | no |
+| <a name="input_use_api_gateway"></a> [use\_api\_gateway](#input\_use\_api\_gateway) | n/a | `bool` | `false` | no |
 | <a name="input_zip_path"></a> [zip\_path](#input\_zip\_path) | Lambda Zip File Path | `string` | `"validate-pr-review-app_lambda_linux_arm64.zip"` | no |
 
 ## Outputs
