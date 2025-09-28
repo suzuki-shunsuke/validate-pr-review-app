@@ -354,17 +354,9 @@ repositories:
 
 You can customize the footer of this app's Checks tab.
 
-The default is:
+The default is: [footer.md](pkg/config/templates/footer.md)
 
-```markdown
----
-
-[This check is created by Validate PR Review App (version: {{if .Version}}{{.Version}}{{else}}unknown{{end}})](https://github.com/suzuki-shunsuke/validate-pr-review-app).
-```
-
-You can add the guide for developers:
-
-e.g.
+For example, you can add the guide for developers:
 
 ```yaml
 templates:
