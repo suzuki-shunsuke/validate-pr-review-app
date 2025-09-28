@@ -48,7 +48,7 @@ func (c *Client) ListReviews(ctx context.Context, owner, name string, number int
 		"repoOwner": githubv4.String(owner),
 		"repoName":  githubv4.String(name),
 		"number":    githubv4.Int(number), //nolint:gosec
-		"cursor":    cursor,
+		"cursor":    githubv4.String(cursor),
 	}
 	for range 100 {
 		q := &ListReviewsQuery{}
@@ -72,7 +72,7 @@ func (c *Client) ListCommits(ctx context.Context, owner, name string, number int
 		"repoOwner": githubv4.String(owner),
 		"repoName":  githubv4.String(name),
 		"number":    githubv4.Int(number), //nolint:gosec
-		"cursor":    cursor,
+		"cursor":    githubv4.String(cursor),
 	}
 	for range 100 {
 		q := &ListCommitsQuery{}

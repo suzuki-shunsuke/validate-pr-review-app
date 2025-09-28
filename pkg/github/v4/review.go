@@ -12,3 +12,15 @@ type Review struct {
 type ReviewCommit struct {
 	OID string `json:"oid"`
 }
+
+type ListReviewsQuery struct {
+	Repository *ReviewsRepository `graphql:"repository(owner: $repoOwner, name: $repoName)"`
+}
+
+func (q *ListReviewsQuery) Nodes() []*Review {
+	return q.Repository.PullRequest.Reviews.Nodes
+}
+
+func (q *ListReviewsQuery) PageInfo() *PageInfo {
+	return q.Repository.PullRequest.Reviews.PageInfo
+}
