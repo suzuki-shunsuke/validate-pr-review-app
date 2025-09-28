@@ -1,8 +1,3 @@
-variable "use_api_gateway" {
-  type    = bool
-  default = false
-}
-
 variable "api_gateway_name" {
   type    = string
   default = "validate-pr-review-app"

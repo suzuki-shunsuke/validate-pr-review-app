@@ -1,24 +1,24 @@
 resource "aws_api_gateway_rest_api" "main" {
-  count = var.use_api_gateway ? 1 : 0
+  count = local.api_gateway_count
   name  = var.api_gateway_name
 }
 
 resource "aws_api_gateway_stage" "main" {
-  count         = var.use_api_gateway ? 1 : 0
+  count         = local.api_gateway_count
   deployment_id = aws_api_gateway_deployment.main[0].id
   rest_api_id   = aws_api_gateway_rest_api.main[0].id
   stage_name    = "main"
 }
 
 resource "aws_api_gateway_resource" "main" {
-  count       = var.use_api_gateway ? 1 : 0
+  count       = local.api_gateway_count
   path_part   = "webhook"
   parent_id   = aws_api_gateway_rest_api.main[0].root_resource_id
   rest_api_id = aws_api_gateway_rest_api.main[0].id
 }
 
 resource "aws_api_gateway_method" "main" {
-  count         = var.use_api_gateway ? 1 : 0
+  count         = local.api_gateway_count
   rest_api_id   = aws_api_gateway_rest_api.main[0].id
   resource_id   = aws_api_gateway_resource.main[0].id
   http_method   = "POST"
@@ -26,7 +26,7 @@ resource "aws_api_gateway_method" "main" {
 }
 
 resource "aws_api_gateway_integration" "main" {
-  count                   = var.use_api_gateway ? 1 : 0
+  count                   = local.api_gateway_count
   rest_api_id             = aws_api_gateway_rest_api.main[0].id
   resource_id             = aws_api_gateway_resource.main[0].id
   http_method             = aws_api_gateway_method.main[0].http_method
@@ -36,7 +36,7 @@ resource "aws_api_gateway_integration" "main" {
 }
 
 resource "aws_api_gateway_deployment" "main" {
-  count       = var.use_api_gateway ? 1 : 0
+  count       = local.api_gateway_count
   rest_api_id = aws_api_gateway_rest_api.main[0].id
 
   triggers = {
@@ -53,7 +53,7 @@ resource "aws_api_gateway_deployment" "main" {
 }
 
 resource "aws_lambda_permission" "main" {
-  count         = var.use_api_gateway ? 1 : 0
+  count         = local.api_gateway_count
   statement_id  = "AllowLambuildInvoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.main.function_name

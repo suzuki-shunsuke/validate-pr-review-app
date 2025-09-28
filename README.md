@@ -251,20 +251,12 @@ terraform destroy
 Amazon API Gateway is also available instead of Lambda Function URL.
 ref. [Select a method to invoke your Lambda function using an HTTP request](https://docs.aws.amazon.com/lambda/latest/dg/furls-http-invoke-decision.html).
 
-1. Remove `use_lambda_function_url` from [config.yaml](terraform/aws/config.yaml.tmpl).
+Remove `use_lambda_function_url` from [config.yaml](terraform/aws/config.yaml.tmpl).
 
 ```yaml
 aws:
   secret_id: validate-pr-review-app
   # use_lambda_function_url: true
-```
-
-2. Set `use_api_gateway` to `true` in [terraform/aws](terraform/aws)
-
-terraform.tfvars:
-
-```tf
-use_api_gateway = true
 ```
 
 ## Merge Queue Support
