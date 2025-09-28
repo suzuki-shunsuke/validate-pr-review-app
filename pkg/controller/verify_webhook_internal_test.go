@@ -60,31 +60,27 @@ func TestHandler_validateRequest(t *testing.T) {
 			},
 			request: &Request{
 				Body: validPayload,
-				Params: &RequestParamsField{
-					Headers: map[string]string{
-						headerXGitHubHookInstallationTargetID: "12345",
-						headerXGitHubEvent:                    eventPullRequestReview,
-					},
+				Headers: map[string]string{
+					headerXGitHubHookInstallationTargetID: "12345",
+					headerXHubSignature:                   dummySignature,
+					headerXGitHubEvent:                    eventPullRequestReview,
 				},
 			},
 		},
 		{
-			name: "invalid signature",
+			name: "invalid X-HUB-SIGNATURE header",
 			controller: &Controller{
 				input: &InputNew{
-					Config:        &config.Config{AppID: 12345},
-					WebhookSecret: []byte("wrong-secret"),
+					Config: &config.Config{AppID: 12345},
 				},
 				validateSignature: newMockValidateSignature(errors.New("invalid signature")),
 			},
 			request: &Request{
 				Body: validPayload,
-				Params: &RequestParamsField{
-					Headers: map[string]string{
-						headerXGitHubHookInstallationTargetID: "12345",
-						headerXHubSignature:                   dummySignature,
-						headerXGitHubEvent:                    eventPullRequestReview,
-					},
+				Headers: map[string]string{
+					headerXGitHubHookInstallationTargetID: "12345",
+					headerXHubSignature:                   dummySignature,
+					headerXGitHubEvent:                    eventPullRequestReview,
 				},
 			},
 		},
@@ -99,11 +95,9 @@ func TestHandler_validateRequest(t *testing.T) {
 			},
 			request: &Request{
 				Body: validPayload,
-				Params: &RequestParamsField{
-					Headers: map[string]string{
-						headerXGitHubHookInstallationTargetID: "12345",
-						headerXHubSignature:                   dummySignature,
-					},
+				Headers: map[string]string{
+					headerXGitHubHookInstallationTargetID: "12345",
+					headerXHubSignature:                   dummySignature,
 				},
 			},
 		},
@@ -118,12 +112,10 @@ func TestHandler_validateRequest(t *testing.T) {
 			},
 			request: &Request{
 				Body: validPayload,
-				Params: &RequestParamsField{
-					Headers: map[string]string{
-						headerXGitHubHookInstallationTargetID: "12345",
-						headerXHubSignature:                   dummySignature,
-						headerXGitHubEvent:                    "label",
-					},
+				Headers: map[string]string{
+					headerXGitHubHookInstallationTargetID: "12345",
+					headerXHubSignature:                   dummySignature,
+					headerXGitHubEvent:                    "label",
 				},
 			},
 		},
@@ -138,12 +130,10 @@ func TestHandler_validateRequest(t *testing.T) {
 			},
 			request: &Request{
 				Body: "invalid json{",
-				Params: &RequestParamsField{
-					Headers: map[string]string{
-						headerXGitHubHookInstallationTargetID: "12345",
-						headerXHubSignature:                   dummySignature,
-						headerXGitHubEvent:                    eventPullRequestReview,
-					},
+				Headers: map[string]string{
+					headerXGitHubHookInstallationTargetID: "12345",
+					headerXHubSignature:                   dummySignature,
+					headerXGitHubEvent:                    eventPullRequestReview,
 				},
 			},
 		},
@@ -158,12 +148,10 @@ func TestHandler_validateRequest(t *testing.T) {
 			},
 			request: &Request{
 				Body: validPayload,
-				Params: &RequestParamsField{
-					Headers: map[string]string{
-						headerXGitHubHookInstallationTargetID: "12345",
-						headerXHubSignature:                   dummySignature,
-						headerXGitHubEvent:                    eventPullRequestReview,
-					},
+				Headers: map[string]string{
+					headerXGitHubHookInstallationTargetID: "12345",
+					headerXHubSignature:                   dummySignature,
+					headerXGitHubEvent:                    eventPullRequestReview,
 				},
 			},
 			wantPayload: true,
@@ -171,10 +159,8 @@ func TestHandler_validateRequest(t *testing.T) {
 		{
 			name: "empty headers",
 			request: &Request{
-				Body: "{}",
-				Params: &RequestParamsField{
-					Headers: map[string]string{},
-				},
+				Body:    "{}",
+				Headers: map[string]string{},
 			},
 		},
 	}
