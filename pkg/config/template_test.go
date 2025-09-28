@@ -46,7 +46,10 @@ Trusted Machine Users: Nothing
 
 ---
 
-[This check is created by Validate PR Review App (version: v0.0.1)](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+[This check is created by Validate PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+
+- Version: v0.0.1
+- Request ID: unknown
 `,
 		},
 		{
@@ -57,6 +60,7 @@ Trusted Machine Users: Nothing
 				TrustedApps:           []string{"dependabot[bot]", "renovate[bot]"},
 				TrustedMachineUsers:   []string{"foo-bot"},
 				UntrustedMachineUsers: []string{"*-bot"},
+				RequestID:             "req-12345",
 			},
 			template: "approved",
 			wantErr:  false,
@@ -82,7 +86,10 @@ Trusted Machine Users:
 
 ---
 
-[This check is created by Validate PR Review App (version: unknown)](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+[This check is created by Validate PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+
+- Version: unknown
+- Request ID: req-12345
 `,
 		},
 		{
@@ -113,7 +120,10 @@ Trusted Machine Users:
 
 ---
 
-[This check is created by Validate PR Review App (version: unknown)](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+[This check is created by Validate PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+
+- Version: unknown
+- Request ID: unknown
 `,
 		},
 		{
@@ -135,7 +145,10 @@ Trusted Machine Users: Nothing
 
 ---
 
-[This check is created by Validate PR Review App (version: unknown)](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+[This check is created by Validate PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+
+- Version: unknown
+- Request ID: unknown
 `,
 		},
 		{
@@ -185,7 +198,10 @@ Trusted Machine Users: Nothing
 
 ---
 
-[This check is created by Validate PR Review App (version: unknown)](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+[This check is created by Validate PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+
+- Version: unknown
+- Request ID: unknown
 `,
 		},
 	}
