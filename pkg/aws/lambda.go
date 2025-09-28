@@ -68,13 +68,14 @@ func NewHandler(ctx context.Context, logger *slog.Logger, version string, logLev
 }
 
 func (h *Handler) Start(ctx context.Context) {
-	var handler any
+	lambda.StartWithOptions(h.handler(), lambda.WithContext(ctx))
+}
+
+func (h *Handler) handler() any {
 	if h.config.AWS.UseLambdaFunctionURL {
-		handler = h.handleFunctionURL
-	} else {
-		handler = h.do
+		return h.handleFunctionURL
 	}
-	lambda.StartWithOptions(handler, lambda.WithContext(ctx))
+	return h.handleProxy
 }
 
 func (h *Handler) newLogger(ctx context.Context) *slog.Logger {

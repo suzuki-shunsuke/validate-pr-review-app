@@ -58,10 +58,8 @@ func (h *Handler) Run(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.controller.Run(r.Context(), logger, &controller.Request{
-		Body: string(body),
-		Params: &controller.RequestParamsField{
-			Headers: convertHeaders(r.Header),
-		},
+		Body:    string(body),
+		Headers: convertHeaders(r.Header),
 	}); err != nil {
 		slogerr.WithError(logger, err).Error("handle request")
 	}

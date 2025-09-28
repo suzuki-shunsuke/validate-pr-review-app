@@ -45,7 +45,7 @@ func (c *Controller) normalizeHeaders(headers map[string]string) map[string]stri
 }
 
 func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) *Event {
-	headers := c.normalizeHeaders(req.Params.Headers)
+	headers := c.normalizeHeaders(req.Headers)
 	body := []byte(req.Body)
 	if err := c.verifySignature(body, headers); err != nil {
 		slogerr.WithError(logger, err).Warn("validate the webhook signature")
