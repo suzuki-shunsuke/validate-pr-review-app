@@ -79,12 +79,12 @@ func (h *Handler) handler() any {
 	return h.handleProxy
 }
 
-func (h *Handler) newLogger(ctx context.Context) *slog.Logger {
+func (h *Handler) newLogger(ctx context.Context) (*slog.Logger, string) {
 	logger := h.logger
 	lc, ok := lambdacontext.FromContext(ctx)
 	if ok {
-		return logger.With("aws_request_id", lc.AwsRequestID)
+		return logger.With("aws_request_id", lc.AwsRequestID), lc.AwsRequestID
 	}
 	logger.Warn("lambda context is not found")
-	return logger
+	return logger, ""
 }

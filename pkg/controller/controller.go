@@ -56,6 +56,7 @@ type GitHub interface {
 
 type Request struct {
 	// Generate template > Method request passthrough
-	Body    string            `json:"body"`
-	Headers map[string]string `json:"header"`
+	Body      string            `json:"body"`
+	Headers   map[string]string `json:"header"`
+	RequestID string            `json:"requestid"`
 }

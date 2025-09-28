@@ -151,6 +151,7 @@ func (c *Validator) VerifyCommit(commit *github.Commit, trust *Trust) *github.Un
 }
 
 type Result struct {
+	RequestID    string
 	Error        string
 	State        State
 	Approvers    []string
