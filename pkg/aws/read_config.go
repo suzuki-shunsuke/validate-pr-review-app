@@ -1,3 +1,5 @@
+// Package aws provides AWS Lambda integration for the validate-pr-review-app.
+// It handles Lambda function execution, API Gateway events, and AWS Secrets Manager integration.
 package aws
 
 import (
@@ -9,6 +11,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// readConfig reads and parses the application configuration from the CONFIG environment variable.
+// The configuration is expected to be a YAML-formatted string containing the application settings.
+// It unmarshals the YAML into the provided config struct and initializes it.
 func readConfig(cfg *config.Config) error {
 	cfgstr := os.Getenv("CONFIG")
 	if cfgstr == "" {
