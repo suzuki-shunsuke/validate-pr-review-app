@@ -1,0 +1,3 @@
+[[io.buildpacks.build.env]]
+name = "GOOGLE_BUILDABLE"
+value = "./cmd/gcloud"
