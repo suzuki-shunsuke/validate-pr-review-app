@@ -97,59 +97,27 @@
     },
     "Trust": {
       "properties": {
-        "TrustedMachineUsers": {
+        "trusted_machine_users": {
           "items": {
             "type": "string"
           },
           "type": "array"
         },
-        "UntrustedMachineUsers": {
+        "untrusted_machine_users": {
           "items": {
             "type": "string"
           },
           "type": "array"
         },
-        "TrustedApps": {
+        "trusted_apps": {
           "items": {
             "type": "string"
           },
           "type": "array"
-        },
-        "UniqueTrustedMachineUsers": {
-          "additionalProperties": {
-            "properties": {},
-            "additionalProperties": false,
-            "type": "object"
-          },
-          "type": "object"
-        },
-        "UniqueUntrustedMachineUsers": {
-          "additionalProperties": {
-            "properties": {},
-            "additionalProperties": false,
-            "type": "object"
-          },
-          "type": "object"
-        },
-        "UniqueTrustedApps": {
-          "additionalProperties": {
-            "properties": {},
-            "additionalProperties": false,
-            "type": "object"
-          },
-          "type": "object"
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "TrustedMachineUsers",
-        "UntrustedMachineUsers",
-        "TrustedApps",
-        "UniqueTrustedMachineUsers",
-        "UniqueUntrustedMachineUsers",
-        "UniqueTrustedApps"
-      ]
+      "type": "object"
     }
   }
 }
