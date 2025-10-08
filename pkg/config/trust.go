@@ -7,12 +7,12 @@ import (
 )
 
 type Trust struct {
-	TrustedMachineUsers         []string            `yaml:"trusted_machine_users"`
-	UntrustedMachineUsers       []string            `yaml:"untrusted_machine_users"`
-	TrustedApps                 []string            `yaml:"trusted_apps"`
-	UniqueTrustedMachineUsers   map[string]struct{} `yaml:"-"`
-	UniqueUntrustedMachineUsers map[string]struct{} `yaml:"-"`
-	UniqueTrustedApps           map[string]struct{} `yaml:"-"`
+	TrustedMachineUsers         []string            `json:"trusted_machine_users,omitempty" yaml:"trusted_machine_users"`
+	UntrustedMachineUsers       []string            `json:"untrusted_machine_users,omitempty" yaml:"untrusted_machine_users"`
+	TrustedApps                 []string            `json:"trusted_apps,omitempty" yaml:"trusted_apps"`
+	UniqueTrustedMachineUsers   map[string]struct{} `json:"-" yaml:"-"`
+	UniqueUntrustedMachineUsers map[string]struct{} `json:"-" yaml:"-"`
+	UniqueTrustedApps           map[string]struct{} `json:"-" yaml:"-"`
 }
 
 func (t *Trust) Init() {
