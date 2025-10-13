@@ -4,7 +4,7 @@ go 1.24.5
 
 require (
 	cloud.google.com/go/secretmanager v1.15.1
-	github.com/aws/aws-lambda-go v1.49.0
+	github.com/aws/aws-lambda-go v1.50.0
 	github.com/aws/aws-sdk-go-v2 v1.39.2
 	github.com/aws/aws-sdk-go-v2/config v1.31.12
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.39.6
