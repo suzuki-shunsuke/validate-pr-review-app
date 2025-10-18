@@ -11,6 +11,7 @@ require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.17.0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v75 v75.0.0
+	github.com/google/uuid v1.6.0
 	github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
 	github.com/suzuki-shunsuke/gen-go-jsonschema v0.1.0
 	github.com/suzuki-shunsuke/go-retryablehttp v0.7.8-2

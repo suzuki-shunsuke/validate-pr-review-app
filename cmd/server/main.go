@@ -9,8 +9,10 @@ import (
 	"syscall"
 
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
-	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/gcloud"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/log"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/secret"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/server"
 )
 
 var version = ""
@@ -34,10 +36,21 @@ func run() int {
 func core(logger *slog.Logger, logLevel *slog.LevelVar) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	handler, err := gcloud.New(ctx, logger, version, logLevel)
-	if err != nil {
-		return fmt.Errorf("create a new handler: %w", err)
+	cfg := &config.Config{}
+	if err := config.Read(cfg); err != nil {
+		return fmt.Errorf("read config: %w", err)
 	}
-	handler.Start(ctx)
+	if err := log.SetLevel(logLevel, cfg.LogLevel); err != nil {
+		return fmt.Errorf("set log level: %w", err)
+	}
+	s := &secret.Secret{}
+	if err := secret.Read(s); err != nil {
+		return fmt.Errorf("read secret: %w", err)
+	}
+	server, err := server.New(logger, version, cfg, s)
+	if err != nil {
+		return fmt.Errorf("create a new server: %w", err)
+	}
+	server.Start(ctx)
 	return nil
 }

@@ -7,7 +7,6 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/lambdacontext"
-	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/controller"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/log"
@@ -31,25 +30,18 @@ func NewHandler(ctx context.Context, logger *slog.Logger, version string, logLev
 	// read config from the environment variable
 	// parse config as YAML
 	cfg := &config.Config{}
-	if err := readConfig(cfg); err != nil {
-		return nil, err
+	if err := config.Read(cfg); err != nil {
+		return nil, fmt.Errorf("read config: %w", err)
 	}
 
-	if cfg.LogLevel != "" {
-		lvl, err := log.ParseLevel(cfg.LogLevel)
-		if err != nil {
-			return nil, fmt.Errorf("parse log level: %w", slogerr.With(err, "log_level", cfg.LogLevel))
-		}
-		logLevel.Set(lvl)
+	if err := log.SetLevel(logLevel, cfg.LogLevel); err != nil {
+		return nil, fmt.Errorf("set log level: %w", err)
 	}
 
 	// read secrets from AWS SecretsManager
 	secret, err := readSecret(ctx, cfg.AWS.SecretID)
 	if err != nil {
 		return nil, fmt.Errorf("get secret from AWS Secrets Manager: %w", err)
-	}
-	if err := secret.Validate(); err != nil {
-		return nil, fmt.Errorf("validate secret: %w", err)
 	}
 	ctrl, err := controller.New(&controller.InputNew{
 		Config:              cfg,
