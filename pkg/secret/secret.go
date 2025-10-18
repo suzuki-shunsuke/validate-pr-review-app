@@ -9,8 +9,8 @@ import (
 )
 
 type Secret struct {
-	GitHubAppPrivateKey string `json:"github_app_private_key"`
-	WebhookSecret       string `json:"webhook_secret"`
+	GitHubAppPrivateKey string `json:"github_app_private_key" yaml:"github_app_private_key"`
+	WebhookSecret       string `json:"webhook_secret" yaml:"webhook_secret"`
 }
 
 func (s *Secret) Validate() error {
