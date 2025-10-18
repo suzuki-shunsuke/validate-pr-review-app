@@ -3,7 +3,8 @@
 version: 2
 project_name: validate-pr-review-app
 archives:
-  - name_template: "{{.ProjectName}}_lambda_{{.Os}}_{{.Arch}}"
+  - id: lambda
+    name_template: "{{.ProjectName}}_lambda_{{.Os}}_{{.Arch}}"
     formats: ["zip"]
     ids:
       - lambda
@@ -11,7 +12,8 @@ archives:
       - LICENSE
       - README.md
       - third_party_licenses/**/*
-  - name_template: "{{.ProjectName}}_server_{{.Os}}_{{.Arch}}"
+  - id: server
+    name_template: "{{.ProjectName}}_server_{{.Os}}_{{.Arch}}"
     formats: ["tar.gz"]
     ids:
       - server
