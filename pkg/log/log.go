@@ -2,14 +2,29 @@ package log
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
+
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 func New(out io.Writer, version string, level *slog.LevelVar) *slog.Logger {
 	return slog.New(slog.NewJSONHandler(out, &slog.HandlerOptions{
 		Level: level,
 	})).With("version", version)
+}
+
+func SetLevel(levelVar *slog.LevelVar, level string) error {
+	if level == "" {
+		return nil
+	}
+	lvl, err := ParseLevel(level)
+	if err != nil {
+		return fmt.Errorf("parse log level: %w", slogerr.With(err, "log_level", level))
+	}
+	levelVar.Set(lvl)
+	return nil
 }
 
 // ErrUnknownLogLevel is returned when an invalid log level string is provided to ParseLevel.
