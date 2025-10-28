@@ -8,6 +8,7 @@ import (
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/secret"
 )
 
 type SecretsManager struct {
@@ -22,25 +23,7 @@ func newSecretManager(ctx context.Context) (*SecretsManager, error) {
 	return &SecretsManager{client: c}, nil
 }
 
-type Secret struct {
-	GitHubAppPrivateKey string `json:"github_app_private_key"`
-	WebhookSecret       string `json:"webhook_secret"`
-}
-
-func (s *Secret) Validate() error {
-	if s == nil {
-		return errors.New("Secret is nil")
-	}
-	if s.GitHubAppPrivateKey == "" {
-		return errors.New("GitHubAppPrivateKey is required")
-	}
-	if s.WebhookSecret == "" {
-		return errors.New("WebhookSecret is required")
-	}
-	return nil
-}
-
-func (sm *SecretsManager) Get(ctx context.Context, req *secretmanagerpb.AccessSecretVersionRequest) (*Secret, error) {
+func (sm *SecretsManager) Get(ctx context.Context, req *secretmanagerpb.AccessSecretVersionRequest) (*secret.Secret, error) {
 	resp, err := sm.client.AccessSecretVersion(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("access secret version: %w", err)
@@ -49,14 +32,14 @@ func (sm *SecretsManager) Get(ctx context.Context, req *secretmanagerpb.AccessSe
 	if data == nil {
 		return nil, errors.New("secret payload data is nil")
 	}
-	var secret Secret
+	var secret secret.Secret
 	if err := json.Unmarshal(data, &secret); err != nil {
 		return nil, fmt.Errorf("unmarshal secret as JSON: %w", err)
 	}
 	return &secret, nil
 }
 
-func readSecret(ctx context.Context, secretID string) (*Secret, error) {
+func readSecret(ctx context.Context, secretID string) (*secret.Secret, error) {
 	sm, err := newSecretManager(ctx)
 	if err != nil {
 		return nil, err
