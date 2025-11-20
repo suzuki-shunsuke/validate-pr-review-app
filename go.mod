@@ -10,7 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.39.13
 	github.com/bradleyfalzon/ghinstallation/v2 v2.17.0
 	github.com/google/go-cmp v0.7.0
-	github.com/google/go-github/v78 v78.0.0
+	github.com/google/go-github/v79 v79.0.0
 	github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
 	github.com/suzuki-shunsuke/gen-go-jsonschema v0.1.0
 	github.com/suzuki-shunsuke/go-retryablehttp v0.7.8-2
