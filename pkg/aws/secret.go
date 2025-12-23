@@ -3,12 +3,12 @@ package aws
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/secret"
 )
 
 type SecretsManager struct {
@@ -24,25 +24,7 @@ func NewSecretsManager(config aws.Config) *SecretsManager {
 	return &SecretsManager{client: client}
 }
 
-type Secret struct {
-	GitHubAppPrivateKey string `json:"github_app_private_key"`
-	WebhookSecret       string `json:"webhook_secret"`
-}
-
-func (s *Secret) Validate() error {
-	if s == nil {
-		return errors.New("Secret is nil")
-	}
-	if s.GitHubAppPrivateKey == "" {
-		return errors.New("GitHubAppPrivateKey is required")
-	}
-	if s.WebhookSecret == "" {
-		return errors.New("WebhookSecret is required")
-	}
-	return nil
-}
-
-func (sm *SecretsManager) Get(ctx context.Context, input *secretsmanager.GetSecretValueInput) (*Secret, error) {
+func (sm *SecretsManager) Get(ctx context.Context, input *secretsmanager.GetSecretValueInput) (*secret.Secret, error) {
 	// config, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
 	// if err != nil {
 	// 	log.Fatal(err)
@@ -54,14 +36,14 @@ func (sm *SecretsManager) Get(ctx context.Context, input *secretsmanager.GetSecr
 	if err != nil {
 		return nil, fmt.Errorf("get secret value from AWS Secrets Manager: %w", err)
 	}
-	secret := &Secret{}
+	secret := &secret.Secret{}
 	if err := json.Unmarshal([]byte(*result.SecretString), secret); err != nil {
 		return nil, fmt.Errorf("unmarshal the secret as JSON: %w", err)
 	}
 	return secret, nil
 }
 
-func readSecret(ctx context.Context, secretID string) (*Secret, error) {
+func readSecret(ctx context.Context, secretID string) (*secret.Secret, error) {
 	// Read AWS config
 	config, err := NewConfig(ctx)
 	if err != nil {
