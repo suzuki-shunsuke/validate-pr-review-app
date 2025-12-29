@@ -39,7 +39,7 @@ func (sm *SecretsManager) Get(ctx context.Context, req *secretmanagerpb.AccessSe
 	return &secret, nil
 }
 
-func readSecret(ctx context.Context, secretID string) (*secret.Secret, error) {
+func ReadSecret(ctx context.Context, secretID string) (*secret.Secret, error) {
 	sm, err := newSecretManager(ctx)
 	if err != nil {
 		return nil, err

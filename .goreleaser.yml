@@ -3,37 +3,19 @@
 version: 2
 project_name: validate-pr-review-app
 archives:
-  - id: lambda
-    name_template: "{{.ProjectName}}_lambda_{{.Os}}_{{.Arch}}"
+  - id: app
+    name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
     formats: ["zip"]
     ids:
-      - lambda
-    files:
-      - LICENSE
-      - README.md
-      - third_party_licenses/**/*
-  - id: server
-    name_template: "{{.ProjectName}}_server_{{.Os}}_{{.Arch}}"
-    formats: ["tar.gz"]
-    ids:
-      - server
+      - app
     files:
       - LICENSE
       - README.md
       - third_party_licenses/**/*
 builds:
-  - id: lambda
+  - id: app
     binary: bootstrap
-    main: cmd/lambda/main.go
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-    goarch:
-      - arm64
-  - id: server
-    binary: validate-pr-review-app
-    main: cmd/server/main.go
+    main: cmd/app/main.go
     env:
       - CGO_ENABLED=0
     goos:

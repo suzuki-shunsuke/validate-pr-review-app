@@ -43,7 +43,7 @@ func (sm *SecretsManager) Get(ctx context.Context, input *secretsmanager.GetSecr
 	return secret, nil
 }
 
-func readSecret(ctx context.Context, secretID string) (*secret.Secret, error) {
+func ReadSecret(ctx context.Context, secretID string) (*secret.Secret, error) {
 	// Read AWS config
 	config, err := NewConfig(ctx)
 	if err != nil {

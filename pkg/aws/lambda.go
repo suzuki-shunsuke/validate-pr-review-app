@@ -39,7 +39,7 @@ func NewHandler(ctx context.Context, logger *slog.Logger, version string, logLev
 	}
 
 	// read secrets from AWS SecretsManager
-	secret, err := readSecret(ctx, cfg.AWS.SecretID)
+	secret, err := ReadSecret(ctx, cfg.AWS.SecretID)
 	if err != nil {
 		return nil, fmt.Errorf("get secret from AWS Secrets Manager: %w", err)
 	}

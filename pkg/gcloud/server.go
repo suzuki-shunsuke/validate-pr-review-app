@@ -20,7 +20,7 @@ func New(ctx context.Context, logger *slog.Logger, version string, logLevel *slo
 		return nil, fmt.Errorf("set log level: %w", err)
 	}
 
-	secret, err := readSecret(ctx, cfg.GoogleCloud.SecretName)
+	secret, err := ReadSecret(ctx, cfg.GoogleCloud.SecretName)
 	if err != nil {
 		return nil, fmt.Errorf("get secret from Google Cloud SecretManager: %w", err)
 	}
