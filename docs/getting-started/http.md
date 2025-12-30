@@ -54,7 +54,7 @@ docker run --rm -d -p 8080:8080 \
 [See also the GitHub Document `Handling webhook deliveries`](https://docs.github.com/en/webhooks/using-webhooks/handling-webhook-deliveries)
 
 ```sh
-smee -u <Webhook Proxy URL> -p 8000
+smee -u <Webhook Proxy URL> -p 8000 --path /webhook
 ```
 
 7. Create pull requests and reviews
