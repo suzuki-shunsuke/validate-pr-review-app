@@ -105,15 +105,6 @@ While GitHub Actions-based validation works for small projects, it doesn’t sca
 This app supports [Merge Queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue).
 Additional settings aren't necessary.
 
-## Verification
-
-1. [Verify Release Assets](docs/verify-asset.md)
-1. [Verify Container Images](docs/verify-image.md)
-
-## GitHub App Settings
-
-[Please see here](docs/github-app.md)
-
 ## Trusted vs. Untrusted Users and GitHub Apps
 
 - **Trusted Apps & Users**: properly managed, cannot be abused.
@@ -154,6 +145,14 @@ Here are some available Actions:
   - If a reviewer updates a branch from the GitHub Web UI, another reviewer’s approval is required to prevent self-approval. With Update Branch Action, the branch is updated securely using a GitHub App.
 
 By registering the Apps or Machine Users used with CSM Actions in `trusted_apps` or `untrusted_machine_users`, you can achieve automatic code fixes and auto-merge without additional PR reviews.
+
+## See Also
+
+- [Verify Release Assets](docs/verify-asset.md)
+- [Verify Container Images](docs/verify-image.md)
+- [GitHub App Settings](docs/github-app.md)
+- [Configuration](docs/config.md)
+- [Logging, Monitoring, and Security](docs/production.md)
 
 ## License
 
