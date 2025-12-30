@@ -100,6 +100,67 @@ Furthermore, it can run as the HTTP server anywhere.
 
 ## Getting Started
 
+### Run HTTP Server in your localhost and receives webhook via smee.io
+
+Requirements:
+
+- Git
+- Docker
+
+1. Checkout the repository
+
+```sh
+git clone https://github.com/suzuki-shunsuke/validate-pr-review-app
+```
+
+```sh
+cd validate-pr-review-app/example
+```
+
+2. Pull Docker Image
+
+```
+VERSION=v0.1.0-0
+```
+
+```sh
+docker pull "ghcr.io/suzuki-shunsuke/validate-pr-review-app:$VERSION"
+```
+
+3. [Create a GitHub App](#github-app-settings)
+4. Prepare config.yaml and secret.yaml
+    1. [config.yaml](#non-secret-config)
+    2. [secret.yaml](#secrets)
+
+```sh
+cp config.yaml.tmpl config.yaml
+cp secret.yaml.tmpl secret.yaml
+vi config.yaml
+vi secret.yaml
+```
+
+5. Run the server
+
+```sh
+docker run --rm -d -p 8080:8080 \
+  -v "$PWD:/workspace" \
+  -e "CONFIG_FILE=/workspace/config.yaml" \
+  -e "SECRET_FILE=/workspace/secret.yaml" \
+  "ghcr.io/suzuki-shunsuke/validate-pr-review-app:$VERSION"
+```
+
+6. Receive GitHub Webhook using [smee.io](https://smee.io/)
+
+[See also the GitHub Document `Handling webhook deliveries`](https://docs.github.com/en/webhooks/using-webhooks/handling-webhook-deliveries)
+
+```sh
+smee -u <Webhook Proxy URL> -p 8000
+```
+
+7. Create pull requests and reviews
+
+### AWS Lambda
+
 Deploying the app to AWS Lambda using Terraform.
 
 Requirements:
@@ -130,25 +191,11 @@ cd validate-pr-review-app/terraform/aws
 bash init.sh
 ```
 
-4. [Registering a GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app)
+4. [Registering a GitHub App](#github-app-settings)
 
-- Deactivate Webhook for now. We'll enable this after deploying the AWS Lambda Function.
-- Permissions:
-  - Checks: Read and write
-  - Contents: Read-only
-  - Pull requests: Read-only
-- `Where can this GitHub App be installed?` > `Only on this account`
+Deactivate Webhook for now. We'll enable this after deploying the AWS Lambda Function.
 
-After registering the app, you can get the app id from the setting page.
-Please add it to config.yaml.
-
-```yaml
-app_id: 0123456
-```
-
-5. [Generate a Private Key of the GitHub App.](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps)
-
-6. Add the private key to [secret.yaml](terraform/aws/secret.yaml.tmpl) and remove the downloaded private key file.
+5. Add the private key to [secret.yaml](terraform/aws/secret.yaml.tmpl) and remove the downloaded private key file.
 
 secret.yaml
 
@@ -162,13 +209,6 @@ github_app_private_key: |
 
 Please install the app to your repository.
 [If you don't have any repository for this, please create a repository.](https://github.com/new)
-
-After installing the app, you can get the installation id from URL.
-Please add it to config.yaml.
-
-```yaml
-installation_id: 01234567
-```
 
 8. [Create a secret token](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries) and add it to secret.yaml
 
@@ -254,7 +294,7 @@ terraform destroy
 - Uninstall the GitHub App from the repository
 - Delete the GitHub App
 
-## Using Amazon API Gateway instead of Lambda Function URL
+#### Using Amazon API Gateway instead of Lambda Function URL
 
 Amazon API Gateway is also available instead of Lambda Function URL.
 ref. [Select a method to invoke your Lambda function using an HTTP request](https://docs.aws.amazon.com/lambda/latest/dg/furls-http-invoke-decision.html).
@@ -271,6 +311,40 @@ aws:
 
 This app supports [Merge Queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue).
 Additional settings aren't necessary.
+
+## Verification
+
+1. [Verify Release Assets](docs/verify-asset.md)
+1. [Verify Container Images](docs/verify-image.md)
+
+## GitHub App Settings
+
+[Registering a GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app)
+
+- Enable Webhook
+- Permissions:
+  - Checks: Read and write
+  - Contents: Read-only
+  - Pull requests: Read-only
+- `Where can this GitHub App be installed?` > `Only on this account`
+- Install apps into repositories
+- [Create a private key](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps)
+- Subscribe Events
+  - Pull request review
+
+After registering the app, you can get the app id from the setting page.
+Please add it to config.yaml.
+
+```yaml
+app_id: 0123456
+```
+
+After installing the app, you can get the installation id from URL.
+Please add it to config.yaml.
+
+```yaml
+installation_id: 01234567
+```
 
 ## Configuration
 
@@ -313,7 +387,7 @@ github_app_private_key: |
   ...
 ```
 
-#### JSON Schema
+### JSON Schema
 
 [json-schema/config.json](json-schema/config.json)
 
@@ -323,7 +397,7 @@ You can validate your config using JSON Schema and tools such as [ajv-cli](https
 ajv --spec=draft2020 -s json-schema/config.json -d config.yaml
 ```
 
-##### Input Complementation by YAML Language Server
+#### Input Complementation by YAML Language Server
 
 [Please see the comment too.](https://github.com/szksh-lab/.github/issues/67#issuecomment-2564960491)
 
