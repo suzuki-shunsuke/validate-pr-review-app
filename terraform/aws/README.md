@@ -51,7 +51,7 @@ No modules.
 | <a name="input_lambda_role_name"></a> [lambda\_role\_name](#input\_lambda\_role\_name) | Lambda Role Name | `string` | `"validate-pr-review-app"` | no |
 | <a name="input_lambda_role_path"></a> [lambda\_role\_path](#input\_lambda\_role\_path) | Lambda Role Path | `string` | `"/service-role/"` | no |
 | <a name="input_secretsmanager_secret_name_main"></a> [secretsmanager\_secret\_name\_main](#input\_secretsmanager\_secret\_name\_main) | n/a | `string` | `"validate-pr-review-app"` | no |
-| <a name="input_zip_path"></a> [zip\_path](#input\_zip\_path) | Lambda Zip File Path | `string` | `"validate-pr-review-app_lambda_linux_arm64.zip"` | no |
+| <a name="input_zip_path"></a> [zip\_path](#input\_zip\_path) | Lambda Zip File Path | `string` | `"validate-pr-review-app_linux_arm64.zip"` | no |
 
 ## Outputs
 
