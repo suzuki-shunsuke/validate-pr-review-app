@@ -20,7 +20,8 @@ const (
 
 func (h *Server) Start(ctx context.Context) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", h.Run)
+	mux.HandleFunc("/webhook", h.Run)
+	mux.HandleFunc("/ready", ready)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
@@ -48,6 +49,11 @@ func (h *Server) Start(ctx context.Context) {
 		slogerr.WithError(h.logger, err).Error("shutdown failed")
 	}
 	h.logger.Info("server exited")
+}
+
+func ready(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(`{"status": "ok"}`))
 }
 
 func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
