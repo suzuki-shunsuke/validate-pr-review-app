@@ -1,0 +1,10 @@
+defaultPlatforms:
+  - linux/amd64
+  - linux/arm64
+builds:
+  - id: app
+    main: ./cmd/app
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -X main.version={{.Env.VERSION}}
