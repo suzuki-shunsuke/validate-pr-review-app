@@ -26,7 +26,7 @@ type Controller interface {
 	Run(ctx context.Context, logger *slog.Logger, req *controller.Request) error
 }
 
-func NewHandler(ctx context.Context, logger *slog.Logger, version string, cfg *config.Config, s *secret.Secret) (*Handler, error) {
+func NewHandler(logger *slog.Logger, version string, cfg *config.Config, s *secret.Secret) (*Handler, error) {
 	ctrl, err := controller.New(&controller.InputNew{
 		Config:              cfg,
 		Version:             version,

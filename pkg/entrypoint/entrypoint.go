@@ -28,7 +28,7 @@ func Run(ctx context.Context, logger *slog.Logger, logLevel *slog.LevelVar, getE
 
 	if getEnv("AWS_LAMBDA_FUNCTION_NAME") != "" {
 		// lambda
-		handler, err := aws.NewHandler(ctx, logger, version, cfg, s)
+		handler, err := aws.NewHandler(logger, version, cfg, s)
 		if err != nil {
 			return fmt.Errorf("create a new handler: %w", err)
 		}
