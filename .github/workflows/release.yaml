@@ -32,8 +32,8 @@ jobs:
       - run: ko version
         env:
           AQUA_GITHUB_TOKEN: ${{ github.token }}
-      - run: echo KO_DOCKER_REPO=ghcr.io/${GITHUB_REPOSITORY} >> "$GITHUB_ENV"
       - run: ko build ./cmd/app --bare -t "$VERSION"
         env:
+          KO_DOCKER_REPO: ghcr.io/${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
           VERSION: ${{ github.ref_name }}
