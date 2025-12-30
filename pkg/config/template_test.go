@@ -175,7 +175,7 @@ Trusted Machine Users: Nothing
 			template: "require_two_approvals",
 			wantText: `This pull request requires two approvals because:
 
-` + "`foo`" + ` approved this pull request, but it's a self-approval.
+` + "`foo` approved this pull request, but it's a self-approval. `foo` pushes commits to this pull request." + `
 
 The following commits are untrusted, so two approvals are required.
 

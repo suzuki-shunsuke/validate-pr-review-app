@@ -17,7 +17,7 @@ variable "lambda_architecture" {
 variable "zip_path" {
   type        = string
   description = "Lambda Zip File Path"
-  default     = "validate-pr-review-app_lambda_linux_arm64.zip"
+  default     = "validate-pr-review-app_linux_arm64.zip"
 }
 
 variable "function_name" {

@@ -1,4 +1,4 @@
-package gcloud
+package server
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/controller"
 )
@@ -17,9 +18,10 @@ const (
 	defaultPort       = "8080"
 )
 
-func (h *Handler) Start(ctx context.Context) {
+func (h *Server) Start(ctx context.Context) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", h.Run)
+	mux.HandleFunc("/webhook", h.Run)
+	mux.HandleFunc("/ready", ready)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
@@ -49,7 +51,12 @@ func (h *Handler) Start(ctx context.Context) {
 	h.logger.Info("server exited")
 }
 
-func (h *Handler) Run(w http.ResponseWriter, r *http.Request) {
+func ready(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(`{"status": "ok"}`))
+}
+
+func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 	logger, requestID := h.newLogger(r)
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -66,12 +73,23 @@ func (h *Handler) Run(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) newLogger(r *http.Request) (*slog.Logger, string) {
+func (h *Server) getRequestID(r *http.Request) string {
+	header := os.Getenv("REQUEST_ID_HEADER")
+	if header == "" {
+		header = "X-Cloud-Trace-Context"
+	}
+	if requestID := r.Header.Get(header); requestID != "" {
+		return requestID
+	}
+	return uuid.New().String()
+}
+
+func (h *Server) newLogger(r *http.Request) (*slog.Logger, string) {
 	logger := h.logger
-	if requestID := r.Header.Get("X-Cloud-Trace-Context"); requestID != "" {
+	if requestID := h.getRequestID(r); requestID != "" {
 		return logger.With("request_id", requestID), requestID
 	}
-	logger.Warn("X-Cloud-Trace-Context header is not set")
+	logger.Debug("the request header is not set")
 	return logger, ""
 }
 

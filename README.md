@@ -1,5 +1,7 @@
 # Validate PR Review App
 
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-suzuki--shunsuke%2Fvalidate--pr--review--app-blue.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAyCAYAAAAnWDnqAAAAAXNSR0IArs4c6QAAA05JREFUaEPtmUtyEzEQhtWTQyQLHNak2AB7ZnyXZMEjXMGeK/AIi+QuHrMnbChYY7MIh8g01fJoopFb0uhhEqqcbWTp06/uv1saEDv4O3n3dV60RfP947Mm9/SQc0ICFQgzfc4CYZoTPAswgSJCCUJUnAAoRHOAUOcATwbmVLWdGoH//PB8mnKqScAhsD0kYP3j/Yt5LPQe2KvcXmGvRHcDnpxfL2zOYJ1mFwrryWTz0advv1Ut4CJgf5uhDuDj5eUcAUoahrdY/56ebRWeraTjMt/00Sh3UDtjgHtQNHwcRGOC98BJEAEymycmYcWwOprTgcB6VZ5JK5TAJ+fXGLBm3FDAmn6oPPjR4rKCAoJCal2eAiQp2x0vxTPB3ALO2CRkwmDy5WohzBDwSEFKRwPbknEggCPB/imwrycgxX2NzoMCHhPkDwqYMr9tRcP5qNrMZHkVnOjRMWwLCcr8ohBVb1OMjxLwGCvjTikrsBOiA6fNyCrm8V1rP93iVPpwaE+gO0SsWmPiXB+jikdf6SizrT5qKasx5j8ABbHpFTx+vFXp9EnYQmLx02h1QTTrl6eDqxLnGjporxl3NL3agEvXdT0WmEost648sQOYAeJS9Q7bfUVoMGnjo4AZdUMQku50McDcMWcBPvr0SzbTAFDfvJqwLzgxwATnCgnp4wDl6Aa+Ax283gghmj+vj7feE2KBBRMW3FzOpLOADl0Isb5587h/U4gGvkt5v60Z1VLG8BhYjbzRwyQZemwAd6cCR5/XFWLYZRIMpX39AR0tjaGGiGzLVyhse5C9RKC6ai42ppWPKiBagOvaYk8lO7DajerabOZP46Lby5wKjw1HCRx7p9sVMOWGzb/vA1hwiWc6jm3MvQDTogQkiqIhJV0nBQBTU+3okKCFDy9WwferkHjtxib7t3xIUQtHxnIwtx4mpg26/HfwVNVDb4oI9RHmx5WGelRVlrtiw43zboCLaxv46AZeB3IlTkwouebTr1y2NjSpHz68WNFjHvupy3q8TFn3Hos2IAk4Ju5dCo8B3wP7VPr/FGaKiG+T+v+TQqIrOqMTL1VdWV1DdmcbO8KXBz6esmYWYKPwDL5b5FA1a0hwapHiom0r/cKaoqr+27/XcrS5UwSMbQAAAABJRU5ErkJggg==)](https://deepwiki.com/suzuki-shunsuke/validate-pr-review-app)
+
 Validate PR Review App is a self-hosted GitHub App that validates Pull Request reviews.
 It helps organizations improve governance and security by ensuring PRs cannot be merged without proper approvals while keeping developer experience.
 
@@ -88,286 +90,20 @@ While GitHub Actions-based validation works for small projects, it doesn’t sca
 
 ## Supported Platforms
 
-Now only AWS Lambda is supported.
+- AWS Lambda
+  - Function URL
+  - Amazon API Gateway
+- HTTP Server
 
 ## Getting Started
 
-Deploying the app to AWS Lambda using Terraform.
-
-Requirements:
-
-- AWS Account
-- Terraform
-- Git
-- bash
-- GitHub CLI
-- GitHub Repository where the app is installed.
-  - A pull request you haven't pushed any commit is necessary
-
-1. Checkout the repository
-
-```sh
-git clone https://github.com/suzuki-shunsuke/validate-pr-review-app
-```
-
-2. Move to [terraform/aws](terraform/aws).
-
-```sh
-cd validate-pr-review-app/terraform/aws
-```
-
-3. Run `bash init.sh`
-
-```sh
-bash init.sh
-```
-
-4. [Registering a GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app)
-
-- Deactivate Webhook for now. We'll enable this after deploying the AWS Lambda Function.
-- Permissions:
-  - Checks: Read and write
-  - Contents: Read-only
-  - Pull requests: Read-only
-- `Where can this GitHub App be installed?` > `Only on this account`
-
-After registering the app, you can get the app id from the setting page.
-Please add it to config.yaml.
-
-```yaml
-app_id: 0123456
-```
-
-5. [Generate a Private Key of the GitHub App.](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps)
-
-6. Add the private key to [secret.yaml](terraform/aws/secret.yaml.tmpl) and remove the downloaded private key file.
-
-secret.yaml
-
-```yaml
-github_app_private_key: |
-  -----BEGIN RSA PRIVATE KEY-----
-  ...
-```
-
-7. [Install the app to your repository](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app)
-
-Please install the app to your repository.
-[If you don't have any repository for this, please create a repository.](https://github.com/new)
-
-After installing the app, you can get the installation id from URL.
-Please add it to config.yaml.
-
-```yaml
-installation_id: 01234567
-```
-
-8. [Create a secret token](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries) and add it to secret.yaml
-
-secret.yaml
-
-```yaml
-webhook_secret: 0123456789abcdefghijklmn
-github_app_private_key: |
-  -----BEGIN RSA PRIVATE KEY-----
-  ...
-```
-
-9. Deploy the app by Terraform
-
-(Optional) If you want to change input variables, please check [variables.tf](terraform/aws/variables.tf) and create a file `terraform.tfvars`.
-
-e.g.
-
-```
-region = "ap-northeast-1" # Default: us-east-1
-```
-
-Then running Terraform commands.
-
-```sh
-terraform init
-terraform validate
-terraform plan
-terraform apply
-```
-
-10. [Configure Webhook](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/using-webhooks-with-github-apps)
-
-You can check the webhook URL by `terraform state show`.
-
-```console
-$ terraform state show aws_lambda_function_url.main
-# aws_lambda_function_url.main:
-resource "aws_lambda_function_url" "main" {
-    # ...
-    function_url       = "https://abcdefghijklmnopqrstuvwxyz012345.lambda-url.us-east-1.on.aws/"
-    # ...
-}
-```
-
-- Set the Lambda Function URL to the webhook URL
-- Set the secret token to the webhook secret
-
-Please don't forget to click `Save changes`.
-
-11. Subscribe Events for GitHub App
-
-Checks the following events.
-
-- Pull request review
-
-And click `Save changes`.
-
-If the button `Save changes` is disabled and you can't clike `Save changes`, please try to change any permission and revert the change.
-
-The setup was done.
-You can create reviews and try the app.
-Please prepare a pull request that you haven't pushed any commit.
-
-12. Approve a pull request
-
-Then the check passes.
-
-If the app doesn't work, please check the AWS CloudWatch Log to check if the request reached to the AWS Lambda.
-
-13. Dismiss the review.
-
-Then the check fails.
-
-14. Clean up
-
-You can destroy resources by `terraform destroy`.
-
-```sh
-terraform destroy
-```
-
-- Uninstall the GitHub App from the repository
-- Delete the GitHub App
-
-## Using Amazon API Gateway instead of Lambda Function URL
-
-Amazon API Gateway is also available instead of Lambda Function URL.
-ref. [Select a method to invoke your Lambda function using an HTTP request](https://docs.aws.amazon.com/lambda/latest/dg/furls-http-invoke-decision.html).
-
-Remove `use_lambda_function_url` from [config.yaml](terraform/aws/config.yaml.tmpl).
-
-```yaml
-aws:
-  secret_id: validate-pr-review-app
-  # use_lambda_function_url: true
-```
+- [Run HTTP Server in your localhost](docs/getting-started/http.md)
+- [AWS Lambda](docs/getting-started/lambda.md)
 
 ## Merge Queue Support
 
 This app supports [Merge Queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue).
 Additional settings aren't necessary.
-
-## Configuration
-
-Configuration consists of **secrets** and **non-secrets**.
-
-### Secrets
-
-- `webhook_secret`
-- `github_app_private_key`
-
-> [!WARNING]
-> When using AWS Secrets Manager Web UI, multi-line values are not supported.
-> You should convert the private key and webhook secret into JSON before storing.
-
-### Non Secret Config
-
-You can configure AWS Lambda Function by environment variable `CONFIG`.
-`CONFIG` is a YAML string.
-
-#### JSON Schema
-
-[json-schema/config.json](json-schema/config.json)
-
-You can validate your config using JSON Schema and tools such as [ajv-cli](https://ajv.js.org/packages/ajv-cli.html).
-
-```sh
-ajv --spec=draft2020 -s json-schema/config.json -d config.yaml
-```
-
-##### Input Complementation by YAML Language Server
-
-[Please see the comment too.](https://github.com/szksh-lab/.github/issues/67#issuecomment-2564960491)
-
-Version: `main`
-
-```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/validate-pr-review-app/main/json-schema/config.json
-```
-
-Or pinning version:
-
-```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/validate-pr-review-app/v0.0.1/json-schema/config.json
-```
-
-### Example Config
-
-> [!WARNING]
-> Please remove `[bot]` from each app name of `trusted_apps`
-> :o: `dependabot`
-> :x: `dependabot[bot]`
-
-```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/validate-pr-review-app/main/json-schema/config.json
-# Required
-app_id: 0000 # GitHub App ID
-installation_id: 00000000 # GitHub App Installation ID
-aws:
-  secret_id: request-pr-review-app # Secret ID in AWS Secrets Manager
-  use_lambda_function_url: true # Optional. true when using Lambda Function URL. Default: false
-
-# Optional
-check_name: check-approval # Optional. Default: validate-review
-log_level: info # debug, info, warn, error. Default: info
-trust:
-  trusted_apps:
-    - renovate
-    - dependabot
-  untrusted_machine_users:
-    - "*-bot"
-    - octocat
-  trusted_machine_users:
-    - suzuki-shunsuke-bot
-repositories:
-  # Repository specific config
-  # Override the root config
-  # Only the first element matching the repository is used
-  # If no element matches, the root config is used
-  - repositories:
-      # Glob pattern matching repository full names
-      - suzuki-shunsuke/*
-    trust:
-      untrusted_machine_users:
-        - "*-bot"
-        - bot-*
-```
-
-### :bulb: Customize footer
-
-You can customize the footer of this app's Checks tab.
-
-The default is: [footer.md](pkg/config/templates/footer.md)
-
-For example, you can add the guide for developers:
-
-```yaml
-templates:
-  footer: |
-    ---
-
-    For more details, see the [document](https://example.com).
-    If you have any questions, please contact the security team.
-```
-
-This template is rendered with [Go's html/template](https://pkg.go.dev/html/template).
 
 ## Trusted vs. Untrusted Users and GitHub Apps
 
@@ -410,51 +146,13 @@ Here are some available Actions:
 
 By registering the Apps or Machine Users used with CSM Actions in `trusted_apps` or `untrusted_machine_users`, you can achieve automatic code fixes and auto-merge without additional PR reviews.
 
-## Logging, Monitoring, Security, etc
+## See Also
 
-Please see the following documents:
-
-- AWS Lambda
-  - [Sending Lambda function logs to CloudWatch Logs](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html)
-  - [Monitoring, debugging, and troubleshooting Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/lambda-monitoring.html)
-- GitHub App
-  - [Validating webhook deliveries](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries)
-
-The log format of Validate PR Review App is the JSON format.
-The log has the log level like `INFO`, `WARN`, and `ERROR`, so you can send alerts based on the log level.
-
-<details>
-<summary>Example Log</summary>
-
-```json
-{
-    "time": "2025-09-25T19:49:28.295812986Z",
-    "level": "INFO",
-    "msg": "Fetched a pull request",
-    "version": "",
-    "pull_request": {
-        "sha": "e21cc0e643655273c71f1d14e3f42ee14c2c6721",
-        "approvers": {
-            "suzuki-shunsuke": {}
-        },
-        "commits": [
-            {
-                "oid": "25031c1e9c20594e0dc4569e193ad3f45de0ade1",
-                "committer": {
-                    "login": "renovate[bot]",
-                    "is_app": true
-                },
-                "signature": {
-                    "isValid": true,
-                    "state": "VALID"
-                }
-            }
-        ]
-    }
-}
-```
-
-</details>
+- [Verify Release Assets](docs/verify-asset.md)
+- [Verify Container Images](docs/verify-image.md)
+- [GitHub App Settings](docs/github-app.md)
+- [Configuration](docs/config.md)
+- [Logging, Monitoring, and Security](docs/production.md)
 
 ## License
 

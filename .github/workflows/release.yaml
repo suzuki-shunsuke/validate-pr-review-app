@@ -9,10 +9,45 @@ jobs:
     uses: suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@4db55f2aeaca166b2655fa4a80658df1050dc203 # v7.0.0
     with:
       go-version-file: go.mod
-      aqua_version: v2.55.3
-      go_licenses_package: ./cmd/lambda
+      aqua_version: v2.56.1
+      go_licenses_package: ./cmd/app
     permissions:
       contents: write
       id-token: write
       actions: read
       attestations: write
+
+  release-image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - uses: aquaproj/aqua-installer@11dd79b4e498d471a9385aa9fb7f62bb5f52a73c # v4.0.4
+        with:
+          aqua_version: v2.56.1
+
+      - run: ko version
+        env:
+          AQUA_GITHUB_TOKEN: ${{ github.token }}
+      - run: cosign version
+        env:
+          AQUA_GITHUB_TOKEN: ${{ github.token }}
+
+      - run: echo "KO_DOCKER_REPO=ghcr.io/${GITHUB_REPOSITORY}" >> "$GITHUB_ENV"
+      - run: ko build ./cmd/app --bare -t "$GITHUB_REF_NAME"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - run: docker pull "$KO_DOCKER_REPO:$GITHUB_REF_NAME"
+      - run: |
+          digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$KO_DOCKER_REPO:$GITHUB_REF_NAME")
+          echo "IMAGE_DIGEST=$digest" >> "$GITHUB_ENV"
+      - run: echo "$GITHUB_TOKEN" | docker login ghcr.io -u "dummy" --password-stdin
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: cosign sign "$IMAGE_DIGEST"

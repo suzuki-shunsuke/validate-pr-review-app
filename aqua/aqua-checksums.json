@@ -1,28 +1,28 @@
 {
   "checksums": [
     {
-      "id": "github_release/github.com/anchore/syft/v1.38.0/syft_1.38.0_darwin_amd64.tar.gz",
-      "checksum": "909FBA8522094679D68111884E8EBCA91A22078F20A0B102EA14ABFED5F7A98C",
+      "id": "github_release/github.com/anchore/syft/v1.39.0/syft_1.39.0_darwin_amd64.tar.gz",
+      "checksum": "EF28D9A8B09070EC2B04E1E97240EEBC66C4E6E78433757A8943CD4867476AF6",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/anchore/syft/v1.38.0/syft_1.38.0_darwin_arm64.tar.gz",
-      "checksum": "E2A02CF6786E420D8FA7D7907DAC86F59ECC011C014B08EF521E8ED4F4ED2CDA",
+      "id": "github_release/github.com/anchore/syft/v1.39.0/syft_1.39.0_darwin_arm64.tar.gz",
+      "checksum": "FE99F5D9D76C48752A53C3E5F3D4044652623DAA623C0DA4B1B501BF4FC6CDE2",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/anchore/syft/v1.38.0/syft_1.38.0_linux_amd64.tar.gz",
-      "checksum": "BC664DEBB00DB1B9B4B9DAE4BA1A29D99621E33B641B94B78B9048374B812A3D",
+      "id": "github_release/github.com/anchore/syft/v1.39.0/syft_1.39.0_linux_amd64.tar.gz",
+      "checksum": "BB8F1BA8201D1CE0D99AB4F5243142629C1AFBA4DA97A7C4CA2DF97327F97190",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/anchore/syft/v1.38.0/syft_1.38.0_linux_arm64.tar.gz",
-      "checksum": "5E28D8E86592A0F269C3BAB153DE2901714382366ED783B26774A5146361E33A",
+      "id": "github_release/github.com/anchore/syft/v1.39.0/syft_1.39.0_linux_arm64.tar.gz",
+      "checksum": "7074B90CBF4FBB8416FEB6ACDEA7A310EFC2D155198D559AEAA691EDD5A8C2CA",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/anchore/syft/v1.38.0/syft_1.38.0_windows_amd64.zip",
-      "checksum": "11A3DE4C82B001DAE3B69E336F1B89391B676B3E74CEAD73790C97FF57445941",
+      "id": "github_release/github.com/anchore/syft/v1.39.0/syft_1.39.0_windows_amd64.zip",
+      "checksum": "FCF42129786C8F7520EE87204851C38438F68EEC20FE69313BEC5B43B0549914",
       "algorithm": "sha256"
     },
     {
@@ -81,28 +81,58 @@
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/goreleaser/goreleaser/v2.13.0/goreleaser_Darwin_all.tar.gz",
-      "checksum": "C2D2EDD02A7F8F6DF9EAE85A623F0094433272CECC3F1352EADFA698773728FE",
+      "id": "github_release/github.com/goreleaser/goreleaser/v2.13.2/goreleaser_Darwin_all.tar.gz",
+      "checksum": "D63BA9584B71A0FFDB0F66BDDCBE4DB5CA1F23EEF1000A63328E19E3ED71D91D",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/goreleaser/goreleaser/v2.13.0/goreleaser_Linux_arm64.tar.gz",
-      "checksum": "0BFDD03273757C8808502A967CEB59384301A6FC40C139609F7FE52D79E7881A",
+      "id": "github_release/github.com/goreleaser/goreleaser/v2.13.2/goreleaser_Linux_arm64.tar.gz",
+      "checksum": "81B59A932F6CB6632D29F334F890BD7A8414CB1B765451517A2E0B8DE523453D",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/goreleaser/goreleaser/v2.13.0/goreleaser_Linux_x86_64.tar.gz",
-      "checksum": "55FA78DCFD079B82ABEF068FE55A8D5610248923EA313AF1B1BEF768AA13FEB3",
+      "id": "github_release/github.com/goreleaser/goreleaser/v2.13.2/goreleaser_Linux_x86_64.tar.gz",
+      "checksum": "B38D8F8F9231EE52EEAC9BBD1E3441467A8B1A2E0AA7461F2B1E52B80CD5C62A",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/goreleaser/goreleaser/v2.13.0/goreleaser_Windows_arm64.zip",
-      "checksum": "BBAF2D4FCD7080E0C0A2BBA04080523318AEFC37AE8196D715B4374DF5B28E14",
+      "id": "github_release/github.com/goreleaser/goreleaser/v2.13.2/goreleaser_Windows_arm64.zip",
+      "checksum": "11F8F48EA75817F071AB8F2C66CF24A3218FCABBE4B6ADA029644548603A14C2",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/goreleaser/goreleaser/v2.13.0/goreleaser_Windows_x86_64.zip",
-      "checksum": "2C1A202ACC04D53C40ABA2AE38922F18CD9FC64F863A80CBB57D0A623FAC1B11",
+      "id": "github_release/github.com/goreleaser/goreleaser/v2.13.2/goreleaser_Windows_x86_64.zip",
+      "checksum": "105B8B760449D111775376580CE1B28BEF11AFAC5CB1B0FC4231113C52DAF06A",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/ko-build/ko/v0.18.1/ko_0.18.1_Darwin_arm64.tar.gz",
+      "checksum": "752A639E0FBC013A35A43974B5ED87E7008BC2AEE4952DFD2CC19F0013205492",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/ko-build/ko/v0.18.1/ko_0.18.1_Darwin_x86_64.tar.gz",
+      "checksum": "0E0DD8FDDBEFEBB8572ECE4DCA8F07A7472DE862FEDD7E9845FD9D651E0D5DBE",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/ko-build/ko/v0.18.1/ko_0.18.1_Linux_arm64.tar.gz",
+      "checksum": "9A26698876892128952FA3D038A4E99BEA961D0D225865C60474B79E3DB12E99",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/ko-build/ko/v0.18.1/ko_0.18.1_Linux_x86_64.tar.gz",
+      "checksum": "048AB11818089A43B7B74BC554494A79A3FD0D9822C061142E5CD3CF8B30CB27",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/ko-build/ko/v0.18.1/ko_0.18.1_Windows_arm64.tar.gz",
+      "checksum": "BCA8D4BFCE66988C55BCD93F2BEE798A9D1FAB283D4E28FAA8033D97AAA8AA8B",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/ko-build/ko/v0.18.1/ko_0.18.1_Windows_x86_64.tar.gz",
+      "checksum": "D15C5E391279A2222D4D659AC53047E08D70E21FEA54B2133F0A5C25A1F1F694",
       "algorithm": "sha256"
     },
     {
@@ -166,28 +196,28 @@
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/sigstore/cosign/v3.0.2/cosign-darwin-amd64",
-      "checksum": "0FC2B6F16B900ABDFDA3153B11FC435A8CBE3830E8E820FE8AD5FE4149A5B472",
+      "id": "github_release/github.com/sigstore/cosign/v3.0.3/cosign-darwin-amd64",
+      "checksum": "6C75981E85E081A73F0B4087F58E0AD5FD4712C71B37FA0B6AD774C1F965BAFA",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/sigstore/cosign/v3.0.2/cosign-darwin-arm64",
-      "checksum": "3823B044DE184DA21E300BC5E20DD29D3FA9243AF3BA70C4A5DA1712F3385D46",
+      "id": "github_release/github.com/sigstore/cosign/v3.0.3/cosign-darwin-arm64",
+      "checksum": "38349E45A8BB0D1ED3A7AFFB8BDD2E9D597CEE08B6800C395A926B4D9ADB84D2",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/sigstore/cosign/v3.0.2/cosign-linux-amd64",
-      "checksum": "46DBDCB5467A3DFEC2526923D0B3365E40C8D9DC00EC23D5ACA3437449E8CBFD",
+      "id": "github_release/github.com/sigstore/cosign/v3.0.3/cosign-linux-amd64",
+      "checksum": "052363A0E23E2E7ED53641351B8B420918E7E08F9C1D8A42A3DD3877A78A2E10",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/sigstore/cosign/v3.0.2/cosign-linux-arm64",
-      "checksum": "17FD784737CA54D7D8A343C82DA6C5D6DBDEE971E66644D923D1B057FB97D7ED",
+      "id": "github_release/github.com/sigstore/cosign/v3.0.3/cosign-linux-arm64",
+      "checksum": "81398231362031E3C7AFD6A7508C57049460CD7E02736F1EBE89A452102253E5",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/sigstore/cosign/v3.0.2/cosign-windows-amd64.exe",
-      "checksum": "7A137280D8686665CEB4D8565DF2A0AC63F28031E014CDCAE5D56891A6C8A400",
+      "id": "github_release/github.com/sigstore/cosign/v3.0.3/cosign-windows-amd64.exe",
+      "checksum": "2593655025B52B5B1C99E43464459B645A3ACBE5D4A5A9F3A766E77BEEC5A441",
       "algorithm": "sha256"
     },
     {
@@ -251,63 +281,63 @@
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.20.0/terraform-docs-v0.20.0-darwin-amd64.tar.gz",
-      "checksum": "8C7EA42429D7F5E3DAE3DE32F3873FDE0419332932549147F40916D3F613B8F7",
+      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.21.0/terraform-docs-v0.21.0-darwin-amd64.tar.gz",
+      "checksum": "DDF4B53925D857AE81210EBEDA32B429A17385D6E4561AB1972067A9CCB36873",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.20.0/terraform-docs-v0.20.0-darwin-arm64.tar.gz",
-      "checksum": "8723013CFE0369C389F4E6CB6E3CFCA1AEBAEFD67871E349E7547F2201564DAD",
+      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.21.0/terraform-docs-v0.21.0-darwin-arm64.tar.gz",
+      "checksum": "92D6988D8C59C25AA1724068F4BC2D0F01A9D4706077E258E946E944AD7EEE03",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.20.0/terraform-docs-v0.20.0-linux-amd64.tar.gz",
-      "checksum": "34AE01772412BB11474E6718EA62113E38FF5964EE570A98C69FAFE3A6DFF286",
+      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.21.0/terraform-docs-v0.21.0-linux-amd64.tar.gz",
+      "checksum": "2FDD81B8D21FF1498CD559AF0DCC5D155835F84600DB06D3923E217124FC735A",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.20.0/terraform-docs-v0.20.0-linux-arm64.tar.gz",
-      "checksum": "371B4ED983781D1EFDD8F7DE06264BAAC41B1D80927F7FD718C405A303D863A0",
+      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.21.0/terraform-docs-v0.21.0-linux-arm64.tar.gz",
+      "checksum": "35B2E6846268841484E6EEA7D00D7DFE2C94B4725E52CFE19AA6C26A86C32EDC",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.20.0/terraform-docs-v0.20.0-windows-amd64.zip",
-      "checksum": "FB372A26F934DC0E163CA914A5AA99FE13D094B1F64F937EFE9DC79BDDDF05A0",
+      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.21.0/terraform-docs-v0.21.0-windows-amd64.zip",
+      "checksum": "9F45957D50656EC91C6172D73A6C9E6A22DF2CCC7CA880CF288D19D6F5E349DB",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.20.0/terraform-docs-v0.20.0-windows-arm64.zip",
-      "checksum": "1E505EF48AAB1CE00F0F13EFF247AFECAEC57F79A0D7353AF101DE114DE2AAE3",
+      "id": "github_release/github.com/terraform-docs/terraform-docs/v0.21.0/terraform-docs-v0.21.0-windows-arm64.zip",
+      "checksum": "A9CA3577209B2C5F21A0D89AFDEE82E6AD912058D64C364B7A7535ABB57E3092",
       "algorithm": "sha256"
     },
     {
-      "id": "http/releases.hashicorp.com/terraform/1.14.1/terraform_1.14.1_darwin_amd64.zip",
-      "checksum": "7760332D860343F83D68EE96EC99EDFFC6A2E95281041AFFFC851CED5DF0F6F3",
+      "id": "http/releases.hashicorp.com/terraform/1.14.3/terraform_1.14.3_darwin_amd64.zip",
+      "checksum": "F88D0C3FF98ADD0E0288BFC1FE59DF15E7FB0302BDDEF6A7367F734EF213CD02",
       "algorithm": "sha256"
     },
     {
-      "id": "http/releases.hashicorp.com/terraform/1.14.1/terraform_1.14.1_darwin_arm64.zip",
-      "checksum": "4E98074E6B8A4B4F692780101D82CD9974C521E4CD6DEF4AB6299594619CDA53",
+      "id": "http/releases.hashicorp.com/terraform/1.14.3/terraform_1.14.3_darwin_arm64.zip",
+      "checksum": "C45E74C19F38EC7FCB55F74B9788A75A2CBB07DA45343B197AE4A41637E571B6",
       "algorithm": "sha256"
     },
     {
-      "id": "http/releases.hashicorp.com/terraform/1.14.1/terraform_1.14.1_linux_amd64.zip",
-      "checksum": "9F53070EE626DF9E157887C1D3F9AF3D8107A1B654371CD99040629EED698B27",
+      "id": "http/releases.hashicorp.com/terraform/1.14.3/terraform_1.14.3_linux_amd64.zip",
+      "checksum": "178B2A602251BB68B94732ACECA2CC1023D87597CB83DBA92CAB31B6689EDB4D",
       "algorithm": "sha256"
     },
     {
-      "id": "http/releases.hashicorp.com/terraform/1.14.1/terraform_1.14.1_linux_arm64.zip",
-      "checksum": "B2BB6AADA17E2954D6B6A6F1E615884CACFD94B3879D8B4644F80B1C5020AC75",
+      "id": "http/releases.hashicorp.com/terraform/1.14.3/terraform_1.14.3_linux_arm64.zip",
+      "checksum": "FB5B004070E5E438214A74DDCA321C22246F799E5CBE1EE9DF582528E953F8CC",
       "algorithm": "sha256"
     },
     {
-      "id": "http/releases.hashicorp.com/terraform/1.14.1/terraform_1.14.1_windows_amd64.zip",
-      "checksum": "D18488068D57115FD44A675F7D58DB8688C0E1BDC38AFFB0591C67EC6472E8A8",
+      "id": "http/releases.hashicorp.com/terraform/1.14.3/terraform_1.14.3_windows_amd64.zip",
+      "checksum": "7BDB1DFD8B3960ACA08B6CF3E47E64BE840582A3B6E396018B22126D517B0434",
       "algorithm": "sha256"
     },
     {
-      "id": "registries/github_content/github.com/aquaproj/aqua-registry/v4.445.0/registry.yaml",
-      "checksum": "AEC9F10EF0D8DD8CB3A3DC7AAC1655FF182432BDCB18811469B59C18E7316CC9BE6EB99DC850AA4E761B4570111DFD4439C46D24436A0ACF458EBD2ED6C058AE",
+      "id": "registries/github_content/github.com/aquaproj/aqua-registry/v4.450.0/registry.yaml",
+      "checksum": "1DE8704F453F7E6A31A437479DE6E66876121F14EC8B1F0C111FE0DF822CDE78C5233B41A827CCDC14E23B5995A1355239EA1C8774890AE452D678C819AF3CE7",
       "algorithm": "sha512"
     }
   ]

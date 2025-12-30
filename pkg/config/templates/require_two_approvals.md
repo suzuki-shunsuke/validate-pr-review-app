@@ -1,7 +1,7 @@
 This pull request requires two approvals because:
 
 {{if .SelfApprover -}}
-`{{.SelfApprover}}` approved this pull request, but it's a self-approval.
+`{{.SelfApprover}}` approved this pull request, but it's a self-approval. `{{.SelfApprover}}` pushes commits to this pull request.
 {{end}}
 {{if .UntrustedCommits -}}
 The following commits are untrusted, so two approvals are required.
