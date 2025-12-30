@@ -37,4 +37,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           VERSION: ${{ github.ref_name }}
-
