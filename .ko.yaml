@@ -7,4 +7,4 @@ builds:
     env:
       - CGO_ENABLED=0
     ldflags:
-      - -X main.version={{.Env.VERSION}}
+      - -X main.version={{.Env.GITHUB_REF_NAME}}

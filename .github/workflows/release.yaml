@@ -38,10 +38,9 @@ jobs:
           AQUA_GITHUB_TOKEN: ${{ github.token }}
 
       - run: echo "KO_DOCKER_REPO=ghcr.io/${GITHUB_REPOSITORY}" >> "$GITHUB_ENV"
-      - run: ko build ./cmd/app --bare -t "$VERSION"
+      - run: ko build ./cmd/app --bare -t "$GITHUB_REF_NAME"
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          VERSION: ${{ github.ref_name }}
 
       - run: docker pull "$KO_DOCKER_REPO:$GITHUB_REF_NAME"
       - run: |
