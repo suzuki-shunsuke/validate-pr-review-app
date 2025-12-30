@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"strings"
 
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
@@ -41,10 +42,15 @@ func (c *Config) initTemplates() error {
 			c.Templates[name] = tpl
 		}
 	}
-	var define string
+	var defineBuilder strings.Builder
 	for k, v := range c.Templates {
-		define += `{{define "` + k + `"}}` + v + "{{end}}"
+		defineBuilder.WriteString(`{{define "`)
+		defineBuilder.WriteString(k)
+		defineBuilder.WriteString(`"}}`)
+		defineBuilder.WriteString(v)
+		defineBuilder.WriteString("{{end}}")
 	}
+	define := defineBuilder.String()
 	keys := []string{
 		"no_approval",
 		"approved",

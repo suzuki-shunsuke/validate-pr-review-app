@@ -13,7 +13,7 @@ func (c *Client) GetPR(ctx context.Context, owner, name string, number int) (*Pu
 	variables := map[string]any{
 		"repoOwner": githubv4.String(owner),
 		"repoName":  githubv4.String(name),
-		"number":    githubv4.Int(number), //nolint:gosec
+		"number":    githubv4.Int(number),
 	}
 	if err := c.v4Client.Query(ctx, q, variables); err != nil {
 		return nil, fmt.Errorf("get a pull request by GitHub GraphQL API: %w", err)
@@ -47,7 +47,7 @@ func (c *Client) ListReviews(ctx context.Context, owner, name string, number int
 	variables := map[string]any{
 		"repoOwner": githubv4.String(owner),
 		"repoName":  githubv4.String(name),
-		"number":    githubv4.Int(number), //nolint:gosec
+		"number":    githubv4.Int(number),
 		"cursor":    githubv4.String(cursor),
 	}
 	for range 100 {
@@ -71,7 +71,7 @@ func (c *Client) ListCommits(ctx context.Context, owner, name string, number int
 	variables := map[string]any{
 		"repoOwner": githubv4.String(owner),
 		"repoName":  githubv4.String(name),
-		"number":    githubv4.Int(number), //nolint:gosec
+		"number":    githubv4.Int(number),
 		"cursor":    githubv4.String(cursor),
 	}
 	for range 100 {
