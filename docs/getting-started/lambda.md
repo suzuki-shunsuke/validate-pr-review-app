@@ -84,8 +84,8 @@ terraform apply
 You can check the webhook URL by `terraform state show`.
 
 ```console
-$ terraform state show aws_lambda_function_url.main
-# aws_lambda_function_url.main:
+$ terraform state show 'aws_lambda_function_url.main[0]'
+# aws_lambda_function_url.main[0]:
 resource "aws_lambda_function_url" "main" {
     # ...
     function_url       = "https://abcdefghijklmnopqrstuvwxyz012345.lambda-url.us-east-1.on.aws/"
