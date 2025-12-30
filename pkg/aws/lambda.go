@@ -2,14 +2,12 @@ package aws
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/lambdacontext"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/controller"
-	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/secret"
 )
 
 // Read config and secret
@@ -26,17 +24,7 @@ type Controller interface {
 	Run(ctx context.Context, logger *slog.Logger, req *controller.Request) error
 }
 
-func NewHandler(logger *slog.Logger, version string, cfg *config.Config, s *secret.Secret) (*Handler, error) {
-	ctrl, err := controller.New(&controller.InputNew{
-		Config:              cfg,
-		Version:             version,
-		WebhookSecret:       []byte(s.WebhookSecret),
-		GitHubAppPrivateKey: s.GitHubAppPrivateKey,
-		Logger:              logger,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("create controller: %w", err)
-	}
+func NewHandler(logger *slog.Logger, ctrl Controller, cfg *config.Config) (*Handler, error) {
 	return &Handler{
 		logger:     logger,
 		config:     cfg,
