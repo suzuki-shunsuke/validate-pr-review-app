@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambdacontext"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/controller"
-	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/log"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/secret"
 )
 
 // Read config and secret
@@ -26,28 +26,12 @@ type Controller interface {
 	Run(ctx context.Context, logger *slog.Logger, req *controller.Request) error
 }
 
-func NewHandler(ctx context.Context, logger *slog.Logger, version string, logLevel *slog.LevelVar) (*Handler, error) {
-	// read config from the environment variable
-	// parse config as YAML
-	cfg := &config.Config{}
-	if err := config.Read(cfg); err != nil {
-		return nil, fmt.Errorf("read config: %w", err)
-	}
-
-	if err := log.SetLevel(logLevel, cfg.LogLevel); err != nil {
-		return nil, fmt.Errorf("set log level: %w", err)
-	}
-
-	// read secrets from AWS SecretsManager
-	secret, err := ReadSecret(ctx, cfg.AWS.SecretID)
-	if err != nil {
-		return nil, fmt.Errorf("get secret from AWS Secrets Manager: %w", err)
-	}
+func NewHandler(ctx context.Context, logger *slog.Logger, version string, cfg *config.Config, s *secret.Secret) (*Handler, error) {
 	ctrl, err := controller.New(&controller.InputNew{
 		Config:              cfg,
 		Version:             version,
-		WebhookSecret:       []byte(secret.WebhookSecret),
-		GitHubAppPrivateKey: secret.GitHubAppPrivateKey,
+		WebhookSecret:       []byte(s.WebhookSecret),
+		GitHubAppPrivateKey: s.GitHubAppPrivateKey,
 		Logger:              logger,
 	})
 	if err != nil {

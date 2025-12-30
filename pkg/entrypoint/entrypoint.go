@@ -14,16 +14,6 @@ import (
 )
 
 func Run(ctx context.Context, logger *slog.Logger, logLevel *slog.LevelVar, getEnv func(string) string, version string) error {
-	if getEnv("AWS_LAMBDA_FUNCTION_NAME") != "" {
-		// lambda
-		handler, err := aws.NewHandler(ctx, logger, version, logLevel)
-		if err != nil {
-			return fmt.Errorf("create a new handler: %w", err)
-		}
-		handler.Start(ctx)
-		return nil
-	}
-	// http server
 	cfg := &config.Config{}
 	if err := config.Read(cfg); err != nil {
 		return fmt.Errorf("read config: %w", err)
@@ -35,6 +25,18 @@ func Run(ctx context.Context, logger *slog.Logger, logLevel *slog.LevelVar, getE
 	if err != nil {
 		return err
 	}
+
+	if getEnv("AWS_LAMBDA_FUNCTION_NAME") != "" {
+		// lambda
+		handler, err := aws.NewHandler(ctx, logger, version, cfg, s)
+		if err != nil {
+			return fmt.Errorf("create a new handler: %w", err)
+		}
+		handler.Start(ctx)
+		return nil
+	}
+
+	// http server
 	server, err := server.New(logger, version, cfg, s)
 	if err != nil {
 		return fmt.Errorf("create a new server: %w", err)

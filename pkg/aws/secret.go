@@ -25,13 +25,6 @@ func NewSecretsManager(config aws.Config) *SecretsManager {
 }
 
 func (sm *SecretsManager) Get(ctx context.Context, input *secretsmanager.GetSecretValueInput) (*secret.Secret, error) {
-	// config, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// // Create Secrets Manager client
-	// svc := secretsmanager.NewFromConfig(config)
 	result, err := sm.client.GetSecretValue(ctx, input)
 	if err != nil {
 		return nil, fmt.Errorf("get secret value from AWS Secrets Manager: %w", err)
