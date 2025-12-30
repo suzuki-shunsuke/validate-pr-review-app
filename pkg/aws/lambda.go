@@ -2,15 +2,12 @@ package aws
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/lambdacontext"
-	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/controller"
-	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/log"
 )
 
 // Read config and secret
@@ -27,40 +24,7 @@ type Controller interface {
 	Run(ctx context.Context, logger *slog.Logger, req *controller.Request) error
 }
 
-func NewHandler(ctx context.Context, logger *slog.Logger, version string, logLevel *slog.LevelVar) (*Handler, error) {
-	// read config from the environment variable
-	// parse config as YAML
-	cfg := &config.Config{}
-	if err := readConfig(cfg); err != nil {
-		return nil, err
-	}
-
-	if cfg.LogLevel != "" {
-		lvl, err := log.ParseLevel(cfg.LogLevel)
-		if err != nil {
-			return nil, fmt.Errorf("parse log level: %w", slogerr.With(err, "log_level", cfg.LogLevel))
-		}
-		logLevel.Set(lvl)
-	}
-
-	// read secrets from AWS SecretsManager
-	secret, err := readSecret(ctx, cfg.AWS.SecretID)
-	if err != nil {
-		return nil, fmt.Errorf("get secret from AWS Secrets Manager: %w", err)
-	}
-	if err := secret.Validate(); err != nil {
-		return nil, fmt.Errorf("validate secret: %w", err)
-	}
-	ctrl, err := controller.New(&controller.InputNew{
-		Config:              cfg,
-		Version:             version,
-		WebhookSecret:       []byte(secret.WebhookSecret),
-		GitHubAppPrivateKey: secret.GitHubAppPrivateKey,
-		Logger:              logger,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("create controller: %w", err)
-	}
+func NewHandler(logger *slog.Logger, ctrl Controller, cfg *config.Config) (*Handler, error) {
 	return &Handler{
 		logger:     logger,
 		config:     cfg,

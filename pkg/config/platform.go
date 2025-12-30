@@ -29,20 +29,18 @@ func (g *GoogleCloud) Validate() error {
 }
 
 func (c *Config) validatePlatform() error {
-	if c.AWS == nil {
-		if c.GoogleCloud == nil {
-			return errors.New("either aws or google_cloud configuration is required")
+	if c.AWS != nil {
+		if err := c.AWS.Validate(); err != nil {
+			return fmt.Errorf("validate aws config: %w", err)
 		}
+	}
+	if c.GoogleCloud != nil {
 		if err := c.GoogleCloud.Validate(); err != nil {
 			return fmt.Errorf("validate google_cloud config: %w", err)
 		}
-		return nil
 	}
-	if c.GoogleCloud != nil {
+	if c.AWS != nil && c.GoogleCloud != nil {
 		return errors.New("only one of aws or google_cloud configuration can be set")
-	}
-	if err := c.AWS.Validate(); err != nil {
-		return fmt.Errorf("validate aws config: %w", err)
 	}
 	return nil
 }
