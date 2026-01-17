@@ -15,7 +15,7 @@ require (
 	github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
 	github.com/suzuki-shunsuke/gen-go-jsonschema v0.1.0
 	github.com/suzuki-shunsuke/go-retryablehttp v0.7.8-2
-	github.com/suzuki-shunsuke/slog-error v0.2.1
+	github.com/suzuki-shunsuke/slog-error v0.2.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 
