@@ -28,7 +28,7 @@ func readConfigBytes() ([]byte, error) {
 		return []byte(cfgStr), nil
 	}
 	if cfgPath := os.Getenv("CONFIG_FILE"); cfgPath != "" {
-		data, err := os.ReadFile(cfgPath)
+		data, err := os.ReadFile(cfgPath) //nolint:gosec
 		if err != nil {
 			return nil, fmt.Errorf("read config file: %w", slogerr.With(err, "config_file", cfgPath))
 		}

@@ -29,7 +29,7 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 				},
 				CheckName: "custom-check",
 				Templates: map[string]string{},
-				AWS: &config.AWS{
+				AWS: &config.AWS{ //nolint:gosec
 					SecretID: "validate-pr-review-app",
 				},
 			},
@@ -51,7 +51,7 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 			name: "empty configuration with defaults",
 			config: &config.Config{
 				Templates: map[string]string{},
-				AWS: &config.AWS{
+				AWS: &config.AWS{ //nolint:gosec
 					SecretID: "validate-pr-review-app",
 				},
 			},
@@ -72,7 +72,7 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 					UntrustedMachineUsers: []string{"bot-*", "bot-*"},
 				},
 				Templates: map[string]string{},
-				AWS: &config.AWS{
+				AWS: &config.AWS{ //nolint:gosec
 					SecretID: "validate-pr-review-app",
 				},
 			},
@@ -174,7 +174,7 @@ func TestConfig_Init_NilTemplates(t *testing.T) {
 			TrustedApps: []string{"app1[bot]"},
 		},
 		Templates: nil,
-		AWS: &config.AWS{
+		AWS: &config.AWS{ //nolint:gosec
 			SecretID: "validate-pr-review-app",
 		},
 	}

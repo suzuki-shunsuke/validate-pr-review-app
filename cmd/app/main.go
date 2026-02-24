@@ -10,7 +10,7 @@ import (
 
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/entrypoint"
-	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/log"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/logging"
 )
 
 var version = ""
@@ -23,7 +23,7 @@ func main() {
 
 func run() int {
 	logLevel := &slog.LevelVar{}
-	logger := log.New(os.Stderr, version, logLevel)
+	logger := logging.New(os.Stderr, version, logLevel)
 	if err := core(logger, logLevel); err != nil {
 		slogerr.WithError(logger, err).Error("failed")
 		return 1
