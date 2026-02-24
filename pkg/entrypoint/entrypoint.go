@@ -9,7 +9,7 @@ import (
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/controller"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/gcloud"
-	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/log"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/logging"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/secret"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/server"
 )
@@ -19,7 +19,7 @@ func Run(ctx context.Context, logger *slog.Logger, logLevel *slog.LevelVar, getE
 	if err := config.Read(cfg); err != nil {
 		return fmt.Errorf("read config: %w", err)
 	}
-	if err := log.SetLevel(logLevel, cfg.LogLevel); err != nil {
+	if err := logging.SetLevel(logLevel, cfg.LogLevel); err != nil {
 		return fmt.Errorf("set log level: %w", err)
 	}
 	s, err := readSecret(ctx, cfg)

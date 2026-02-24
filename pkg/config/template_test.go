@@ -206,7 +206,7 @@ Trusted Machine Users: Nothing
 		},
 	}
 	cfg := &config.Config{
-		AWS: &config.AWS{
+		AWS: &config.AWS{ //nolint:gosec
 			SecretID: "validate-pr-review-app",
 		},
 	}

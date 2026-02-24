@@ -28,7 +28,7 @@ func (s *Secret) Validate() error {
 
 func Read(secret *Secret) error {
 	if p := os.Getenv("SECRET_FILE"); p != "" {
-		data, err := os.ReadFile(p)
+		data, err := os.ReadFile(p) //nolint:gosec
 		if err != nil {
 			return fmt.Errorf("read secret file %q: %w", p, err)
 		}
