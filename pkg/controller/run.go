@@ -14,6 +14,7 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request)
 	if ev == nil {
 		return nil
 	}
+	logger = logger.With("repository", ev.RepoFullName, "pr_number", ev.PRNumber, "sha", ev.HeadSHA)
 
 	if ignore(logger, ev) {
 		return nil
