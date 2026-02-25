@@ -12,6 +12,9 @@ type User struct {
 }
 
 func newUser(v *v4.User) *User {
+	if v == nil {
+		return nil
+	}
 	return &User{
 		Login: v.Login,
 		IsApp: strings.HasPrefix(v.ResourcePath, "/apps/") || strings.HasSuffix(v.Login, "[bot]"),
