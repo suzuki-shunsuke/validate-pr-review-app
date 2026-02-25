@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
@@ -14,7 +15,12 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request)
 	if ev == nil {
 		return nil
 	}
-	logger = logger.With("repository", ev.RepoFullName, "pr_number", ev.PRNumber, "sha", ev.HeadSHA)
+	logger = logger.With(
+		"repository", ev.RepoFullName,
+		"pr_number", ev.PRNumber,
+		"sha", ev.HeadSHA,
+		"pr_url", fmt.Sprintf("https://github.com/%s/pull/%d", ev.RepoFullName, ev.PRNumber),
+	)
 
 	if ignore(logger, ev) {
 		return nil
