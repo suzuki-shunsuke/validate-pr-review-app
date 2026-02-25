@@ -61,11 +61,11 @@ func (c *Validator) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 
 	// One approval
 
-	// Require two approvals if the PR author is untrusted
 	for _, commit := range pr.Commits {
 		if untrustedCommit := c.VerifyCommit(commit, input.Trust); untrustedCommit != nil {
 			// Two approvals are required as there is an untrusted commit, but one approval is given
 			result.UntrustedCommits = append(result.UntrustedCommits, untrustedCommit)
+			continue
 		}
 		committer := commit.Committer
 		login := committer.Login
@@ -113,9 +113,15 @@ func (c *Validator) VerifyUser(login string, trust *Trust) bool {
 }
 
 func (c *Validator) VerifyCommit(commit *github.Commit, trust *Trust) *github.UntrustedCommit {
-	user := commit.Committer
-	login := user.Login
 	sha := commit.SHA
+	user := commit.Committer
+	if user == nil {
+		return &github.UntrustedCommit{
+			NotLinkedToUser: true,
+			SHA:             sha,
+		}
+	}
+	login := user.Login
 	if !commit.Linked() {
 		return &github.UntrustedCommit{
 			NotLinkedToUser: true,

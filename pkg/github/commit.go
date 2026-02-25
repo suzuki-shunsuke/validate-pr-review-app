@@ -40,5 +40,5 @@ type Commit struct {
 }
 
 func (c *Commit) Linked() bool {
-	return c.Committer.Login != ""
+	return c.Committer != nil && c.Committer.Login != ""
 }
