@@ -46,12 +46,12 @@ func (c *Client) GetPR(ctx context.Context, owner, name string, number int) (*Pu
 		}
 		reviews[login] = node
 	}
-	m := make(map[string]struct{}, len(reviews))
+	m := make(map[string]*User, len(reviews))
 	for k, v := range reviews {
 		if v.State != "APPROVED" {
 			continue
 		}
-		m[k] = struct{}{}
+		m[k] = newUser(v.Author)
 	}
 	p := &PullRequest{
 		HeadSHA:   pr.HeadRefOID,
