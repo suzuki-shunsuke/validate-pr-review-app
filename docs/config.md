@@ -125,3 +125,29 @@ templates:
 ```
 
 This template is rendered with [Go's html/template](https://pkg.go.dev/html/template).
+
+## Allow Unsigned Commits
+
+> [!WARNING]
+> This setting isn't recommended in terms of security.
+
+In the real world, sometimes it's hard to enforce signed commits.
+So you may want to allow unsigned commits from certain authors.
+
+- `allow_unsigned_commits`: If this is true, all unsigned commits don't require two approvals. By default, this is false.
+- `unsigned_commit_authors`: If this is set, commits from these authors don't require two approvals. By default, this is empty.
+  - If `allow_unsigned_commits` is true, this setting is ignored.
+
+```yaml
+insecure:
+  allow_unsigned_commits: true
+  unsigned_commit_authors:
+    - "*-bot"
+repositories:
+  - repositories:
+      - suzuki-shunsuke/*
+    insecure: # The repository config overrides the root config.
+      allow_unsigned_commits: true
+      unsigned_commit_authors:
+        - "*-bot"
+```
