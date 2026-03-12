@@ -6,3 +6,4 @@ bootstrap
 .terraform
 *.tfstate
 *.backup
+*-ja.md
