@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "Commit Message": {
+      "source": "suzuki-shunsuke/agent-skills",
+      "sourceType": "github",
+      "computedHash": "9b70d86bee6bda74f8f08c078c80fa44b31c6a4bda7d5b0ab96a4df51925c595"
+    },
+    "go": {
+      "source": "suzuki-shunsuke/agent-skills",
+      "sourceType": "github",
+      "computedHash": "d42f8e91dc337545e6e903f95e9aea98f737a1783ed5a77fe4c93b21c63949fc"
+    },
+    "manner": {
+      "source": "suzuki-shunsuke/agent-skills",
+      "sourceType": "github",
+      "computedHash": "1941cb09209863a47b9790b99f68bebac78d22f6cfadb15fbfda3f647ee2d003"
+    }
+  }
+}
