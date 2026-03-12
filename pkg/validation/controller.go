@@ -21,8 +21,14 @@ func New(input *InputNew) *Validator {
 }
 
 type Input struct {
-	PR    *github.PullRequest
-	Trust *Trust
+	PR       *github.PullRequest
+	Trust    *Trust
+	Insecure *Insecure
+}
+
+type Insecure struct {
+	AllowUnsignedCommits  bool
+	UnsignedCommitAuthors []string
 }
 
 type Trust struct {

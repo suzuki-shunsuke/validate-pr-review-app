@@ -20,6 +20,9 @@ func (c *Config) initRepos() error {
 		if err := repo.Validate(); err != nil {
 			return fmt.Errorf("validate a repository config: %w", err)
 		}
+		if repo.Insecure == nil {
+			repo.Insecure = c.Insecure
+		}
 		if repo.Trust.TrustedApps == nil {
 			repo.Trust.TrustedApps = c.Trust.TrustedApps
 		}
@@ -35,9 +38,10 @@ func (c *Config) initRepos() error {
 }
 
 type Repository struct {
-	Repositories []string `json:"repositories" yaml:"repositories"`
-	Trust        *Trust   `json:"trust" yaml:"trust"`
-	Ignored      bool     `json:"ignored,omitempty" yaml:"ignored"`
+	Repositories []string  `json:"repositories" yaml:"repositories"`
+	Trust        *Trust    `json:"trust" yaml:"trust"`
+	Insecure     *Insecure `json:"insecure,omitempty" yaml:"insecure"`
+	Ignored      bool      `json:"ignored,omitempty" yaml:"ignored"`
 }
 
 func (r *Repository) Validate() error {
@@ -51,6 +55,9 @@ func (r *Repository) Validate() error {
 		if _, err := path.Match(pattern, "suzuki-shunsuke/validate-pr-review-app"); err != nil {
 			return fmt.Errorf("invalid repository pattern %q: %w", pattern, err)
 		}
+	}
+	if err := r.Insecure.Validate(); err != nil {
+		return fmt.Errorf("validate insecure config: %w", err)
 	}
 	return nil
 }

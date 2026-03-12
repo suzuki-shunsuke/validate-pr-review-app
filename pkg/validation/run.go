@@ -62,7 +62,7 @@ func (c *Validator) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 	// One approval
 
 	for _, commit := range pr.Commits {
-		if untrustedCommit := c.VerifyCommit(commit, input.Trust); untrustedCommit != nil {
+		if untrustedCommit := c.VerifyCommit(commit, input.Trust, input.Insecure); untrustedCommit != nil {
 			// Two approvals are required as there is an untrusted commit, but one approval is given
 			result.UntrustedCommits = append(result.UntrustedCommits, untrustedCommit)
 			continue
@@ -112,7 +112,7 @@ func (c *Validator) VerifyUser(login string, trust *Trust) bool {
 	return true
 }
 
-func (c *Validator) VerifyCommit(commit *github.Commit, trust *Trust) *github.UntrustedCommit {
+func (c *Validator) VerifyCommit(commit *github.Commit, trust *Trust, insecure *Insecure) *github.UntrustedCommit {
 	sha := commit.SHA
 	user := commit.Committer
 	if user == nil {
@@ -130,10 +130,12 @@ func (c *Validator) VerifyCommit(commit *github.Commit, trust *Trust) *github.Un
 	}
 	sig := commit.Signature
 	if sig == nil || !sig.IsValid {
-		return &github.UntrustedCommit{
-			Login:       login,
-			SHA:         sha,
-			InvalidSign: sig,
+		if !isUnsignedCommitAllowed(login, insecure) {
+			return &github.UntrustedCommit{
+				Login:       login,
+				SHA:         sha,
+				InvalidSign: sig,
+			}
 		}
 	}
 	if user.IsApp {
@@ -174,6 +176,21 @@ type Result struct {
 	UntrustedMachineUsers []string
 	TrustedMachineUsers   []string
 	Version               string
+}
+
+func isUnsignedCommitAllowed(login string, insecure *Insecure) bool {
+	if insecure == nil {
+		return false
+	}
+	if insecure.AllowUnsignedCommits {
+		return true
+	}
+	for _, pattern := range insecure.UnsignedCommitAuthors {
+		if matched, _ := path.Match(pattern, login); matched {
+			return true
+		}
+	}
+	return false
 }
 
 type State string

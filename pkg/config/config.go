@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"html/template"
 )
 
@@ -11,6 +12,7 @@ type Config struct {
 	GoogleCloud    *GoogleCloud                  `json:"google_cloud,omitempty" yaml:"google_cloud"`
 	CheckName      string                        `json:"check_name,omitempty" yaml:"check_name"`
 	Trust          *Trust                        `json:"trust,omitempty" yaml:"trust"`
+	Insecure       *Insecure                     `json:"insecure,omitempty" yaml:"insecure"`
 	Templates      map[string]string             `json:"templates,omitempty" yaml:"templates"`
 	BuiltTemplates map[string]*template.Template `json:"-" yaml:"-"`
 	LogLevel       string                        `json:"log_level,omitempty" yaml:"log_level"`
@@ -38,6 +40,9 @@ func (c *Config) Init() error {
 	}
 	if err := c.testUntrustedMachineUsers(); err != nil {
 		return err
+	}
+	if err := c.Insecure.Validate(); err != nil {
+		return fmt.Errorf("validate insecure config: %w", err)
 	}
 	return c.testTemplate()
 }
