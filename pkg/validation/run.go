@@ -175,6 +175,9 @@ type Result struct {
 	TrustedApps           []string
 	UntrustedMachineUsers []string
 	TrustedMachineUsers   []string
+	// insecure settings
+	AllowUnsignedCommits  bool
+	UnsignedCommitAuthors []string
 	Version               string
 }
 

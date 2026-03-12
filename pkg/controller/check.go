@@ -13,7 +13,7 @@ import (
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
-func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *validation.Result, trust *config.Trust) githubv4.CreateCheckRunInput {
+func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *validation.Result, trust *config.Trust, insecure *config.Insecure) githubv4.CreateCheckRunInput {
 	result.Version = c.input.Version
 	var conclusion githubv4.CheckConclusionState
 	var title githubv4.String
@@ -35,6 +35,10 @@ func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *va
 	result.TrustedApps = trust.TrustedApps
 	result.TrustedMachineUsers = trust.TrustedMachineUsers
 	result.UntrustedMachineUsers = trust.UntrustedMachineUsers
+	if insecure != nil {
+		result.AllowUnsignedCommits = insecure.AllowUnsignedCommits
+		result.UnsignedCommitAuthors = insecure.UnsignedCommitAuthors
+	}
 	s, err := summarize(result, c.input.Config.BuiltTemplates)
 	if err != nil {
 		slogerr.WithError(logger, err).Error("summarize the result")

@@ -24,3 +24,15 @@ Trusted Machine Users:
 {{else}}
 Trusted Machine Users: Nothing
 {{end -}}
+{{- if or .AllowUnsignedCommits .UnsignedCommitAuthors}}
+:warning: Insecure Settings:
+{{- if .AllowUnsignedCommits}}
+- Allow Unsigned Commits: Yes
+{{- end}}
+{{- if .UnsignedCommitAuthors}}
+- Unsigned Commit Authors:
+{{- range .UnsignedCommitAuthors}}
+  - {{.}}
+{{- end}}
+{{- end}}
+{{end -}}
