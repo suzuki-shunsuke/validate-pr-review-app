@@ -334,6 +334,158 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
+			name:     "unsigned commit with AllowUnsignedCommits - one approval sufficient",
+			inputNew: &validation.InputNew{},
+			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
+				Insecure: &validation.Insecure{
+					AllowUnsignedCommits: true,
+				},
+				PR: &github.PullRequest{
+					HeadSHA: "abc123",
+					Approvers: map[string]struct{}{
+						"reviewer1": {},
+					},
+					Commits: []*github.Commit{
+						{
+							SHA: "abc123",
+							Committer: &github.User{
+								Login: "committer",
+								IsApp: false,
+							},
+							Signature: &github.Signature{
+								IsValid: false,
+								State:   "invalid",
+							},
+						},
+					},
+				},
+			},
+			expected: &validation.Result{
+				State:     validation.StateApproved,
+				Approvers: []string{"reviewer1"},
+			},
+		},
+		{
+			name:     "unsigned commit with matching UnsignedCommitAuthors - one approval sufficient",
+			inputNew: &validation.InputNew{},
+			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
+				Insecure: &validation.Insecure{
+					UnsignedCommitAuthors: []string{"machine-*"},
+				},
+				PR: &github.PullRequest{
+					HeadSHA: "abc123",
+					Approvers: map[string]struct{}{
+						"reviewer1": {},
+					},
+					Commits: []*github.Commit{
+						{
+							SHA: "abc123",
+							Committer: &github.User{
+								Login: "machine-user",
+								IsApp: false,
+							},
+							Signature: nil,
+						},
+					},
+				},
+			},
+			expected: &validation.Result{
+				State:     validation.StateApproved,
+				Approvers: []string{"reviewer1"},
+			},
+		},
+		{
+			name:     "unsigned commit with non-matching UnsignedCommitAuthors - two approvals required",
+			inputNew: &validation.InputNew{},
+			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
+				Insecure: &validation.Insecure{
+					UnsignedCommitAuthors: []string{"machine-*"},
+				},
+				PR: &github.PullRequest{
+					HeadSHA: "abc123",
+					Approvers: map[string]struct{}{
+						"reviewer1": {},
+					},
+					Commits: []*github.Commit{
+						{
+							SHA: "abc123",
+							Committer: &github.User{
+								Login: "other-user",
+								IsApp: false,
+							},
+							Signature: &github.Signature{
+								IsValid: false,
+								State:   "invalid",
+							},
+						},
+					},
+				},
+			},
+			expected: &validation.Result{
+				State: validation.StateTwoApprovalsAreRequired,
+				UntrustedCommits: []*github.UntrustedCommit{
+					{
+						Login: "other-user",
+						SHA:   "abc123",
+						InvalidSign: &github.Signature{
+							State: "invalid",
+						},
+					},
+				},
+			},
+		},
+		{
+			name:     "unsigned commit with nil Insecure - two approvals required",
+			inputNew: &validation.InputNew{},
+			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
+				PR: &github.PullRequest{
+					HeadSHA: "abc123",
+					Approvers: map[string]struct{}{
+						"reviewer1": {},
+					},
+					Commits: []*github.Commit{
+						{
+							SHA: "abc123",
+							Committer: &github.User{
+								Login: "committer",
+								IsApp: false,
+							},
+							Signature: nil,
+						},
+					},
+				},
+			},
+			expected: &validation.Result{
+				State: validation.StateTwoApprovalsAreRequired,
+				UntrustedCommits: []*github.UntrustedCommit{
+					{
+						Login: "committer",
+						SHA:   "abc123",
+					},
+				},
+			},
+		},
+		{
 			name:     "one approval with commit not linked to user - two approvals required",
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{

@@ -31,15 +31,17 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request)
 		return nil
 	}
 	trust := c.input.Config.Trust
+	insecure := c.input.Config.Insecure
 	if repo != nil {
 		trust = repo.Trust
+		insecure = repo.Insecure
 	}
 
 	// Run validation
-	result := c.validate(ctx, logger, ev, trust)
+	result := c.validate(ctx, logger, ev, trust, insecure)
 	result.RequestID = req.RequestID
 
-	if err := c.gh.CreateCheckRun(ctx, c.newCheckRunInput(logger, ev, result, trust)); err != nil {
+	if err := c.gh.CreateCheckRun(ctx, c.newCheckRunInput(logger, ev, result, trust, insecure)); err != nil {
 		slogerr.WithError(logger, err).Error("create final check run")
 	}
 	return nil

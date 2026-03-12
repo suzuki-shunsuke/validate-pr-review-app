@@ -204,6 +204,81 @@ Trusted Machine Users: Nothing
 - Request ID: unknown
 `,
 		},
+		{
+			name: "approved with insecure settings",
+			result: &validation.Result{
+				State:                 validation.StateApproved,
+				Approvers:             []string{"user1"},
+				AllowUnsignedCommits:  true,
+				UnsignedCommitAuthors: []string{"bot-*", "ci-user"},
+				Version:               "v0.1.0",
+				RequestID:             "req-insecure",
+			},
+			template: "approved",
+			wantText: `The pull request has been approved.
+
+Approvers:
+
+- user1
+
+## Settings
+
+Trusted Apps: Nothing
+
+Untrusted Machine Users: Nothing
+
+Trusted Machine Users: Nothing
+
+:warning: Insecure Settings:
+- Allow Unsigned Commits: Yes
+- Unsigned Commit Authors:
+  - bot-*
+  - ci-user
+
+---
+
+[This check is created by Validate PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+
+- Version: v0.1.0
+- Request ID: req-insecure
+`,
+		},
+		{
+			name: "approved with only unsigned commit authors",
+			result: &validation.Result{
+				State:                 validation.StateApproved,
+				Approvers:             []string{"user1"},
+				UnsignedCommitAuthors: []string{"deploy-bot"},
+				Version:               "v0.1.0",
+				RequestID:             "req-partial",
+			},
+			template: "approved",
+			wantText: `The pull request has been approved.
+
+Approvers:
+
+- user1
+
+## Settings
+
+Trusted Apps: Nothing
+
+Untrusted Machine Users: Nothing
+
+Trusted Machine Users: Nothing
+
+:warning: Insecure Settings:
+- Unsigned Commit Authors:
+  - deploy-bot
+
+---
+
+[This check is created by Validate PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
+
+- Version: v0.1.0
+- Request ID: req-partial
+`,
+		},
 	}
 	cfg := &config.Config{
 		AWS: &config.AWS{ //nolint:gosec

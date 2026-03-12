@@ -9,18 +9,25 @@ import (
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
-func (c *Controller) validate(ctx context.Context, logger *slog.Logger, ev *Event, trust *config.Trust) *validation.Result {
+func (c *Controller) validate(ctx context.Context, logger *slog.Logger, ev *Event, trust *config.Trust, insecure *config.Insecure) *validation.Result {
 	pr, err := c.gh.GetPR(ctx, ev.RepoOwner, ev.RepoName, ev.PRNumber)
 	if err != nil {
 		return &validation.Result{Error: fmt.Errorf("get a pull request: %w", err).Error()}
 	}
 	logger.Info("fetched a pull request", "pull_request", pr)
-	return c.validator.Run(logger, &validation.Input{
+	input := &validation.Input{
 		PR: pr,
 		Trust: &validation.Trust{
 			TrustedApps:           trust.UniqueTrustedApps,
 			TrustedMachineUsers:   trust.UniqueTrustedMachineUsers,
 			UntrustedMachineUsers: trust.UniqueUntrustedMachineUsers,
 		},
-	})
+	}
+	if insecure != nil {
+		input.Insecure = &validation.Insecure{
+			AllowUnsignedCommits:  insecure.AllowUnsignedCommits,
+			UnsignedCommitAuthors: insecure.UnsignedCommitAuthors,
+		}
+	}
+	return c.validator.Run(logger, input)
 }

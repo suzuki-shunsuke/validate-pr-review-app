@@ -167,7 +167,7 @@ func TestController_newCheckRunInput(t *testing.T) {
 			}
 
 			logger := slog.Default()
-			result := controller.newCheckRunInput(logger, tt.event, tt.result, tt.trust)
+			result := controller.newCheckRunInput(logger, tt.event, tt.result, tt.trust, nil)
 
 			if diff := cmp.Diff(tt.expected, result); diff != "" {
 				t.Errorf("newCheckRunInput() mismatch (-want +got):\n%s", diff)

@@ -38,6 +38,9 @@
         "trust": {
           "$ref": "#/$defs/Trust"
         },
+        "insecure": {
+          "$ref": "#/$defs/Insecure"
+        },
         "templates": {
           "additionalProperties": {
             "type": "string"
@@ -73,6 +76,21 @@
         "secret_name"
       ]
     },
+    "Insecure": {
+      "properties": {
+        "allow_unsigned_commits": {
+          "type": "boolean"
+        },
+        "unsigned_commit_authors": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "Repository": {
       "properties": {
         "repositories": {
@@ -83,6 +101,9 @@
         },
         "trust": {
           "$ref": "#/$defs/Trust"
+        },
+        "insecure": {
+          "$ref": "#/$defs/Insecure"
         },
         "ignored": {
           "type": "boolean"
