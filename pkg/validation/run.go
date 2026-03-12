@@ -6,7 +6,6 @@ import (
 	"path"
 	"slices"
 	"sort"
-	"strings"
 
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
@@ -19,8 +18,8 @@ func (c *Validator) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 	result := &Result{}
 	ignoredApprovers := make(map[string]*github.IgnoredApproval, len(pr.Approvers))
 	approvers := make(map[string]struct{}, len(pr.Approvers))
-	for approver := range pr.Approvers {
-		if isApp(approver) {
+	for approver, user := range pr.Approvers {
+		if user.IsApp {
 			if !c.VerifyApp(approver, input.Trust.TrustedApps) {
 				// Ignore the approval from untrusted apps
 				ignoredApprovers[approver] = &github.IgnoredApproval{
@@ -83,10 +82,6 @@ func (c *Validator) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 	result.Approvers = slices.Sorted(maps.Keys(approvers))
 	result.State = StateApproved
 	return result
-}
-
-func isApp(login string) bool {
-	return strings.HasSuffix(login, "[bot]")
 }
 
 func (c *Validator) VerifyApp(login string, trustedApps map[string]struct{}) bool {

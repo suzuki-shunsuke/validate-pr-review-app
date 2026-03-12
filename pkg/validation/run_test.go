@@ -23,9 +23,9 @@ func TestController_Run(t *testing.T) {
 			input: &validation.Input{
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"reviewer1": {},
-						"reviewer2": {},
+					Approvers: map[string]*github.User{
+						"reviewer1": {Login: "reviewer1"},
+						"reviewer2": {Login: "reviewer2"},
 					},
 					Commits: []*github.Commit{
 						{
@@ -63,7 +63,7 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA:   "abc123",
-					Approvers: map[string]struct{}{},
+					Approvers: map[string]*github.User{},
 					Commits: []*github.Commit{
 						{
 							SHA: "abc123",
@@ -90,8 +90,8 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"committer": {},
+					Approvers: map[string]*github.User{
+						"committer": {Login: "committer"},
 					},
 					Commits: []*github.Commit{
 						{
@@ -124,8 +124,8 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"reviewer1": {},
+					Approvers: map[string]*github.User{
+						"reviewer1": {Login: "reviewer1"},
 					},
 					Commits: []*github.Commit{
 						{
@@ -158,8 +158,8 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"bot-app[bot]": {},
+					Approvers: map[string]*github.User{
+						"bot-app[bot]": {Login: "bot-app[bot]", IsApp: true},
 					},
 					Commits: []*github.Commit{
 						{
@@ -183,6 +183,41 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
+			name:     "ignored app approval without bot suffix",
+			inputNew: &validation.InputNew{},
+			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
+				PR: &github.PullRequest{
+					HeadSHA: "abc123",
+					Approvers: map[string]*github.User{
+						"coderabbitai": {Login: "coderabbitai", IsApp: true},
+					},
+					Commits: []*github.Commit{
+						{
+							SHA: "abc123",
+							Committer: &github.User{
+								Login: "committer",
+								IsApp: false,
+							},
+						},
+					},
+				},
+			},
+			expected: &validation.Result{
+				State: validation.StateApprovalIsRequired,
+				IgnoredApprovers: []*github.IgnoredApproval{
+					{
+						Login: "coderabbitai",
+						IsApp: true,
+					},
+				},
+			},
+		},
+		{
 			name:     "ignored untrusted machine user approval",
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
@@ -193,8 +228,8 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"untrusted-bot": {},
+					Approvers: map[string]*github.User{
+						"untrusted-bot": {Login: "untrusted-bot"},
 					},
 					Commits: []*github.Commit{
 						{
@@ -228,8 +263,8 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"trusted-bot": {},
+					Approvers: map[string]*github.User{
+						"trusted-bot": {Login: "trusted-bot"},
 					},
 					Commits: []*github.Commit{
 						{
@@ -262,8 +297,8 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"reviewer1": {},
+					Approvers: map[string]*github.User{
+						"reviewer1": {Login: "reviewer1"},
 					},
 					Commits: []*github.Commit{
 						{
@@ -304,8 +339,8 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"reviewer1": {},
+					Approvers: map[string]*github.User{
+						"reviewer1": {Login: "reviewer1"},
 					},
 					Commits: []*github.Commit{
 						{
@@ -347,8 +382,8 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"reviewer1": {},
+					Approvers: map[string]*github.User{
+						"reviewer1": {Login: "reviewer1"},
 					},
 					Commits: []*github.Commit{
 						{
@@ -384,8 +419,8 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"reviewer1": {},
+					Approvers: map[string]*github.User{
+						"reviewer1": {Login: "reviewer1"},
 					},
 					Commits: []*github.Commit{
 						{
@@ -418,8 +453,8 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"reviewer1": {},
+					Approvers: map[string]*github.User{
+						"reviewer1": {Login: "reviewer1"},
 					},
 					Commits: []*github.Commit{
 						{
@@ -460,8 +495,8 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"reviewer1": {},
+					Approvers: map[string]*github.User{
+						"reviewer1": {Login: "reviewer1"},
 					},
 					Commits: []*github.Commit{
 						{
@@ -496,8 +531,8 @@ func TestController_Run(t *testing.T) {
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
-					Approvers: map[string]struct{}{
-						"reviewer1": {},
+					Approvers: map[string]*github.User{
+						"reviewer1": {Login: "reviewer1"},
 					},
 					Commits: []*github.Commit{
 						{
