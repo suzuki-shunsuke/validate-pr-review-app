@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 )
 
 func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request) error {
@@ -30,19 +31,52 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request)
 		logger.Info("ignore the event because the repository is ignored in the config", "repository", ev.RepoFullName)
 		return nil
 	}
-	trust := c.input.Config.Trust
-	insecure := c.input.Config.Insecure
+	var repoTrust *config.Trust
+	var repoInsecure *config.Insecure
 	if repo != nil {
-		trust = repo.Trust
-		insecure = repo.Insecure
+		repoTrust = repo.Trust
+		repoInsecure = repo.Insecure
 	}
+	trust := mergeTrust(c.input.Config.Trust, repoTrust)
+	insecure := mergeInsecure(c.input.Config.Insecure, repoInsecure)
+	trust.Init()
 
 	// Run validation
-	result := c.validate(ctx, logger, ev, trust, insecure)
+	result := c.validate(ctx, logger, ev, &trust, &insecure)
 	result.RequestID = req.RequestID
 
-	if err := c.gh.CreateCheckRun(ctx, c.newCheckRunInput(logger, ev, result, trust, insecure)); err != nil {
+	if err := c.gh.CreateCheckRun(ctx, c.newCheckRunInput(logger, ev, result, &trust, &insecure)); err != nil {
 		slogerr.WithError(logger, err).Error("create final check run")
 	}
 	return nil
+}
+
+func mergeTrust(global *config.Trust, repo *config.Trust) config.Trust {
+	var trust config.Trust
+	if global != nil {
+		trust = *global
+	}
+	if repo != nil {
+		if repo.TrustedApps != nil {
+			trust.TrustedApps = repo.TrustedApps
+		}
+		if repo.TrustedMachineUsers != nil {
+			trust.TrustedMachineUsers = repo.TrustedMachineUsers
+		}
+		if repo.UntrustedMachineUsers != nil {
+			trust.UntrustedMachineUsers = repo.UntrustedMachineUsers
+		}
+	}
+	return trust
+}
+
+func mergeInsecure(global *config.Insecure, repo *config.Insecure) config.Insecure {
+	var insecure config.Insecure
+	if global != nil {
+		insecure = *global
+	}
+	if repo != nil {
+		insecure = *repo
+	}
+	return insecure
 }
