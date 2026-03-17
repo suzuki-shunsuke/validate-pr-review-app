@@ -89,6 +89,40 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 			},
 			expectedCheckName: "validate-review",
 		},
+		{
+			name: "global insecure allow_unsigned_commits with apps",
+			config: &config.Config{
+				Insecure: &config.Insecure{
+					AllowUnsignedCommits: new(true),
+					UnsignedCommitApps:   []string{"renovate[bot]"},
+				},
+				Templates: map[string]string{},
+				AWS: &config.AWS{ //nolint:gosec
+					SecretID: "validate-pr-review-app",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "repo insecure allow_unsigned_commits with machine users",
+			config: &config.Config{
+				Repositories: []*config.Repository{
+					{
+						Repositories: []string{"org/repo"},
+						Trust:        &config.Trust{},
+						Insecure: &config.Insecure{
+							AllowUnsignedCommits:       new(true),
+							UnsignedCommitMachineUsers: []string{"bot-user"},
+						},
+					},
+				},
+				Templates: map[string]string{},
+				AWS: &config.AWS{ //nolint:gosec
+					SecretID: "validate-pr-review-app",
+				},
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -99,6 +133,9 @@ func TestConfig_Init(t *testing.T) { //nolint:gocognit,cyclop
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Config.Init() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.wantErr {
 				return
 			}
 
