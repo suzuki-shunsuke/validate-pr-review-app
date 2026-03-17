@@ -25,9 +25,18 @@ func (c *Controller) validate(ctx context.Context, logger *slog.Logger, ev *Even
 	}
 	if insecure != nil {
 		input.Insecure = &validation.Insecure{
-			AllowUnsignedCommits:  insecure.AllowUnsignedCommits,
-			UnsignedCommitAuthors: insecure.UnsignedCommitAuthors,
+			AllowUnsignedCommits:       insecure.AllowUnsignedCommits,
+			UnsignedCommitApps:         toSet(insecure.UnsignedCommitApps),
+			UnsignedCommitMachineUsers: toSet(insecure.UnsignedCommitMachineUsers),
 		}
 	}
 	return c.validator.Run(logger, input)
+}
+
+func toSet(s []string) map[string]struct{} {
+	m := make(map[string]struct{}, len(s))
+	for _, v := range s {
+		m[v] = struct{}{}
+	}
+	return m
 }

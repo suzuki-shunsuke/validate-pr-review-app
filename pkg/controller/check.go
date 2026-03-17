@@ -37,7 +37,8 @@ func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *va
 	result.UntrustedMachineUsers = trust.UntrustedMachineUsers
 	if insecure != nil {
 		result.AllowUnsignedCommits = insecure.AllowUnsignedCommits
-		result.UnsignedCommitAuthors = insecure.UnsignedCommitAuthors
+		result.UnsignedCommitApps = insecure.UnsignedCommitApps
+		result.UnsignedCommitMachineUsers = insecure.UnsignedCommitMachineUsers
 	}
 	s, err := summarize(result, c.input.Config.BuiltTemplates)
 	if err != nil {

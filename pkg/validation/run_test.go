@@ -406,7 +406,7 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
-			name:     "unsigned commit with matching UnsignedCommitAuthors - one approval sufficient",
+			name:     "unsigned commit with matching UnsignedCommitMachineUsers - one approval sufficient",
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
@@ -415,7 +415,7 @@ func TestController_Run(t *testing.T) {
 					UntrustedMachineUsers: map[string]struct{}{},
 				},
 				Insecure: &validation.Insecure{
-					UnsignedCommitAuthors: []string{"machine-*"},
+					UnsignedCommitMachineUsers: map[string]struct{}{"machine-user": {}},
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
@@ -440,7 +440,7 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
-			name:     "unsigned commit with non-matching UnsignedCommitAuthors - two approvals required",
+			name:     "unsigned commit with non-matching UnsignedCommitMachineUsers - two approvals required",
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
@@ -449,7 +449,7 @@ func TestController_Run(t *testing.T) {
 					UntrustedMachineUsers: map[string]struct{}{},
 				},
 				Insecure: &validation.Insecure{
-					UnsignedCommitAuthors: []string{"machine-*"},
+					UnsignedCommitMachineUsers: map[string]struct{}{"machine-user": {}},
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
@@ -482,6 +482,40 @@ func TestController_Run(t *testing.T) {
 						},
 					},
 				},
+			},
+		},
+		{
+			name:     "unsigned commit from bot app with matching UnsignedCommitApps - one approval sufficient",
+			inputNew: &validation.InputNew{},
+			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps:           map[string]struct{}{"eks-cluster-upgrade-ci[bot]": {}},
+					TrustedMachineUsers:   map[string]struct{}{},
+					UntrustedMachineUsers: map[string]struct{}{},
+				},
+				Insecure: &validation.Insecure{
+					UnsignedCommitApps: map[string]struct{}{"eks-cluster-upgrade-ci": {}},
+				},
+				PR: &github.PullRequest{
+					HeadSHA: "abc123",
+					Approvers: map[string]*github.User{
+						"reviewer1": {Login: "reviewer1"},
+					},
+					Commits: []*github.Commit{
+						{
+							SHA: "abc123",
+							Committer: &github.User{
+								Login: "eks-cluster-upgrade-ci[bot]",
+								IsApp: true,
+							},
+							Signature: nil,
+						},
+					},
+				},
+			},
+			expected: &validation.Result{
+				State:     validation.StateApproved,
+				Approvers: []string{"reviewer1"},
 			},
 		},
 		{
