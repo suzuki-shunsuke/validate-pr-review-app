@@ -36,7 +36,7 @@ func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *va
 	result.TrustedMachineUsers = trust.TrustedMachineUsers
 	result.UntrustedMachineUsers = trust.UntrustedMachineUsers
 	if insecure != nil {
-		result.AllowUnsignedCommits = insecure.AllowUnsignedCommits
+		result.AllowUnsignedCommits = insecure.AllowUnsignedCommits != nil && *insecure.AllowUnsignedCommits
 		result.UnsignedCommitApps = insecure.UnsignedCommitApps
 		result.UnsignedCommitMachineUsers = insecure.UnsignedCommitMachineUsers
 	}

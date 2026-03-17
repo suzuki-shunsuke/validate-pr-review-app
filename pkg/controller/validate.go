@@ -25,7 +25,7 @@ func (c *Controller) validate(ctx context.Context, logger *slog.Logger, ev *Even
 	}
 	if insecure != nil {
 		input.Insecure = &validation.Insecure{
-			AllowUnsignedCommits:       insecure.AllowUnsignedCommits,
+			AllowUnsignedCommits:       insecure.AllowUnsignedCommits != nil && *insecure.AllowUnsignedCommits,
 			UnsignedCommitApps:         toSet(insecure.UnsignedCommitApps),
 			UnsignedCommitMachineUsers: toSet(insecure.UnsignedCommitMachineUsers),
 		}

@@ -106,7 +106,7 @@ func Test_mergeTrust_doesNotMutateGlobal(t *testing.T) {
 	}
 }
 
-func Test_mergeInsecure(t *testing.T) {
+func Test_mergeInsecure(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	tests := []struct {
 		name   string
@@ -121,12 +121,12 @@ func Test_mergeInsecure(t *testing.T) {
 		{
 			name: "global set, repo nil",
 			global: &config.Insecure{
-				AllowUnsignedCommits:       true,
+				AllowUnsignedCommits:       new(true),
 				UnsignedCommitApps:         []string{"app1"},
 				UnsignedCommitMachineUsers: []string{"bot1"},
 			},
 			want: config.Insecure{
-				AllowUnsignedCommits:       true,
+				AllowUnsignedCommits:       new(true),
 				UnsignedCommitApps:         []string{"app1"},
 				UnsignedCommitMachineUsers: []string{"bot1"},
 			},
@@ -134,17 +134,17 @@ func Test_mergeInsecure(t *testing.T) {
 		{
 			name: "global set, repo overrides all",
 			global: &config.Insecure{
-				AllowUnsignedCommits:       true,
+				AllowUnsignedCommits:       new(true),
 				UnsignedCommitApps:         []string{"app1"},
 				UnsignedCommitMachineUsers: []string{"bot1"},
 			},
 			repo: &config.Insecure{
-				AllowUnsignedCommits:       false,
+				AllowUnsignedCommits:       new(false),
 				UnsignedCommitApps:         []string{"app2"},
 				UnsignedCommitMachineUsers: []string{"bot2"},
 			},
 			want: config.Insecure{
-				AllowUnsignedCommits:       false,
+				AllowUnsignedCommits:       new(false),
 				UnsignedCommitApps:         []string{"app2"},
 				UnsignedCommitMachineUsers: []string{"bot2"},
 			},
@@ -152,7 +152,7 @@ func Test_mergeInsecure(t *testing.T) {
 		{
 			name: "global set, repo partial override apps only",
 			global: &config.Insecure{
-				AllowUnsignedCommits:       true,
+				AllowUnsignedCommits:       new(true),
 				UnsignedCommitApps:         []string{"app1"},
 				UnsignedCommitMachineUsers: []string{"bot1"},
 			},
@@ -160,18 +160,52 @@ func Test_mergeInsecure(t *testing.T) {
 				UnsignedCommitApps: []string{"app2"},
 			},
 			want: config.Insecure{
+				AllowUnsignedCommits:       new(false),
 				UnsignedCommitApps:         []string{"app2"},
 				UnsignedCommitMachineUsers: []string{"bot1"},
+			},
+		},
+		{
+			name: "global set, repo sets apps and explicitly allows unsigned",
+			global: &config.Insecure{
+				AllowUnsignedCommits:       new(true),
+				UnsignedCommitApps:         []string{"app1"},
+				UnsignedCommitMachineUsers: []string{"bot1"},
+			},
+			repo: &config.Insecure{
+				UnsignedCommitApps:   []string{"app2"},
+				AllowUnsignedCommits: new(true),
+			},
+			want: config.Insecure{
+				AllowUnsignedCommits:       new(true),
+				UnsignedCommitApps:         []string{"app2"},
+				UnsignedCommitMachineUsers: []string{"bot1"},
+			},
+		},
+		{
+			name: "global set, repo sets machine users only",
+			global: &config.Insecure{
+				AllowUnsignedCommits:       new(true),
+				UnsignedCommitApps:         []string{"app1"},
+				UnsignedCommitMachineUsers: []string{"bot1"},
+			},
+			repo: &config.Insecure{
+				UnsignedCommitMachineUsers: []string{"bot2"},
+			},
+			want: config.Insecure{
+				AllowUnsignedCommits:       new(false),
+				UnsignedCommitApps:         []string{"app1"},
+				UnsignedCommitMachineUsers: []string{"bot2"},
 			},
 		},
 		{
 			name:   "global nil, repo set",
 			global: nil,
 			repo: &config.Insecure{
-				AllowUnsignedCommits: true,
+				AllowUnsignedCommits: new(true),
 			},
 			want: config.Insecure{
-				AllowUnsignedCommits: true,
+				AllowUnsignedCommits: new(true),
 			},
 		},
 	}
@@ -189,12 +223,12 @@ func Test_mergeInsecure(t *testing.T) {
 func Test_mergeInsecure_doesNotMutateGlobal(t *testing.T) {
 	t.Parallel()
 	global := &config.Insecure{
-		AllowUnsignedCommits:       true,
+		AllowUnsignedCommits:       new(true),
 		UnsignedCommitApps:         []string{"app1"},
 		UnsignedCommitMachineUsers: []string{"bot1"},
 	}
 	repo := &config.Insecure{
-		AllowUnsignedCommits:       false,
+		AllowUnsignedCommits:       new(false),
 		UnsignedCommitApps:         []string{"app2"},
 		UnsignedCommitMachineUsers: []string{"bot2"},
 	}

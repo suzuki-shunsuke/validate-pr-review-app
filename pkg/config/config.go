@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"html/template"
 )
 
@@ -29,6 +30,12 @@ func (c *Config) Init() error {
 
 	if err := c.validatePlatform(); err != nil {
 		return err
+	}
+
+	if c.Insecure != nil {
+		if err := c.Insecure.Validate(); err != nil {
+			return fmt.Errorf("validate insecure config: %w", err)
+		}
 	}
 
 	if err := c.initRepos(); err != nil {

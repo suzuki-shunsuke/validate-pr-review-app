@@ -78,11 +78,15 @@ func mergeInsecure(global *config.Insecure, repo *config.Insecure) config.Insecu
 	if repo != nil {
 		if repo.UnsignedCommitApps != nil {
 			insecure.UnsignedCommitApps = repo.UnsignedCommitApps
+			insecure.AllowUnsignedCommits = new(false)
 		}
 		if repo.UnsignedCommitMachineUsers != nil {
 			insecure.UnsignedCommitMachineUsers = repo.UnsignedCommitMachineUsers
+			insecure.AllowUnsignedCommits = new(false)
 		}
-		insecure.AllowUnsignedCommits = repo.AllowUnsignedCommits
+		if repo.AllowUnsignedCommits != nil {
+			insecure.AllowUnsignedCommits = repo.AllowUnsignedCommits
+		}
 	}
 	return insecure
 }
