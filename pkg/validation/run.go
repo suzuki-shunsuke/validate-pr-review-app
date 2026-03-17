@@ -175,7 +175,7 @@ type Result struct {
 	AllowUnsignedCommits       bool
 	UnsignedCommitApps         []string
 	UnsignedCommitMachineUsers []string
-	Version               string
+	Version                    string
 }
 
 func isUnsignedCommitAllowed(login string, insecure *Insecure) bool {

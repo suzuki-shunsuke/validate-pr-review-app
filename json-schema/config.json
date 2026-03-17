@@ -81,7 +81,13 @@
         "allow_unsigned_commits": {
           "type": "boolean"
         },
-        "unsigned_commit_authors": {
+        "unsigned_commit_apps": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "unsigned_commit_machine_users": {
           "items": {
             "type": "string"
           },
