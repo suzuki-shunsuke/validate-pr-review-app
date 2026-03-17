@@ -60,7 +60,7 @@ func (c *Client) ListReviews(ctx context.Context, owner, name string, number int
 		if !pageInfo.HasNextPage {
 			return reviews, nil
 		}
-		variables["cursor"] = pageInfo.EndCursor
+		variables["cursor"] = githubv4.String(pageInfo.EndCursor)
 	}
 	return reviews, nil
 }
@@ -84,7 +84,7 @@ func (c *Client) ListCommits(ctx context.Context, owner, name string, number int
 		if !pageInfo.HasNextPage {
 			return commits, nil
 		}
-		variables["cursor"] = pageInfo.EndCursor
+		variables["cursor"] = githubv4.String(pageInfo.EndCursor)
 	}
 	return commits, nil
 }
