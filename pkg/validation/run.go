@@ -6,6 +6,7 @@ import (
 	"path"
 	"slices"
 	"sort"
+	"strings"
 
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
@@ -171,9 +172,10 @@ type Result struct {
 	UntrustedMachineUsers []string
 	TrustedMachineUsers   []string
 	// insecure settings
-	AllowUnsignedCommits  bool
-	UnsignedCommitAuthors []string
-	Version               string
+	AllowUnsignedCommits       bool
+	UnsignedCommitApps         []string
+	UnsignedCommitMachineUsers []string
+	Version                    string
 }
 
 func isUnsignedCommitAllowed(login string, insecure *Insecure) bool {
@@ -183,10 +185,14 @@ func isUnsignedCommitAllowed(login string, insecure *Insecure) bool {
 	if insecure.AllowUnsignedCommits {
 		return true
 	}
-	for _, pattern := range insecure.UnsignedCommitAuthors {
-		if matched, _ := path.Match(pattern, login); matched {
-			return true
-		}
+	// Check apps: strip [bot] suffix from login for lookup
+	appName := strings.TrimSuffix(login, "[bot]")
+	if _, ok := insecure.UnsignedCommitApps[appName]; ok {
+		return true
+	}
+	// Check machine users: exact match
+	if _, ok := insecure.UnsignedCommitMachineUsers[login]; ok {
+		return true
 	}
 	return false
 }

@@ -32,6 +32,12 @@ func (c *Config) Init() error {
 		return err
 	}
 
+	if c.Insecure != nil {
+		if err := c.Insecure.Validate(); err != nil {
+			return fmt.Errorf("validate insecure config: %w", err)
+		}
+	}
+
 	if err := c.initRepos(); err != nil {
 		return err
 	}
@@ -40,9 +46,6 @@ func (c *Config) Init() error {
 	}
 	if err := c.testUntrustedMachineUsers(); err != nil {
 		return err
-	}
-	if err := c.Insecure.Validate(); err != nil {
-		return fmt.Errorf("validate insecure config: %w", err)
 	}
 	return c.testTemplate()
 }

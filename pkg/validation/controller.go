@@ -27,8 +27,9 @@ type Input struct {
 }
 
 type Insecure struct {
-	AllowUnsignedCommits  bool
-	UnsignedCommitAuthors []string
+	AllowUnsignedCommits       bool
+	UnsignedCommitApps         map[string]struct{}
+	UnsignedCommitMachineUsers map[string]struct{}
 }
 
 type Trust struct {

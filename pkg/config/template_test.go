@@ -207,12 +207,13 @@ Trusted Machine Users: Nothing
 		{
 			name: "approved with insecure settings",
 			result: &validation.Result{
-				State:                 validation.StateApproved,
-				Approvers:             []string{"user1"},
-				AllowUnsignedCommits:  true,
-				UnsignedCommitAuthors: []string{"bot-*", "ci-user"},
-				Version:               "v0.1.0",
-				RequestID:             "req-insecure",
+				State:                      validation.StateApproved,
+				Approvers:                  []string{"user1"},
+				AllowUnsignedCommits:       true,
+				UnsignedCommitApps:         []string{"renovate", "dependabot"},
+				UnsignedCommitMachineUsers: []string{"ci-user"},
+				Version:                    "v0.1.0",
+				RequestID:                  "req-insecure",
 			},
 			template: "approved",
 			wantText: `The pull request has been approved.
@@ -231,8 +232,10 @@ Trusted Machine Users: Nothing
 
 :warning: Insecure Settings:
 - Allow Unsigned Commits: Yes
-- Unsigned Commit Authors:
-  - bot-*
+- Unsigned Commit Apps:
+  - renovate
+  - dependabot
+- Unsigned Commit Machine Users:
   - ci-user
 
 ---
@@ -244,13 +247,13 @@ Trusted Machine Users: Nothing
 `,
 		},
 		{
-			name: "approved with only unsigned commit authors",
+			name: "approved with only unsigned commit apps",
 			result: &validation.Result{
-				State:                 validation.StateApproved,
-				Approvers:             []string{"user1"},
-				UnsignedCommitAuthors: []string{"deploy-bot"},
-				Version:               "v0.1.0",
-				RequestID:             "req-partial",
+				State:              validation.StateApproved,
+				Approvers:          []string{"user1"},
+				UnsignedCommitApps: []string{"deploy-bot"},
+				Version:            "v0.1.0",
+				RequestID:          "req-partial",
 			},
 			template: "approved",
 			wantText: `The pull request has been approved.
@@ -268,7 +271,7 @@ Untrusted Machine Users: Nothing
 Trusted Machine Users: Nothing
 
 :warning: Insecure Settings:
-- Unsigned Commit Authors:
+- Unsigned Commit Apps:
   - deploy-bot
 
 ---
