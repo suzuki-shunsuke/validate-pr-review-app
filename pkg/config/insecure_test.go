@@ -6,7 +6,7 @@ import (
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 )
 
-func TestInsecure_Validate(t *testing.T) {
+func TestInsecure_Validate(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	tests := []struct {
 		name    string
