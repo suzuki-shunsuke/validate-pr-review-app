@@ -75,17 +75,23 @@ func mergeInsecure(global *config.Insecure, repo *config.Insecure) config.Insecu
 	if global != nil {
 		insecure = *global
 	}
-	if repo != nil {
-		if repo.UnsignedCommitApps != nil {
-			insecure.UnsignedCommitApps = repo.UnsignedCommitApps
-			insecure.AllowUnsignedCommits = new(false)
-		}
-		if repo.UnsignedCommitMachineUsers != nil {
-			insecure.UnsignedCommitMachineUsers = repo.UnsignedCommitMachineUsers
-			insecure.AllowUnsignedCommits = new(false)
-		}
-		if repo.AllowUnsignedCommits != nil {
-			insecure.AllowUnsignedCommits = repo.AllowUnsignedCommits
+	if repo == nil {
+		return insecure
+	}
+	if repo.UnsignedCommitApps != nil {
+		insecure.UnsignedCommitApps = repo.UnsignedCommitApps
+		insecure.AllowUnsignedCommits = new(false)
+	}
+	if repo.UnsignedCommitMachineUsers != nil {
+		insecure.UnsignedCommitMachineUsers = repo.UnsignedCommitMachineUsers
+		insecure.AllowUnsignedCommits = new(false)
+	}
+	if repo.AllowUnsignedCommits != nil {
+		insecure.AllowUnsignedCommits = repo.AllowUnsignedCommits
+		if *repo.AllowUnsignedCommits {
+			// If repo.AllowUnsignedCommits is true, it overrides global UnsignedCommitApps and UnsignedCommitMachineUsers.
+			insecure.UnsignedCommitApps = nil
+			insecure.UnsignedCommitMachineUsers = nil
 		}
 	}
 	return insecure

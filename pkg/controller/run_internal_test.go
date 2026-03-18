@@ -119,22 +119,28 @@ func Test_mergeInsecure(t *testing.T) { //nolint:funlen
 			want: config.Insecure{},
 		},
 		{
-			name: "global set, repo nil",
+			name: "global set AllowUnsignedCommits true, repo nil",
 			global: &config.Insecure{
-				AllowUnsignedCommits:       new(true),
+				AllowUnsignedCommits: new(true),
+			},
+			want: config.Insecure{
+				AllowUnsignedCommits: new(true),
+			},
+		},
+		{
+			name: "global set apps and machine users, repo nil",
+			global: &config.Insecure{
 				UnsignedCommitApps:         []string{"app1"},
 				UnsignedCommitMachineUsers: []string{"bot1"},
 			},
 			want: config.Insecure{
-				AllowUnsignedCommits:       new(true),
 				UnsignedCommitApps:         []string{"app1"},
 				UnsignedCommitMachineUsers: []string{"bot1"},
 			},
 		},
 		{
-			name: "global set, repo overrides all",
+			name: "global set apps and machine users, repo overrides all",
 			global: &config.Insecure{
-				AllowUnsignedCommits:       new(true),
 				UnsignedCommitApps:         []string{"app1"},
 				UnsignedCommitMachineUsers: []string{"bot1"},
 			},
@@ -150,9 +156,8 @@ func Test_mergeInsecure(t *testing.T) { //nolint:funlen
 			},
 		},
 		{
-			name: "global set, repo partial override apps only",
+			name: "global set apps and machine users, repo partial override apps only",
 			global: &config.Insecure{
-				AllowUnsignedCommits:       new(true),
 				UnsignedCommitApps:         []string{"app1"},
 				UnsignedCommitMachineUsers: []string{"bot1"},
 			},
@@ -166,26 +171,34 @@ func Test_mergeInsecure(t *testing.T) { //nolint:funlen
 			},
 		},
 		{
-			name: "global set, repo sets apps and explicitly allows unsigned",
+			name: "global set AllowUnsignedCommits true, repo sets apps",
 			global: &config.Insecure{
-				AllowUnsignedCommits:       new(true),
+				AllowUnsignedCommits: new(true),
+			},
+			repo: &config.Insecure{
+				UnsignedCommitApps: []string{"app2"},
+			},
+			want: config.Insecure{
+				AllowUnsignedCommits: new(false),
+				UnsignedCommitApps:   []string{"app2"},
+			},
+		},
+		{
+			name: "global set apps, repo sets AllowUnsignedCommits true",
+			global: &config.Insecure{
 				UnsignedCommitApps:         []string{"app1"},
 				UnsignedCommitMachineUsers: []string{"bot1"},
 			},
 			repo: &config.Insecure{
-				UnsignedCommitApps:   []string{"app2"},
 				AllowUnsignedCommits: new(true),
 			},
 			want: config.Insecure{
-				AllowUnsignedCommits:       new(true),
-				UnsignedCommitApps:         []string{"app2"},
-				UnsignedCommitMachineUsers: []string{"bot1"},
+				AllowUnsignedCommits: new(true),
 			},
 		},
 		{
-			name: "global set, repo sets machine users only",
+			name: "global set apps and machine users, repo sets machine users only",
 			global: &config.Insecure{
-				AllowUnsignedCommits:       new(true),
 				UnsignedCommitApps:         []string{"app1"},
 				UnsignedCommitMachineUsers: []string{"bot1"},
 			},
@@ -223,7 +236,6 @@ func Test_mergeInsecure(t *testing.T) { //nolint:funlen
 func Test_mergeInsecure_doesNotMutateGlobal(t *testing.T) {
 	t.Parallel()
 	global := &config.Insecure{
-		AllowUnsignedCommits:       new(true),
 		UnsignedCommitApps:         []string{"app1"},
 		UnsignedCommitMachineUsers: []string{"bot1"},
 	}
