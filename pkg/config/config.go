@@ -23,6 +23,9 @@ func (c *Config) Init() error {
 	if c.Trust == nil {
 		c.Trust = &Trust{}
 	}
+	if err := c.Trust.Validate(); err != nil {
+		return fmt.Errorf("validate trust config: %w", err)
+	}
 	c.Trust.Init()
 	if c.CheckName == "" {
 		c.CheckName = "validate-review"

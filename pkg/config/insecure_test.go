@@ -63,6 +63,34 @@ func TestInsecure_Validate(t *testing.T) { //nolint:funlen
 			},
 			wantErr: true,
 		},
+		{
+			name: "invalid unsigned_commit_apps with dot",
+			input: &config.Insecure{
+				UnsignedCommitApps: []string{"user.name"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid unsigned_commit_apps with asterisk",
+			input: &config.Insecure{
+				UnsignedCommitApps: []string{"renovate*"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid unsigned_commit_machine_users with dot",
+			input: &config.Insecure{
+				UnsignedCommitMachineUsers: []string{"user.name"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid unsigned_commit_machine_users with asterisk",
+			input: &config.Insecure{
+				UnsignedCommitMachineUsers: []string{"bot*"},
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {

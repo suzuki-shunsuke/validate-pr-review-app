@@ -56,6 +56,9 @@ func (r *Repository) Validate() error {
 			return fmt.Errorf("invalid repository pattern %q: %w", pattern, err)
 		}
 	}
+	if err := r.Trust.Validate(); err != nil {
+		return fmt.Errorf("validate trust config: %w", err)
+	}
 	if r.Insecure != nil {
 		if err := r.Insecure.Validate(); err != nil {
 			return fmt.Errorf("validate insecure config: %w", err)

@@ -15,6 +15,16 @@ type Trust struct {
 	UniqueTrustedApps           map[string]struct{} `json:"-" yaml:"-"`
 }
 
+func (t *Trust) Validate() error {
+	if err := validateLoginNames(t.TrustedApps, "trusted_apps"); err != nil {
+		return err
+	}
+	if err := validateLoginNames(t.TrustedMachineUsers, "trusted_machine_users"); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (t *Trust) Init() {
 	if t.TrustedApps == nil {
 		t.TrustedApps = []string{
@@ -31,7 +41,6 @@ func (t *Trust) Init() {
 	}
 	t.UniqueTrustedApps = make(map[string]struct{}, len(t.TrustedApps))
 	for _, app := range t.TrustedApps {
-		// TODO validate the app name
 		if app == "" {
 			continue
 		}
@@ -39,7 +48,6 @@ func (t *Trust) Init() {
 	}
 	t.UniqueTrustedMachineUsers = make(map[string]struct{}, len(t.TrustedMachineUsers))
 	for _, user := range t.TrustedMachineUsers {
-		// TODO validate the user name
 		if user == "" {
 			continue
 		}
@@ -47,7 +55,6 @@ func (t *Trust) Init() {
 	}
 	t.UniqueUntrustedMachineUsers = make(map[string]struct{}, len(t.UntrustedMachineUsers))
 	for _, user := range t.UntrustedMachineUsers {
-		// TODO validate the user name
 		if user == "" {
 			continue
 		}
