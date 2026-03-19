@@ -49,6 +49,30 @@ func Test_validateLoginNames(t *testing.T) {
 			field:   "trusted_apps",
 			wantErr: true,
 		},
+		{
+			name:    "invalid with question mark",
+			names:   []string{"bot?"},
+			field:   "trusted_apps",
+			wantErr: true,
+		},
+		{
+			name:    "invalid with caret",
+			names:   []string{"^bot"},
+			field:   "trusted_apps",
+			wantErr: true,
+		},
+		{
+			name:    "invalid with plus",
+			names:   []string{"bot+"},
+			field:   "trusted_apps",
+			wantErr: true,
+		},
+		{
+			name:    "invalid with dollar",
+			names:   []string{"bot$"},
+			field:   "trusted_apps",
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
