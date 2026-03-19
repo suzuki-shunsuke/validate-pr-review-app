@@ -2,7 +2,7 @@ package config
 
 import "testing"
 
-func Test_validateLoginNames(t *testing.T) {
+func Test_validateLoginNames(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	tests := []struct {
 		name    string
