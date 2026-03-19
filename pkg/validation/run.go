@@ -197,6 +197,31 @@ func isUnsignedCommitAllowed(login string, insecure *Insecure) bool {
 	return false
 }
 
+func (r *Result) Reasons() []string {
+	var reasons []string
+	hasUnsigned := false
+	hasUntrustedApp := false
+	hasUntrustedMachineUser := false
+	for _, c := range r.UntrustedCommits {
+		if !hasUnsigned && (c.NotLinkedToUser || c.InvalidSign != nil) {
+			hasUnsigned = true
+			reasons = append(reasons, "unsigned commits")
+		}
+		if !hasUntrustedApp && c.IsUntrustedApp {
+			hasUntrustedApp = true
+			reasons = append(reasons, "untrusted app commits")
+		}
+		if !hasUntrustedMachineUser && c.IsUntrustedMachineUser {
+			hasUntrustedMachineUser = true
+			reasons = append(reasons, "untrusted machine user commits")
+		}
+	}
+	if r.SelfApprover != "" {
+		reasons = append(reasons, "self-approval")
+	}
+	return reasons
+}
+
 type State string
 
 const (
