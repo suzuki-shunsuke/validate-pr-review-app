@@ -14,5 +14,11 @@ func (i *Insecure) Validate() error {
 			return errors.New("allow_unsigned_commits cannot be used together with unsigned_commit_apps or unsigned_commit_machine_users")
 		}
 	}
+	if err := validateLoginNames(i.UnsignedCommitApps, "unsigned_commit_apps"); err != nil {
+		return err
+	}
+	if err := validateLoginNames(i.UnsignedCommitMachineUsers, "unsigned_commit_machine_users"); err != nil {
+		return err
+	}
 	return nil
 }
