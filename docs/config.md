@@ -135,19 +135,23 @@ In the real world, sometimes it's hard to enforce signed commits.
 So you may want to allow unsigned commits from certain authors.
 
 - `allow_unsigned_commits`: If this is true, all unsigned commits don't require two approvals. By default, this is false.
-- `unsigned_commit_authors`: If this is set, commits from these authors don't require two approvals. By default, this is empty.
-  - If `allow_unsigned_commits` is true, this setting is ignored.
+- `unsigned_commit_apps`: If this is set, commits from these apps don't require two approvals. By default, this is empty.
+  - If `allow_unsigned_commits` is true, please don't set this setting. Otherwise, the app fails.
+  - Glob is unavailable
+  - `[bot]` should be removed from login
+- `unsigned_commit_machine_users`: If this is set, commits from these machine users don't require two approvals. By default, this is empty.
+  - If `allow_unsigned_commits` is true, please don't set this setting. Otherwise, the app fails.
+  - Glob is unavailable
 
 ```yaml
 insecure:
   allow_unsigned_commits: true
-  unsigned_commit_authors:
-    - "*-bot"
 repositories:
   - repositories:
       - suzuki-shunsuke/*
     insecure: # The repository config overrides the root config.
-      allow_unsigned_commits: true
-      unsigned_commit_authors:
-        - "*-bot"
+      unsigned_commit_machine_users:
+        - "foo-bot"
+      unsigned_commit_apps:
+        - "foo-bot"
 ```
