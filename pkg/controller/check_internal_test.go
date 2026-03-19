@@ -9,10 +9,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/shurcooL/githubv4"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
-func TestController_newCheckRunInput(t *testing.T) {
+func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 	t.Parallel()
 
 	// Setup templates
@@ -93,7 +94,38 @@ func TestController_newCheckRunInput(t *testing.T) {
 			},
 		},
 		{
-			name: "two approvals required state",
+			name: "two approvals required state - self-approval",
+			config: &config.Config{
+				CheckName:      "test-check",
+				BuiltTemplates: templates,
+			},
+			trust: &config.Trust{
+				TrustedApps:           []string{"dependabot[bot]"},
+				TrustedMachineUsers:   []string{"trusted-user"},
+				UntrustedMachineUsers: []string{"untrusted-*"},
+			},
+			event: &Event{
+				RepoID:  "12345",
+				HeadSHA: "abc123",
+			},
+			result: &validation.Result{
+				State:        validation.StateTwoApprovalsAreRequired,
+				SelfApprover: "committer",
+			},
+			expected: githubv4.CreateCheckRunInput{
+				RepositoryID: githubv4.String("12345"),
+				HeadSha:      githubv4.GitObjectID("abc123"),
+				Name:         githubv4.String("test-check"),
+				Status:       &[]githubv4.RequestableCheckStatusState{githubv4.RequestableCheckStatusStateCompleted}[0],
+				Conclusion:   &[]githubv4.CheckConclusionState{githubv4.CheckConclusionStateFailure}[0],
+				Output: &githubv4.CheckRunOutput{
+					Title:   githubv4.String("Two approvals are required (self-approval)"),
+					Summary: githubv4.String("Two approvals required"),
+				},
+			},
+		},
+		{
+			name: "two approvals required state - unsigned commits",
 			config: &config.Config{
 				CheckName:      "test-check",
 				BuiltTemplates: templates,
@@ -109,6 +141,13 @@ func TestController_newCheckRunInput(t *testing.T) {
 			},
 			result: &validation.Result{
 				State: validation.StateTwoApprovalsAreRequired,
+				UntrustedCommits: []*github.UntrustedCommit{
+					{
+						Login:       "committer",
+						SHA:         "abc123",
+						InvalidSign: &github.Signature{State: "invalid"},
+					},
+				},
 			},
 			expected: githubv4.CreateCheckRunInput{
 				RepositoryID: githubv4.String("12345"),
@@ -117,7 +156,45 @@ func TestController_newCheckRunInput(t *testing.T) {
 				Status:       &[]githubv4.RequestableCheckStatusState{githubv4.RequestableCheckStatusStateCompleted}[0],
 				Conclusion:   &[]githubv4.CheckConclusionState{githubv4.CheckConclusionStateFailure}[0],
 				Output: &githubv4.CheckRunOutput{
-					Title:   githubv4.String("Two approvals are required"),
+					Title:   githubv4.String("Two approvals are required (unsigned commits)"),
+					Summary: githubv4.String("Two approvals required"),
+				},
+			},
+		},
+		{
+			name: "two approvals required state - unsigned commits and self-approval",
+			config: &config.Config{
+				CheckName:      "test-check",
+				BuiltTemplates: templates,
+			},
+			trust: &config.Trust{
+				TrustedApps:           []string{"dependabot[bot]"},
+				TrustedMachineUsers:   []string{"trusted-user"},
+				UntrustedMachineUsers: []string{"untrusted-*"},
+			},
+			event: &Event{
+				RepoID:  "12345",
+				HeadSHA: "abc123",
+			},
+			result: &validation.Result{
+				State:        validation.StateTwoApprovalsAreRequired,
+				SelfApprover: "committer",
+				UntrustedCommits: []*github.UntrustedCommit{
+					{
+						Login:           "committer",
+						SHA:             "abc123",
+						NotLinkedToUser: true,
+					},
+				},
+			},
+			expected: githubv4.CreateCheckRunInput{
+				RepositoryID: githubv4.String("12345"),
+				HeadSha:      githubv4.GitObjectID("abc123"),
+				Name:         githubv4.String("test-check"),
+				Status:       &[]githubv4.RequestableCheckStatusState{githubv4.RequestableCheckStatusStateCompleted}[0],
+				Conclusion:   &[]githubv4.CheckConclusionState{githubv4.CheckConclusionStateFailure}[0],
+				Output: &githubv4.CheckRunOutput{
+					Title:   githubv4.String("Two approvals are required (unsigned commits, self-approval)"),
 					Summary: githubv4.String("Two approvals required"),
 				},
 			},

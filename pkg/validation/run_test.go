@@ -603,3 +603,140 @@ func TestController_Run(t *testing.T) {
 		})
 	}
 }
+
+func TestResult_Reasons(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name     string
+		result   *validation.Result
+		expected []string
+	}{
+		{
+			name:     "no reasons",
+			result:   &validation.Result{},
+			expected: nil,
+		},
+		{
+			name: "self-approval only",
+			result: &validation.Result{
+				SelfApprover: "user1",
+			},
+			expected: []string{"self-approval"},
+		},
+		{
+			name: "unsigned commit - InvalidSign",
+			result: &validation.Result{
+				UntrustedCommits: []*github.UntrustedCommit{
+					{
+						Login:       "user1",
+						SHA:         "abc123",
+						InvalidSign: &github.Signature{State: "invalid"},
+					},
+				},
+			},
+			expected: []string{"unsigned commits"},
+		},
+		{
+			name: "unsigned commit - NotLinkedToUser",
+			result: &validation.Result{
+				UntrustedCommits: []*github.UntrustedCommit{
+					{
+						SHA:             "abc123",
+						NotLinkedToUser: true,
+					},
+				},
+			},
+			expected: []string{"unsigned commits"},
+		},
+		{
+			name: "untrusted app commit only",
+			result: &validation.Result{
+				UntrustedCommits: []*github.UntrustedCommit{
+					{
+						Login:          "app[bot]",
+						SHA:            "abc123",
+						IsUntrustedApp: true,
+					},
+				},
+			},
+			expected: []string{"untrusted app commits"},
+		},
+		{
+			name: "untrusted machine user commit only",
+			result: &validation.Result{
+				UntrustedCommits: []*github.UntrustedCommit{
+					{
+						Login:                  "bot-user",
+						SHA:                    "abc123",
+						IsUntrustedMachineUser: true,
+					},
+				},
+			},
+			expected: []string{"untrusted machine user commits"},
+		},
+		{
+			name: "unsigned commit and self-approval",
+			result: &validation.Result{
+				SelfApprover: "user1",
+				UntrustedCommits: []*github.UntrustedCommit{
+					{
+						Login:       "user1",
+						SHA:         "abc123",
+						InvalidSign: &github.Signature{State: "invalid"},
+					},
+				},
+			},
+			expected: []string{"unsigned commits", "self-approval"},
+		},
+		{
+			name: "multiple unsigned commits - deduplicated",
+			result: &validation.Result{
+				UntrustedCommits: []*github.UntrustedCommit{
+					{
+						Login:       "user1",
+						SHA:         "abc123",
+						InvalidSign: &github.Signature{State: "invalid"},
+					},
+					{
+						SHA:             "def456",
+						NotLinkedToUser: true,
+					},
+				},
+			},
+			expected: []string{"unsigned commits"},
+		},
+		{
+			name: "all reasons combined",
+			result: &validation.Result{
+				SelfApprover: "user1",
+				UntrustedCommits: []*github.UntrustedCommit{
+					{
+						Login:           "user1",
+						SHA:             "abc123",
+						NotLinkedToUser: true,
+					},
+					{
+						Login:          "app[bot]",
+						SHA:            "def456",
+						IsUntrustedApp: true,
+					},
+					{
+						Login:                  "bot-user",
+						SHA:                    "ghi789",
+						IsUntrustedMachineUser: true,
+					},
+				},
+			},
+			expected: []string{"unsigned commits", "untrusted app commits", "untrusted machine user commits", "self-approval"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if diff := cmp.Diff(tt.expected, tt.result.Reasons()); diff != "" {
+				t.Errorf("Reasons() mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

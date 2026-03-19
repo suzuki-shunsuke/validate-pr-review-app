@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"log/slog"
+	"strings"
 
 	"github.com/shurcooL/githubv4"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
@@ -26,7 +27,12 @@ func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *va
 		title = githubv4.String("Approvals are required")
 	case validation.StateTwoApprovalsAreRequired:
 		conclusion = githubv4.CheckConclusionStateFailure
-		title = githubv4.String("Two approvals are required")
+		reasons := result.Reasons()
+		if len(reasons) > 0 {
+			title = githubv4.String("Two approvals are required (" + strings.Join(reasons, ", ") + ")")
+		} else {
+			title = githubv4.String("Two approvals are required")
+		}
 	}
 	if result.Error != "" {
 		conclusion = githubv4.CheckConclusionStateFailure
