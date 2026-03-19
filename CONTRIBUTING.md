@@ -32,3 +32,7 @@ Lint:
 cmdx v # go vet
 cmdx l # golangci-lint
 ```
+
+### Hot To Run App On Your Machine
+
+[Please see Getting Started (HTTP).](docs/getting-started/http.md)
