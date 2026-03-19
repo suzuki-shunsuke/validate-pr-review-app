@@ -48,12 +48,18 @@ docker run --rm -d -p 8080:8080 \
 Go:
 
 ```sh
+bash start-go.sh
+```
+
+Or
+
+```sh
 export CONFIG_FILE=example/config.yaml
 export SECRET_FILE=example/secret.yaml
 go run ./cmd/app
 ```
 
-5. Receive GitHub Webhook using [smee.io](https://smee.io/)
+5. Receive GitHub Webhook using [smee.io](https://smee.io/) ([smee-client](https://www.npmjs.com/package/smee-client))
 
 [See also the GitHub Document `Handling webhook deliveries`](https://docs.github.com/en/webhooks/using-webhooks/handling-webhook-deliveries)
 
@@ -61,4 +67,5 @@ go run ./cmd/app
 smee -u <Webhook Proxy URL> -p 8080 --path /webhook
 ```
 
-6. Create pull requests and reviews
+6. Change the GitHub App Webhook URL to `<Webhook Proxy URL>`.
+7. Create pull requests and reviews
