@@ -39,7 +39,6 @@ func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *va
 		title = githubv4.String("Internal Error")
 	}
 	result.TrustedApps = trust.TrustedApps
-	result.TrustedMachineUsers = trust.TrustedMachineUsers
 	result.UntrustedMachineUsers = trust.UntrustedMachineUsers
 	if insecure != nil {
 		result.AllowUnsignedCommits = insecure.AllowUnsignedCommits != nil && *insecure.AllowUnsignedCommits

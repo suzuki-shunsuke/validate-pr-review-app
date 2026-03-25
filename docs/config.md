@@ -90,9 +90,8 @@ trust:
     - dependabot
   untrusted_machine_users:
     - "*-bot"
+    - "!suzuki-shunsuke-bot" # exclude from the pattern above
     - octocat
-  trusted_machine_users:
-    - suzuki-shunsuke-bot
 repositories:
   # Repository specific config
   # Override the root config

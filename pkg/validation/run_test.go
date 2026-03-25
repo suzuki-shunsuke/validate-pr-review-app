@@ -42,9 +42,7 @@ func TestController_Run(t *testing.T) {
 					},
 				},
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 			},
 			expected: &validation.Result{
@@ -57,9 +55,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 				PR: &github.PullRequest{
 					HeadSHA:   "abc123",
@@ -84,9 +80,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
@@ -118,9 +112,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
@@ -152,9 +144,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
@@ -187,9 +177,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
@@ -223,8 +211,7 @@ func TestController_Run(t *testing.T) {
 			input: &validation.Input{
 				Trust: &validation.Trust{
 					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{"untrusted-*": {}},
+					UntrustedMachineUsers: []string{"untrusted-*"},
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
@@ -258,8 +245,7 @@ func TestController_Run(t *testing.T) {
 			input: &validation.Input{
 				Trust: &validation.Trust{
 					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{"trusted-bot": {}},
-					UntrustedMachineUsers: map[string]struct{}{"trusted-*": {}},
+					UntrustedMachineUsers: []string{"trusted-*", "!trusted-bot"},
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
@@ -291,9 +277,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
@@ -333,9 +317,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
@@ -373,9 +355,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 				Insecure: &validation.Insecure{
 					AllowUnsignedCommits: true,
@@ -410,9 +390,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 				Insecure: &validation.Insecure{
 					UnsignedCommitMachineUsers: map[string]struct{}{"machine-user": {}},
@@ -444,9 +422,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 				Insecure: &validation.Insecure{
 					UnsignedCommitMachineUsers: map[string]struct{}{"machine-user": {}},
@@ -489,9 +465,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{"eks-cluster-upgrade-ci[bot]": {}},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{"eks-cluster-upgrade-ci[bot]": {}},
 				},
 				Insecure: &validation.Insecure{
 					UnsignedCommitApps: map[string]struct{}{"eks-cluster-upgrade-ci": {}},
@@ -523,9 +497,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",
@@ -559,9 +531,7 @@ func TestController_Run(t *testing.T) {
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{
 				Trust: &validation.Trust{
-					TrustedApps:           map[string]struct{}{},
-					TrustedMachineUsers:   map[string]struct{}{},
-					UntrustedMachineUsers: map[string]struct{}{},
+					TrustedApps: map[string]struct{}{},
 				},
 				PR: &github.PullRequest{
 					HeadSHA: "abc123",

@@ -13,7 +13,7 @@ import (
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
-func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
+func TestController_newCheckRunInput(t *testing.T) {
 	t.Parallel()
 
 	// Setup templates
@@ -39,8 +39,8 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 				BuiltTemplates: templates,
 			},
 			trust: &config.Trust{
-				TrustedApps:           []string{"dependabot[bot]"},
-				TrustedMachineUsers:   []string{"trusted-user"},
+				TrustedApps: []string{"dependabot[bot]"},
+
 				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
@@ -70,8 +70,8 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 				BuiltTemplates: templates,
 			},
 			trust: &config.Trust{
-				TrustedApps:           []string{"dependabot[bot]"},
-				TrustedMachineUsers:   []string{"trusted-user"},
+				TrustedApps: []string{"dependabot[bot]"},
+
 				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
@@ -100,8 +100,8 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 				BuiltTemplates: templates,
 			},
 			trust: &config.Trust{
-				TrustedApps:           []string{"dependabot[bot]"},
-				TrustedMachineUsers:   []string{"trusted-user"},
+				TrustedApps: []string{"dependabot[bot]"},
+
 				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
@@ -131,8 +131,8 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 				BuiltTemplates: templates,
 			},
 			trust: &config.Trust{
-				TrustedApps:           []string{"dependabot[bot]"},
-				TrustedMachineUsers:   []string{"trusted-user"},
+				TrustedApps: []string{"dependabot[bot]"},
+
 				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
@@ -168,8 +168,8 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 				BuiltTemplates: templates,
 			},
 			trust: &config.Trust{
-				TrustedApps:           []string{"dependabot[bot]"},
-				TrustedMachineUsers:   []string{"trusted-user"},
+				TrustedApps: []string{"dependabot[bot]"},
+
 				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
@@ -206,8 +206,8 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 				BuiltTemplates: templates,
 			},
 			trust: &config.Trust{
-				TrustedApps:           []string{"dependabot[bot]"},
-				TrustedMachineUsers:   []string{"trusted-user"},
+				TrustedApps: []string{"dependabot[bot]"},
+
 				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
@@ -253,9 +253,6 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 			// Verify that result fields are populated correctly
 			if tt.result.TrustedApps == nil {
 				t.Error("TrustedApps should be populated")
-			}
-			if tt.result.TrustedMachineUsers == nil {
-				t.Error("TrustedMachineUsers should be populated")
 			}
 			if tt.result.UntrustedMachineUsers == nil {
 				t.Error("UntrustedMachineUsers should be populated")

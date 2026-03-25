@@ -29,9 +29,6 @@ func (c *Config) initRepos() error {
 		if repo.Trust.UntrustedMachineUsers == nil {
 			repo.Trust.UntrustedMachineUsers = c.Trust.UntrustedMachineUsers
 		}
-		if repo.Trust.TrustedMachineUsers == nil {
-			repo.Trust.TrustedMachineUsers = c.Trust.TrustedMachineUsers
-		}
 		repo.Trust.Init()
 	}
 	return nil

@@ -19,8 +19,7 @@ func (c *Controller) validate(ctx context.Context, logger *slog.Logger, ev *Even
 		PR: pr,
 		Trust: &validation.Trust{
 			TrustedApps:           trust.UniqueTrustedApps,
-			TrustedMachineUsers:   trust.UniqueTrustedMachineUsers,
-			UntrustedMachineUsers: trust.UniqueUntrustedMachineUsers,
+			UntrustedMachineUsers: trust.UntrustedMachineUsers,
 		},
 	}
 	if insecure != nil {
