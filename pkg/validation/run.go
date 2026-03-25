@@ -93,19 +93,27 @@ func (c *Validator) VerifyApp(login string, trustedApps map[string]struct{}) boo
 }
 
 func (c *Validator) VerifyUser(login string, trust *Trust) bool {
-	if _, ok := trust.TrustedMachineUsers[login]; ok {
-		return true
-	}
-	for pattern := range trust.UntrustedMachineUsers {
-		matched, err := path.Match(pattern, login)
-		if err != nil { // TODO error handling
-			continue
+	trusted := true
+	for _, pattern := range trust.UntrustedMachineUsers {
+		if neg, ok := strings.CutPrefix(pattern, "!"); ok {
+			matched, err := path.Match(neg, login)
+			if err != nil {
+				continue
+			}
+			if matched {
+				trusted = true
+			}
+		} else {
+			matched, err := path.Match(pattern, login)
+			if err != nil {
+				continue
+			}
+			if matched {
+				trusted = false
+			}
 		}
-		if matched {
-			return false
-		}
 	}
-	return true
+	return trusted
 }
 
 func (c *Validator) VerifyCommit(commit *github.Commit, trust *Trust, insecure *Insecure) *github.UntrustedCommit {
@@ -170,7 +178,6 @@ type Result struct {
 	// settings
 	TrustedApps           []string
 	UntrustedMachineUsers []string
-	TrustedMachineUsers   []string
 	// insecure settings
 	AllowUnsignedCommits       bool
 	UnsignedCommitApps         []string

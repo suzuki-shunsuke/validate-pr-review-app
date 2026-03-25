@@ -124,8 +124,7 @@ trusted_apps:
   - dependabot
 untrusted_machine_users:
   - "*-bot"
-trusted_machine_users:
-  - my-safe-bot
+  - "!my-safe-bot" # exclude from the pattern above
 ```
 
 ## Using CSM Actions For Secure Automatic Code Fixes and Approvals

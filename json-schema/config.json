@@ -124,12 +124,6 @@
     },
     "Trust": {
       "properties": {
-        "trusted_machine_users": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
         "untrusted_machine_users": {
           "items": {
             "type": "string"

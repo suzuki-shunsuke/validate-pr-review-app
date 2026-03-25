@@ -60,9 +60,6 @@ func mergeTrust(global *config.Trust, repo *config.Trust) config.Trust {
 		if repo.TrustedApps != nil {
 			trust.TrustedApps = repo.TrustedApps
 		}
-		if repo.TrustedMachineUsers != nil {
-			trust.TrustedMachineUsers = repo.TrustedMachineUsers
-		}
 		if repo.UntrustedMachineUsers != nil {
 			trust.UntrustedMachineUsers = repo.UntrustedMachineUsers
 		}

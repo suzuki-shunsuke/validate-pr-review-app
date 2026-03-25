@@ -16,8 +16,7 @@ func TestTrust_Validate(t *testing.T) {
 		{
 			name: "valid entries",
 			trust: &config.Trust{
-				TrustedApps:         []string{"renovate[bot]", "dependabot[bot]"},
-				TrustedMachineUsers: []string{"bot-user", "ci-bot"},
+				TrustedApps: []string{"renovate[bot]", "dependabot[bot]"},
 			},
 		},
 		{
@@ -35,20 +34,6 @@ func TestTrust_Validate(t *testing.T) {
 			name: "invalid trusted app with asterisk",
 			trust: &config.Trust{
 				TrustedApps: []string{"renovate*"},
-			},
-			wantErr: true,
-		},
-		{
-			name: "invalid trusted machine user with dot",
-			trust: &config.Trust{
-				TrustedMachineUsers: []string{"user.name"},
-			},
-			wantErr: true,
-		},
-		{
-			name: "invalid trusted machine user with asterisk",
-			trust: &config.Trust{
-				TrustedMachineUsers: []string{"bot*"},
 			},
 			wantErr: true,
 		},

@@ -16,14 +16,6 @@ Untrusted Machine Users:
 Untrusted Machine Users: Nothing
 {{end}}
 
-{{- if .TrustedMachineUsers}}
-Trusted Machine Users:
-{{range .TrustedMachineUsers}}
-- {{. -}}
-{{end}}
-{{else}}
-Trusted Machine Users: Nothing
-{{end -}}
 {{- if or .AllowUnsignedCommits .UnsignedCommitApps .UnsignedCommitMachineUsers}}
 :warning: Insecure Settings:
 {{- if .AllowUnsignedCommits}}

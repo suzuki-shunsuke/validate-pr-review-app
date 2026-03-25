@@ -42,8 +42,6 @@ Trusted Apps: Nothing
 
 Untrusted Machine Users: Nothing
 
-Trusted Machine Users: Nothing
-
 ---
 
 [This check is created by Validate PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
@@ -58,7 +56,7 @@ Trusted Machine Users: Nothing
 				State:                 validation.StateApproved,
 				Approvers:             []string{"user1"},
 				TrustedApps:           []string{"dependabot[bot]", "renovate[bot]"},
-				TrustedMachineUsers:   []string{"foo-bot"},
+				
 				UntrustedMachineUsers: []string{"*-bot"},
 				RequestID:             "req-12345",
 			},
@@ -80,10 +78,6 @@ Trusted Apps:
 Untrusted Machine Users:
 - *-bot
 
-Trusted Machine Users:
-
-- foo-bot
-
 ---
 
 [This check is created by Validate PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
@@ -97,7 +91,7 @@ Trusted Machine Users:
 			result: &validation.Result{
 				Error:                 "failed to fetch pr",
 				TrustedApps:           []string{"dependabot[bot]", "renovate[bot]"},
-				TrustedMachineUsers:   []string{"foo-bot"},
+				
 				UntrustedMachineUsers: []string{"*-bot"},
 			},
 			template: "error",
@@ -113,10 +107,6 @@ Trusted Apps:
 
 Untrusted Machine Users:
 - *-bot
-
-Trusted Machine Users:
-
-- foo-bot
 
 ---
 
@@ -140,8 +130,6 @@ Approvals are required.
 Trusted Apps: Nothing
 
 Untrusted Machine Users: Nothing
-
-Trusted Machine Users: Nothing
 
 ---
 
@@ -194,8 +182,6 @@ Trusted Apps: Nothing
 Untrusted Machine Users:
 - *-bot
 
-Trusted Machine Users: Nothing
-
 ---
 
 [This check is created by Validate PR Review App](https://github.com/suzuki-shunsuke/validate-pr-review-app).
@@ -227,8 +213,6 @@ Approvers:
 Trusted Apps: Nothing
 
 Untrusted Machine Users: Nothing
-
-Trusted Machine Users: Nothing
 
 :warning: Insecure Settings:
 - Allow Unsigned Commits: Yes
@@ -267,8 +251,6 @@ Approvers:
 Trusted Apps: Nothing
 
 Untrusted Machine Users: Nothing
-
-Trusted Machine Users: Nothing
 
 :warning: Insecure Settings:
 - Unsigned Commit Apps:

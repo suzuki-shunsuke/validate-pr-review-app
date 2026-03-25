@@ -10,8 +10,7 @@ type Validator struct {
 
 type InputNew struct {
 	// TrustedApps           map[string]struct{}
-	// TrustedMachineUsers   map[string]struct{}
-	// UntrustedMachineUsers map[string]struct{}
+	// UntrustedMachineUsers []string
 }
 
 func New(input *InputNew) *Validator {
@@ -34,6 +33,5 @@ type Insecure struct {
 
 type Trust struct {
 	TrustedApps           map[string]struct{}
-	TrustedMachineUsers   map[string]struct{}
-	UntrustedMachineUsers map[string]struct{}
+	UntrustedMachineUsers []string
 }

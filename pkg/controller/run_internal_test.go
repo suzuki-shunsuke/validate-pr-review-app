@@ -23,12 +23,12 @@ func Test_mergeTrust(t *testing.T) { //nolint:funlen
 			name: "global set, repo nil",
 			global: &config.Trust{
 				TrustedApps:           []string{"app1[bot]"},
-				TrustedMachineUsers:   []string{"bot1"},
+				
 				UntrustedMachineUsers: []string{"evil*"},
 			},
 			want: config.Trust{
 				TrustedApps:           []string{"app1[bot]"},
-				TrustedMachineUsers:   []string{"bot1"},
+				
 				UntrustedMachineUsers: []string{"evil*"},
 			},
 		},
@@ -36,7 +36,7 @@ func Test_mergeTrust(t *testing.T) { //nolint:funlen
 			name: "global set, repo partial override",
 			global: &config.Trust{
 				TrustedApps:           []string{"app1[bot]"},
-				TrustedMachineUsers:   []string{"bot1"},
+				
 				UntrustedMachineUsers: []string{"evil*"},
 			},
 			repo: &config.Trust{
@@ -44,7 +44,7 @@ func Test_mergeTrust(t *testing.T) { //nolint:funlen
 			},
 			want: config.Trust{
 				TrustedApps:           []string{"app2[bot]"},
-				TrustedMachineUsers:   []string{"bot1"},
+				
 				UntrustedMachineUsers: []string{"evil*"},
 			},
 		},
@@ -52,17 +52,15 @@ func Test_mergeTrust(t *testing.T) { //nolint:funlen
 			name: "global set, repo full override",
 			global: &config.Trust{
 				TrustedApps:           []string{"app1[bot]"},
-				TrustedMachineUsers:   []string{"bot1"},
+				
 				UntrustedMachineUsers: []string{"evil*"},
 			},
 			repo: &config.Trust{
 				TrustedApps:           []string{"app2[bot]"},
-				TrustedMachineUsers:   []string{"bot2"},
 				UntrustedMachineUsers: []string{"bad*"},
 			},
 			want: config.Trust{
 				TrustedApps:           []string{"app2[bot]"},
-				TrustedMachineUsers:   []string{"bot2"},
 				UntrustedMachineUsers: []string{"bad*"},
 			},
 		},
@@ -92,12 +90,12 @@ func Test_mergeTrust_doesNotMutateGlobal(t *testing.T) {
 	t.Parallel()
 	global := &config.Trust{
 		TrustedApps:           []string{"app1[bot]"},
-		TrustedMachineUsers:   []string{"bot1"},
+		
 		UntrustedMachineUsers: []string{"evil*"},
 	}
 	repo := &config.Trust{
 		TrustedApps:         []string{"app2[bot]"},
-		TrustedMachineUsers: []string{"bot2"},
+		
 	}
 	original := *global
 	_ = mergeTrust(global, repo)
