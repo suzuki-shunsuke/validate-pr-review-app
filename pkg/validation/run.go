@@ -103,14 +103,14 @@ func (c *Validator) VerifyUser(login string, trust *Trust) bool {
 			if matched {
 				trusted = true
 			}
-		} else {
-			matched, err := path.Match(pattern, login)
-			if err != nil {
-				continue
-			}
-			if matched {
-				trusted = false
-			}
+			continue
+		}
+		matched, err := path.Match(pattern, login)
+		if err != nil {
+			continue
+		}
+		if matched {
+			trusted = false
 		}
 	}
 	return trusted

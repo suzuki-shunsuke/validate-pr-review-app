@@ -13,7 +13,7 @@ import (
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
-func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
+func TestController_newCheckRunInput(t *testing.T) {
 	t.Parallel()
 
 	// Setup templates
