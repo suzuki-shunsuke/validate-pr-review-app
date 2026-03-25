@@ -22,37 +22,37 @@ func Test_mergeTrust(t *testing.T) { //nolint:funlen
 		{
 			name: "global set, repo nil",
 			global: &config.Trust{
-				TrustedApps:           []string{"app1[bot]"},
-				
+				TrustedApps: []string{"app1[bot]"},
+
 				UntrustedMachineUsers: []string{"evil*"},
 			},
 			want: config.Trust{
-				TrustedApps:           []string{"app1[bot]"},
-				
+				TrustedApps: []string{"app1[bot]"},
+
 				UntrustedMachineUsers: []string{"evil*"},
 			},
 		},
 		{
 			name: "global set, repo partial override",
 			global: &config.Trust{
-				TrustedApps:           []string{"app1[bot]"},
-				
+				TrustedApps: []string{"app1[bot]"},
+
 				UntrustedMachineUsers: []string{"evil*"},
 			},
 			repo: &config.Trust{
 				TrustedApps: []string{"app2[bot]"},
 			},
 			want: config.Trust{
-				TrustedApps:           []string{"app2[bot]"},
-				
+				TrustedApps: []string{"app2[bot]"},
+
 				UntrustedMachineUsers: []string{"evil*"},
 			},
 		},
 		{
 			name: "global set, repo full override",
 			global: &config.Trust{
-				TrustedApps:           []string{"app1[bot]"},
-				
+				TrustedApps: []string{"app1[bot]"},
+
 				UntrustedMachineUsers: []string{"evil*"},
 			},
 			repo: &config.Trust{
@@ -89,13 +89,12 @@ func Test_mergeTrust(t *testing.T) { //nolint:funlen
 func Test_mergeTrust_doesNotMutateGlobal(t *testing.T) {
 	t.Parallel()
 	global := &config.Trust{
-		TrustedApps:           []string{"app1[bot]"},
-		
+		TrustedApps: []string{"app1[bot]"},
+
 		UntrustedMachineUsers: []string{"evil*"},
 	}
 	repo := &config.Trust{
-		TrustedApps:         []string{"app2[bot]"},
-		
+		TrustedApps: []string{"app2[bot]"},
 	}
 	original := *global
 	_ = mergeTrust(global, repo)

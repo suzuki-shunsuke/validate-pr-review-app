@@ -53,10 +53,10 @@ Untrusted Machine Users: Nothing
 		{
 			name: "one approval",
 			result: &validation.Result{
-				State:                 validation.StateApproved,
-				Approvers:             []string{"user1"},
-				TrustedApps:           []string{"dependabot[bot]", "renovate[bot]"},
-				
+				State:       validation.StateApproved,
+				Approvers:   []string{"user1"},
+				TrustedApps: []string{"dependabot[bot]", "renovate[bot]"},
+
 				UntrustedMachineUsers: []string{"*-bot"},
 				RequestID:             "req-12345",
 			},
@@ -89,9 +89,9 @@ Untrusted Machine Users:
 		{
 			name: "error",
 			result: &validation.Result{
-				Error:                 "failed to fetch pr",
-				TrustedApps:           []string{"dependabot[bot]", "renovate[bot]"},
-				
+				Error:       "failed to fetch pr",
+				TrustedApps: []string{"dependabot[bot]", "renovate[bot]"},
+
 				UntrustedMachineUsers: []string{"*-bot"},
 			},
 			template: "error",

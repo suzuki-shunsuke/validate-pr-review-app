@@ -39,8 +39,8 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 				BuiltTemplates: templates,
 			},
 			trust: &config.Trust{
-				TrustedApps:           []string{"dependabot[bot]"},
-				
+				TrustedApps: []string{"dependabot[bot]"},
+
 				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
@@ -70,8 +70,8 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 				BuiltTemplates: templates,
 			},
 			trust: &config.Trust{
-				TrustedApps:           []string{"dependabot[bot]"},
-				
+				TrustedApps: []string{"dependabot[bot]"},
+
 				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
@@ -100,8 +100,8 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 				BuiltTemplates: templates,
 			},
 			trust: &config.Trust{
-				TrustedApps:           []string{"dependabot[bot]"},
-				
+				TrustedApps: []string{"dependabot[bot]"},
+
 				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
@@ -131,8 +131,8 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 				BuiltTemplates: templates,
 			},
 			trust: &config.Trust{
-				TrustedApps:           []string{"dependabot[bot]"},
-				
+				TrustedApps: []string{"dependabot[bot]"},
+
 				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
@@ -168,8 +168,8 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 				BuiltTemplates: templates,
 			},
 			trust: &config.Trust{
-				TrustedApps:           []string{"dependabot[bot]"},
-				
+				TrustedApps: []string{"dependabot[bot]"},
+
 				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
@@ -206,8 +206,8 @@ func TestController_newCheckRunInput(t *testing.T) { //nolint:maintidx
 				BuiltTemplates: templates,
 			},
 			trust: &config.Trust{
-				TrustedApps:           []string{"dependabot[bot]"},
-				
+				TrustedApps: []string{"dependabot[bot]"},
+
 				UntrustedMachineUsers: []string{"untrusted-*"},
 			},
 			event: &Event{
