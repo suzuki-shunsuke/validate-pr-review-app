@@ -64,7 +64,7 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to read the request body", http.StatusBadRequest)
 		return
 	}
-	if err := h.controller.Run(r.Context(), logger, &controller.Request{
+	if err := h.controller.Run(context.Background(), logger, &controller.Request{
 		Body:      string(body),
 		Headers:   convertHeaders(r.Header),
 		RequestID: requestID,
