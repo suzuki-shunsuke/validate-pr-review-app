@@ -64,7 +64,24 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to read the request body", http.StatusBadRequest)
 		return
 	}
-	if err := h.controller.Run(context.Background(), logger, &controller.Request{
+
+	// Use context.Background() instead of r.Context()
+	// https://github.com/suzuki-shunsuke/validate-pr-review-app/pull/401
+	// When GitHub closes the webhook HTTP connection (after a few seconds timeout), r.Context() is canceled.
+	// So using r.Context() may cancel Create Check Run.
+	// Why context.Background() is correct?
+	// There are two sources of context cancellation, and neither should abort processing:
+	// 1. GitHub webhook connection timeout
+	//   GitHub may close the HTTP connection after a few seconds, but this does not indicate intent to abort processing — it's simply an HTTP connection timeout.
+	//   The application should continue processing the webhook event and create the check run regardless.
+	// 2. Server shutdown (k8s pod/node rotation)
+	//   validate-pr-review-app runs as an HTTP server on AWS Lambda, Kubernetes, etc.
+	//   Pod rollouts, node rotations, and other infrastructure events are unavoidable and will trigger server graceful shutdown, canceling the server's context.
+	//   However, these events do not mean we want to abort in-flight operations — the Check Run should still be created to avoid leaving PRs in an indeterminate state.
+	//
+	// Both cases differ from a CLI tool where Ctrl-C is an intentional user action to stop processing.
+	// In the webhook server case, neither the sender (GitHub) nor the infrastructure (k8s) intends to cancel the application's business logic.
+	if err := h.controller.Run(context.Background(), logger, &controller.Request{ //nolint:contextcheck
 		Body:      string(body),
 		Headers:   convertHeaders(r.Header),
 		RequestID: requestID,
