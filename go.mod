@@ -1,6 +1,6 @@
 module github.com/suzuki-shunsuke/validate-pr-review-app
 
-go 1.26.1
+go 1.26.2
 
 require (
 	cloud.google.com/go/secretmanager v1.17.0
