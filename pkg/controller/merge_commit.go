@@ -40,7 +40,7 @@ func (c *Controller) isCleanMergeCommit(ctx context.Context, logger *slog.Logger
 		return false
 	}
 
-	allFiles := make([]map[string]struct{}, 0, len(commit.Parents))
+	allFiles := make(map[string]struct{})
 	for _, parentSHA := range commit.Parents {
 		files, err := c.gh.CompareCommits(ctx, ev.RepoOwner, ev.RepoName, parentSHA, commit.SHA)
 		if err != nil {
@@ -55,23 +55,13 @@ func (c *Controller) isCleanMergeCommit(ctx context.Context, logger *slog.Logger
 				"file_count", len(files), "base", parentSHA, "head", commit.SHA)
 			return false
 		}
-		fileSet := make(map[string]struct{}, len(files))
 		for _, f := range files {
-			fileSet[f] = struct{}{}
-		}
-		allFiles = append(allFiles, fileSet)
-	}
-
-	// Check for overlapping files between any two parent diffs.
-	for i := range allFiles {
-		for j := i + 1; j < len(allFiles); j++ {
-			for file := range allFiles[i] {
-				if _, ok := allFiles[j][file]; ok {
-					logger.Info("overlapping file found between parent diffs, requiring two approvals",
-						"file", file, "commit", commit.SHA)
-					return false
-				}
+			if _, ok := allFiles[f]; ok {
+				logger.Info("overlapping file found between parent diffs, requiring two approvals",
+					"file", f, "commit", commit.SHA)
+				return false
 			}
+			allFiles[f] = struct{}{}
 		}
 	}
 
