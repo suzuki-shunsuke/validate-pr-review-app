@@ -15,6 +15,9 @@ func (c *Controller) validate(ctx context.Context, logger *slog.Logger, ev *Even
 		return &validation.Result{Error: fmt.Errorf("get a pull request: %w", err).Error()}
 	}
 	logger.Info("fetched a pull request", "pull_request", pr)
+
+	c.checkMergeCommits(ctx, logger, ev, pr)
+
 	input := &validation.Input{
 		PR: pr,
 		Trust: &validation.Trust{

@@ -16,10 +16,18 @@ func (c *Client) GetPR(ctx context.Context, owner, name string, number int) (*Pu
 	}
 	commits := make([]*Commit, len(pr.Commits.Nodes))
 	for i, v := range pr.Commits.Nodes {
+		var parents []string
+		if v.Commit.Parents != nil {
+			parents = make([]string, len(v.Commit.Parents.Nodes))
+			for j, p := range v.Commit.Parents.Nodes {
+				parents[j] = p.OID
+			}
+		}
 		commits[i] = &Commit{
 			SHA:       v.Commit.OID,
 			Committer: newUser(v.Commit.User()),
 			Signature: v.Commit.Signature,
+			Parents:   parents,
 		}
 	}
 	// filter reviews

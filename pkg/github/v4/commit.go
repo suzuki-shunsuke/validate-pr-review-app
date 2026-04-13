@@ -9,6 +9,15 @@ type Commit struct {
 	Committer *Committer `json:"committer"`
 	Author    *Committer `json:"author"`
 	Signature *Signature `json:"signature"`
+	Parents   *Parents   `json:"parents" graphql:"parents(first:10)"`
+}
+
+type Parents struct {
+	Nodes []*ParentCommit `json:"nodes"`
+}
+
+type ParentCommit struct {
+	OID string `json:"oid"`
 }
 
 type Signature struct {

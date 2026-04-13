@@ -34,9 +34,11 @@ func (c *UntrustedCommit) Message() string {
 }
 
 type Commit struct {
-	SHA       string        `json:"oid"`
-	Committer *User         `json:"committer"`
-	Signature *v4.Signature `json:"signature"`
+	SHA                  string        `json:"oid"`
+	Committer            *User         `json:"committer"`
+	Signature            *v4.Signature `json:"signature"`
+	Parents              []string      `json:"parents"`
+	IsAllowedMergeCommit bool          `json:"is_allowed_merge_commit"`
 }
 
 func (c *Commit) Linked() bool {
