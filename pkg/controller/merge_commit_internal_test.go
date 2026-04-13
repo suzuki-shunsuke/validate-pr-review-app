@@ -165,9 +165,9 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 func Test_checkMergeCommits(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	tests := []struct {
-		name                      string
-		pr                        *github.PullRequest
-		mock                      *mockGitHub
+		name                     string
+		pr                       *github.PullRequest
+		mock                     *mockGitHub
 		wantIsAllowedMergeCommit []bool
 	}{
 		{
@@ -184,7 +184,7 @@ func Test_checkMergeCommits(t *testing.T) { //nolint:funlen
 					},
 				},
 			},
-			mock:                      &mockGitHub{},
+			mock:                     &mockGitHub{},
 			wantIsAllowedMergeCommit: []bool{false},
 		},
 		{
@@ -259,7 +259,7 @@ func Test_checkMergeCommits(t *testing.T) { //nolint:funlen
 					},
 				},
 			},
-			mock:                      &mockGitHub{},
+			mock:                     &mockGitHub{},
 			wantIsAllowedMergeCommit: []bool{false},
 		},
 	}
