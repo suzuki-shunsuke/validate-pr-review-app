@@ -607,6 +607,40 @@ func TestController_Run(t *testing.T) {
 			},
 		},
 		{
+			name:     "one approval with self approval but allowed empty commit - approved",
+			inputNew: &validation.InputNew{},
+			input: &validation.Input{
+				Trust: &validation.Trust{
+					TrustedApps: map[string]struct{}{},
+				},
+				PR: &github.PullRequest{
+					HeadSHA: "abc123",
+					Approvers: map[string]*github.User{
+						"committer": {Login: "committer"},
+					},
+					Commits: []*github.Commit{
+						{
+							SHA: "abc123",
+							Committer: &github.User{
+								Login: "committer",
+								IsApp: false,
+							},
+							Signature: &github.Signature{
+								IsValid: true,
+								State:   "valid",
+							},
+							Parents:              []string{"parent1"},
+							IsAllowedMergeCommit: true, // marked by controller as empty commit
+						},
+					},
+				},
+			},
+			expected: &validation.Result{
+				State:     validation.StateApproved,
+				Approvers: []string{"committer"},
+			},
+		},
+		{
 			name:     "one approval with commit not linked to user - two approvals required",
 			inputNew: &validation.InputNew{},
 			input: &validation.Input{

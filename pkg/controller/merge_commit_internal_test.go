@@ -162,7 +162,11 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 	}
 }
 
-func Test_checkMergeCommits(t *testing.T) { //nolint:funlen
+func intPtr(v int) *int {
+	return &v
+}
+
+func Test_checkApproverCommits(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	tests := []struct {
 		name                     string
@@ -262,6 +266,87 @@ func Test_checkMergeCommits(t *testing.T) { //nolint:funlen
 			mock:                     &mockGitHub{},
 			wantIsAllowedMergeCommit: []bool{false},
 		},
+		{
+			name: "approver empty commit (single parent) is allowed",
+			pr: &github.PullRequest{
+				Approvers: map[string]*github.User{
+					"alice": {Login: "alice"},
+				},
+				Commits: []*github.Commit{
+					{
+						SHA:                     "empty1",
+						Committer:               &github.User{Login: "alice"},
+						Parents:                 []string{"p1"},
+						ChangedFilesIfAvailable: intPtr(0),
+					},
+				},
+			},
+			mock:                     &mockGitHub{},
+			wantIsAllowedMergeCommit: []bool{true},
+		},
+		{
+			name: "approver empty merge commit is allowed without Compare API",
+			pr: &github.PullRequest{
+				Approvers: map[string]*github.User{
+					"alice": {Login: "alice"},
+				},
+				Commits: []*github.Commit{
+					{
+						SHA:                     "empty-merge1",
+						Committer:               &github.User{Login: "alice"},
+						Parents:                 []string{"p1", "p2"},
+						ChangedFilesIfAvailable: intPtr(0),
+					},
+				},
+			},
+			// No compareResult needed — empty commit check short-circuits before Compare API.
+			mock:                     &mockGitHub{},
+			wantIsAllowedMergeCommit: []bool{true},
+		},
+		{
+			name: "approver commit with nil changedFilesIfAvailable is not allowed (fail closed)",
+			pr: &github.PullRequest{
+				Approvers: map[string]*github.User{
+					"alice": {Login: "alice"},
+				},
+				Commits: []*github.Commit{
+					{
+						SHA:                     "commit1",
+						Committer:               &github.User{Login: "alice"},
+						Parents:                 []string{"p1"},
+						ChangedFilesIfAvailable: nil,
+					},
+				},
+			},
+			mock:                     &mockGitHub{},
+			wantIsAllowedMergeCommit: []bool{false},
+		},
+		{
+			name: "approver non-empty single-parent commit triggers early termination",
+			pr: &github.PullRequest{
+				Approvers: map[string]*github.User{
+					"alice": {Login: "alice"},
+				},
+				Commits: []*github.Commit{
+					{
+						SHA:                     "nonempty1",
+						Committer:               &github.User{Login: "alice"},
+						Parents:                 []string{"p1"},
+						ChangedFilesIfAvailable: intPtr(5),
+					},
+					{
+						SHA:                     "empty1",
+						Committer:               &github.User{Login: "alice"},
+						Parents:                 []string{"p2"},
+						ChangedFilesIfAvailable: intPtr(0),
+					},
+				},
+			},
+			mock: &mockGitHub{},
+			// First commit is non-empty single-parent → early termination.
+			// Second commit is not checked.
+			wantIsAllowedMergeCommit: []bool{false, false},
+		},
 	}
 
 	for _, tt := range tests {
@@ -269,7 +354,7 @@ func Test_checkMergeCommits(t *testing.T) { //nolint:funlen
 			t.Parallel()
 			ctrl := &Controller{gh: tt.mock}
 			ev := &Event{RepoOwner: "owner", RepoName: "repo"}
-			ctrl.checkMergeCommits(context.Background(), discardLogger, ev, tt.pr)
+			ctrl.checkApproverCommits(context.Background(), discardLogger, ev, tt.pr)
 
 			got := make([]bool, len(tt.pr.Commits))
 			for i, c := range tt.pr.Commits {

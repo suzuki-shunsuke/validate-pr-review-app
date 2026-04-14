@@ -7,18 +7,22 @@ import (
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 )
 
-// checkMergeCommits checks if commits by approvers are clean merge commits
-// that don't change the PR diff (e.g., "Update branch" on GitHub).
-// If so, it marks them as IsAllowedMergeCommit so the validator can skip
-// the self-approval check for those commits.
+// checkApproverCommits checks if commits by approvers are harmless
+// (empty commits or clean merge commits) and marks them as IsAllowedMergeCommit
+// so the validator can skip the self-approval check for those commits.
 // Only commits where the committer is an approver are checked.
-func (c *Controller) checkMergeCommits(ctx context.Context, logger *slog.Logger, ev *Event, pr *github.PullRequest) {
+func (c *Controller) checkApproverCommits(ctx context.Context, logger *slog.Logger, ev *Event, pr *github.PullRequest) {
 	for _, commit := range pr.Commits {
 		if commit.Committer == nil {
 			continue
 		}
 		login := commit.Committer.Login
 		if _, ok := pr.Approvers[login]; !ok {
+			continue
+		}
+		// Empty commits (0 changed files) cannot introduce malicious changes.
+		if commit.ChangedFilesIfAvailable != nil && *commit.ChangedFilesIfAvailable == 0 {
+			commit.IsAllowedMergeCommit = true
 			continue
 		}
 		allowed := c.isCleanMergeCommit(ctx, logger, ev, commit)
