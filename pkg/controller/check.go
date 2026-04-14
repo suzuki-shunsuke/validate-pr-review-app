@@ -21,7 +21,11 @@ func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *va
 	switch result.State {
 	case validation.StateApproved:
 		conclusion = githubv4.CheckConclusionStateSuccess
-		title = githubv4.String("Approved")
+		if result.CarriedForward {
+			title = githubv4.String("Approved (carried forward)")
+		} else {
+			title = githubv4.String("Approved")
+		}
 	case validation.StateApprovalIsRequired:
 		conclusion = githubv4.CheckConclusionStateFailure
 		title = githubv4.String("Approvals are required")
