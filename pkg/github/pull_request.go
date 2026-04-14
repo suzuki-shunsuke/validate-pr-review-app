@@ -2,6 +2,7 @@ package github
 
 type PullRequest struct {
 	HeadSHA           string                      `json:"sha"`
+	BaseSHA           string                      `json:"base_sha"`
 	Approvers         map[string]*User            `json:"approvers"`
 	ApproversByCommit map[string]map[string]*User `json:"approvers_by_commit"`
 	Commits           []*Commit                   `json:"commits"`

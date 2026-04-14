@@ -22,6 +22,7 @@ type V4Client interface {
 
 type V3Client interface {
 	CompareCommits(ctx context.Context, owner, repo, base, head string) ([]string, error)
+	IsAncestor(ctx context.Context, owner, repo, ancestor, descendant string) (bool, error)
 }
 
 type (
