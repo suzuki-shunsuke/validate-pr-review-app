@@ -12,6 +12,7 @@ import (
 // so the validator can skip the self-approval check for those commits.
 // Only commits where the committer is an approver are checked.
 func (c *Controller) checkApproverCommits(ctx context.Context, logger *slog.Logger, ev *Event, pr *github.PullRequest) {
+	prCommitSHAs := buildPRCommitSHAs(pr)
 	for _, commit := range pr.Commits {
 		if commit.Committer == nil {
 			continue
@@ -25,7 +26,7 @@ func (c *Controller) checkApproverCommits(ctx context.Context, logger *slog.Logg
 			commit.IsAllowedMergeCommit = true
 			continue
 		}
-		allowed := c.isCleanMergeCommit(ctx, logger, ev, commit)
+		allowed := c.isCleanMergeCommit(ctx, logger, ev, commit, prCommitSHAs, pr.BaseSHA)
 		commit.IsAllowedMergeCommit = allowed
 		if !allowed {
 			// Early termination: if any approver commit is not a clean merge,
@@ -35,11 +36,20 @@ func (c *Controller) checkApproverCommits(ctx context.Context, logger *slog.Logg
 	}
 }
 
+func buildPRCommitSHAs(pr *github.PullRequest) map[string]struct{} {
+	m := make(map[string]struct{}, len(pr.Commits))
+	for _, c := range pr.Commits {
+		m[c.SHA] = struct{}{}
+	}
+	return m
+}
+
 const maxCompareFiles = 300
 
 // isCleanMergeCommit checks whether a commit is a merge commit whose parents'
-// diffs to the merge commit have no overlapping files (i.e., no conflict resolution).
-func (c *Controller) isCleanMergeCommit(ctx context.Context, logger *slog.Logger, ev *Event, commit *github.Commit) bool {
+// diffs to the merge commit have no overlapping files (i.e., no conflict resolution)
+// and whose non-PR parents are ancestors of the base branch.
+func (c *Controller) isCleanMergeCommit(ctx context.Context, logger *slog.Logger, ev *Event, commit *github.Commit, prCommitSHAs map[string]struct{}, prBaseSHA string) bool { //nolint:cyclop
 	if len(commit.Parents) < 2 { //nolint:mnd
 		return false
 	}
@@ -66,6 +76,26 @@ func (c *Controller) isCleanMergeCommit(ctx context.Context, logger *slog.Logger
 				return false
 			}
 			allFiles[f] = struct{}{}
+		}
+	}
+
+	// Verify that non-PR parents are ancestors of the base branch.
+	// This ensures the merge is with the base branch (e.g., "Update branch"),
+	// not an arbitrary branch that could introduce unreviewed code.
+	for _, parentSHA := range commit.Parents {
+		if _, ok := prCommitSHAs[parentSHA]; ok {
+			continue
+		}
+		ancestor, err := c.gh.IsAncestor(ctx, ev.RepoOwner, ev.RepoName, parentSHA, prBaseSHA)
+		if err != nil {
+			logger.Warn("ancestor check API failed, requiring two approvals",
+				"error", err, "parent", parentSHA, "base", prBaseSHA)
+			return false
+		}
+		if !ancestor {
+			logger.Info("merge parent is not an ancestor of base branch, requiring two approvals",
+				"parent", parentSHA, "base", prBaseSHA, "commit", commit.SHA)
+			return false
 		}
 	}
 

@@ -48,6 +48,7 @@ func Test_findCarryForwardApprovers(t *testing.T) { //nolint:funlen
 			name: "HEAD is clean merge commit, previous commit has review",
 			pr: &github.PullRequest{
 				HeadSHA: "merge1",
+				BaseSHA: "base-sha",
 				Commits: []*github.Commit{
 					{
 						SHA:       "reviewed1",
@@ -70,6 +71,9 @@ func Test_findCarryForwardApprovers(t *testing.T) { //nolint:funlen
 				compareResult: map[string][]string{
 					"reviewed1...merge1": {"file_a.go"},
 					"main-tip...merge1":  {"file_b.go"},
+				},
+				ancestorResult: map[string]bool{
+					"main-tip...base-sha": true,
 				},
 			},
 			want: map[string]*github.User{
@@ -169,6 +173,7 @@ func Test_findCarryForwardApprovers(t *testing.T) { //nolint:funlen
 			name: "conflict-resolution merge commit blocks carry-forward",
 			pr: &github.PullRequest{
 				HeadSHA: "conflict-merge1",
+				BaseSHA: "base-sha",
 				Commits: []*github.Commit{
 					{
 						SHA:       "reviewed1",

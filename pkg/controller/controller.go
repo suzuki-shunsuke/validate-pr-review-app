@@ -53,6 +53,7 @@ type GitHub interface {
 	GetPR(ctx context.Context, owner, name string, number int) (*github.PullRequest, error)
 	CreateCheckRun(ctx context.Context, input githubv4.CreateCheckRunInput) error
 	CompareCommits(ctx context.Context, owner, repo, base, head string) ([]string, error)
+	IsAncestor(ctx context.Context, owner, repo, ancestor, descendant string) (bool, error)
 }
 
 type Request struct {

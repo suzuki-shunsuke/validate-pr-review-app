@@ -24,6 +24,7 @@ func (c *Client) GetPR(ctx context.Context, owner, name string, number int) (*Pu
 
 	p := &PullRequest{
 		HeadSHA:           pr.HeadRefOID,
+		BaseSHA:           pr.BaseRefOID,
 		Commits:           commits,
 		Approvers:         approversByCommit[pr.HeadRefOID],
 		ApproversByCommit: approversByCommit,

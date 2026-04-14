@@ -13,3 +13,12 @@ func (c *Client) CompareCommits(ctx context.Context, owner, repo, base, head str
 	}
 	return files, nil
 }
+
+// IsAncestor checks whether ancestor is a git ancestor of descendant.
+func (c *Client) IsAncestor(ctx context.Context, owner, repo, ancestor, descendant string) (bool, error) {
+	result, err := c.v3Client.IsAncestor(ctx, owner, repo, ancestor, descendant)
+	if err != nil {
+		return false, fmt.Errorf("check ancestor: %w", err)
+	}
+	return result, nil
+}

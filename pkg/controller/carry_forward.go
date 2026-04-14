@@ -60,6 +60,7 @@ func (c *Controller) carryForwardCheck(ctx context.Context, logger *slog.Logger,
 // When a commit with reviews is found, its approvers are returned.
 // Returns nil if carry-forward is not applicable.
 func (c *Controller) findCarryForwardApprovers(ctx context.Context, logger *slog.Logger, ev *Event, pr *github.PullRequest) map[string]*github.User {
+	prCommitSHAs := buildPRCommitSHAs(pr)
 	// Walk commits from newest to oldest.
 	for i := len(pr.Commits) - 1; i >= 0; i-- {
 		commit := pr.Commits[i]
@@ -76,7 +77,7 @@ func (c *Controller) findCarryForwardApprovers(ctx context.Context, logger *slog
 			logger.Info("commit is empty, continuing carry-forward walk", "commit", commit.SHA)
 			continue
 		}
-		if c.isCleanMergeCommit(ctx, logger, ev, commit) {
+		if c.isCleanMergeCommit(ctx, logger, ev, commit, prCommitSHAs, pr.BaseSHA) {
 			logger.Info("commit is a clean merge, continuing carry-forward walk", "commit", commit.SHA)
 			continue
 		}

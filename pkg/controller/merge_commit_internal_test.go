@@ -14,8 +14,10 @@ import (
 var discardLogger = slog.New(slog.DiscardHandler) //nolint:gochecknoglobals
 
 type mockGitHub struct {
-	compareResult map[string][]string // key: "base...head"
-	compareErr    map[string]error    // key: "base...head"
+	compareResult  map[string][]string // key: "base...head"
+	compareErr     map[string]error    // key: "base...head"
+	ancestorResult map[string]bool     // key: "ancestor...descendant"
+	ancestorErr    map[string]error    // key: "ancestor...descendant"
 }
 
 func (m *mockGitHub) GetPR(_ context.Context, _, _ string, _ int) (*github.PullRequest, error) {
@@ -37,13 +39,30 @@ func (m *mockGitHub) CompareCommits(_ context.Context, _, _, base, head string) 
 	return nil, nil
 }
 
+func (m *mockGitHub) IsAncestor(_ context.Context, _, _, ancestor, descendant string) (bool, error) {
+	key := ancestor + "..." + descendant
+	if err, ok := m.ancestorErr[key]; ok {
+		return false, err
+	}
+	if result, ok := m.ancestorResult[key]; ok {
+		return result, nil
+	}
+	return false, nil
+}
+
 func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 	t.Parallel()
+	defaultPRCommitSHAs := map[string]struct{}{
+		"parent1": {},
+	}
+	defaultBaseSHA := "base-sha"
 	tests := []struct {
-		name   string
-		commit *github.Commit
-		mock   *mockGitHub
-		want   bool
+		name         string
+		commit       *github.Commit
+		mock         *mockGitHub
+		prCommitSHAs map[string]struct{}
+		baseSHA      string
+		want         bool
 	}{
 		{
 			name: "non-merge commit (single parent)",
@@ -51,8 +70,10 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 				SHA:     "merge123",
 				Parents: []string{"parent1"},
 			},
-			mock: &mockGitHub{},
-			want: false,
+			mock:         &mockGitHub{},
+			prCommitSHAs: defaultPRCommitSHAs,
+			baseSHA:      defaultBaseSHA,
+			want:         false,
 		},
 		{
 			name: "non-merge commit (no parents)",
@@ -60,11 +81,13 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 				SHA:     "merge123",
 				Parents: nil,
 			},
-			mock: &mockGitHub{},
-			want: false,
+			mock:         &mockGitHub{},
+			prCommitSHAs: defaultPRCommitSHAs,
+			baseSHA:      defaultBaseSHA,
+			want:         false,
 		},
 		{
-			name: "clean merge commit (no overlapping files)",
+			name: "clean merge commit (no overlapping files, base branch parent)",
 			commit: &github.Commit{
 				SHA:     "merge123",
 				Parents: []string{"parent1", "parent2"},
@@ -74,8 +97,13 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 					"parent1...merge123": {"file_a.go", "file_b.go"},
 					"parent2...merge123": {"file_c.go", "file_d.go"},
 				},
+				ancestorResult: map[string]bool{
+					"parent2...base-sha": true,
+				},
 			},
-			want: true,
+			prCommitSHAs: defaultPRCommitSHAs,
+			baseSHA:      defaultBaseSHA,
+			want:         true,
 		},
 		{
 			name: "merge commit with overlapping files (conflict resolution)",
@@ -89,7 +117,9 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 					"parent2...merge123": {"file_b.go", "file_c.go"},
 				},
 			},
-			want: false,
+			prCommitSHAs: defaultPRCommitSHAs,
+			baseSHA:      defaultBaseSHA,
+			want:         false,
 		},
 		{
 			name: "compare API failure",
@@ -102,7 +132,9 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 					"parent1...merge123": errors.New("API error"),
 				},
 			},
-			want: false,
+			prCommitSHAs: defaultPRCommitSHAs,
+			baseSHA:      defaultBaseSHA,
+			want:         false,
 		},
 		{
 			name: "too many changed files (>= 300)",
@@ -115,10 +147,12 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 					"parent1...merge123": make([]string, 300),
 				},
 			},
-			want: false,
+			prCommitSHAs: defaultPRCommitSHAs,
+			baseSHA:      defaultBaseSHA,
+			want:         false,
 		},
 		{
-			name: "octopus merge (3 parents, no overlap)",
+			name: "octopus merge (3 parents, no overlap, base branch parents)",
 			commit: &github.Commit{
 				SHA:     "merge123",
 				Parents: []string{"parent1", "parent2", "parent3"},
@@ -129,8 +163,14 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 					"parent2...merge123": {"file_b.go"},
 					"parent3...merge123": {"file_c.go"},
 				},
+				ancestorResult: map[string]bool{
+					"parent2...base-sha": true,
+					"parent3...base-sha": true,
+				},
 			},
-			want: true,
+			prCommitSHAs: defaultPRCommitSHAs,
+			baseSHA:      defaultBaseSHA,
+			want:         true,
 		},
 		{
 			name: "octopus merge (3 parents, overlap between non-adjacent)",
@@ -145,7 +185,66 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 					"parent3...merge123": {"file_a.go"},
 				},
 			},
-			want: false,
+			prCommitSHAs: defaultPRCommitSHAs,
+			baseSHA:      defaultBaseSHA,
+			want:         false,
+		},
+		{
+			name: "non-PR parent is not ancestor of base branch",
+			commit: &github.Commit{
+				SHA:     "merge123",
+				Parents: []string{"parent1", "arbitrary-branch"},
+			},
+			mock: &mockGitHub{
+				compareResult: map[string][]string{
+					"parent1...merge123":          {"file_a.go"},
+					"arbitrary-branch...merge123": {"file_b.go"},
+				},
+				ancestorResult: map[string]bool{
+					"arbitrary-branch...base-sha": false,
+				},
+			},
+			prCommitSHAs: defaultPRCommitSHAs,
+			baseSHA:      defaultBaseSHA,
+			want:         false,
+		},
+		{
+			name: "ancestor check API failure",
+			commit: &github.Commit{
+				SHA:     "merge123",
+				Parents: []string{"parent1", "parent2"},
+			},
+			mock: &mockGitHub{
+				compareResult: map[string][]string{
+					"parent1...merge123": {"file_a.go"},
+					"parent2...merge123": {"file_b.go"},
+				},
+				ancestorErr: map[string]error{
+					"parent2...base-sha": errors.New("API error"),
+				},
+			},
+			prCommitSHAs: defaultPRCommitSHAs,
+			baseSHA:      defaultBaseSHA,
+			want:         false,
+		},
+		{
+			name: "all parents in PR commit list (no external parent)",
+			commit: &github.Commit{
+				SHA:     "merge123",
+				Parents: []string{"parent1", "parent2"},
+			},
+			mock: &mockGitHub{
+				compareResult: map[string][]string{
+					"parent1...merge123": {"file_a.go"},
+					"parent2...merge123": {"file_b.go"},
+				},
+			},
+			prCommitSHAs: map[string]struct{}{
+				"parent1": {},
+				"parent2": {},
+			},
+			baseSHA: defaultBaseSHA,
+			want:    true,
 		},
 	}
 
@@ -154,7 +253,7 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 			t.Parallel()
 			ctrl := &Controller{gh: tt.mock}
 			ev := &Event{RepoOwner: "owner", RepoName: "repo"}
-			got := ctrl.isCleanMergeCommit(context.Background(), discardLogger, ev, tt.commit)
+			got := ctrl.isCleanMergeCommit(context.Background(), discardLogger, ev, tt.commit, tt.prCommitSHAs, tt.baseSHA)
 			if got != tt.want {
 				t.Errorf("isCleanMergeCommit() = %v, want %v", got, tt.want)
 			}
@@ -190,10 +289,16 @@ func Test_checkApproverCommits(t *testing.T) { //nolint:funlen
 		{
 			name: "approver clean merge commits marked as allowed",
 			pr: &github.PullRequest{
+				BaseSHA: "base-sha",
 				Approvers: map[string]*github.User{
 					"alice": {Login: "alice"},
 				},
 				Commits: []*github.Commit{
+					{
+						SHA:       "p1",
+						Committer: &github.User{Login: "bob"},
+						Parents:   []string{"p0"},
+					},
 					{
 						SHA:       "merge1",
 						Committer: &github.User{Login: "alice"},
@@ -202,19 +307,23 @@ func Test_checkApproverCommits(t *testing.T) { //nolint:funlen
 					{
 						SHA:       "merge2",
 						Committer: &github.User{Login: "alice"},
-						Parents:   []string{"p3", "p4"},
+						Parents:   []string{"merge1", "p4"},
 					},
 				},
 			},
 			mock: &mockGitHub{
 				compareResult: map[string][]string{
-					"p1...merge1": {"a.go"},
-					"p2...merge1": {"b.go"},
-					"p3...merge2": {"c.go"},
-					"p4...merge2": {"d.go"},
+					"p1...merge1":     {"a.go"},
+					"p2...merge1":     {"b.go"},
+					"merge1...merge2": {"c.go"},
+					"p4...merge2":     {"d.go"},
+				},
+				ancestorResult: map[string]bool{
+					"p2...base-sha": true,
+					"p4...base-sha": true,
 				},
 			},
-			wantIsAllowedMergeCommit: []bool{true, true},
+			wantIsAllowedMergeCommit: []bool{false, true, true},
 		},
 		{
 			name: "early termination on non-clean approver commit",
