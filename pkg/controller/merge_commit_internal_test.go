@@ -152,39 +152,23 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 			want:         false,
 		},
 		{
-			name: "octopus merge (3 parents, no overlap, base branch parents)",
+			name: "octopus merge (3 parents) rejected",
 			commit: &github.Commit{
 				SHA:     "merge123",
 				Parents: []string{"parent1", "parent2", "parent3"},
 			},
-			mock: &mockGitHub{
-				compareResult: map[string][]string{
-					"parent1...merge123": {"file_a.go"},
-					"parent2...merge123": {"file_b.go"},
-					"parent3...merge123": {"file_c.go"},
-				},
-				ancestorResult: map[string]bool{
-					"parent2...base-sha": true,
-					"parent3...base-sha": true,
-				},
-			},
+			mock:         &mockGitHub{},
 			prCommitSHAs: defaultPRCommitSHAs,
 			baseSHA:      defaultBaseSHA,
-			want:         true,
+			want:         false,
 		},
 		{
-			name: "octopus merge (3 parents, overlap between non-adjacent)",
+			name: "octopus merge (3 parents, overlap) also rejected",
 			commit: &github.Commit{
 				SHA:     "merge123",
 				Parents: []string{"parent1", "parent2", "parent3"},
 			},
-			mock: &mockGitHub{
-				compareResult: map[string][]string{
-					"parent1...merge123": {"file_a.go"},
-					"parent2...merge123": {"file_b.go"},
-					"parent3...merge123": {"file_a.go"},
-				},
-			},
+			mock:         &mockGitHub{},
 			prCommitSHAs: defaultPRCommitSHAs,
 			baseSHA:      defaultBaseSHA,
 			want:         false,

@@ -50,7 +50,7 @@ const maxCompareFiles = 300
 // diffs to the merge commit have no overlapping files (i.e., no conflict resolution)
 // and whose non-PR parents are ancestors of the base branch.
 func (c *Controller) isCleanMergeCommit(ctx context.Context, logger *slog.Logger, ev *Event, commit *github.Commit, prCommitSHAs map[string]struct{}, prBaseSHA string) bool { //nolint:cyclop
-	if len(commit.Parents) < 2 { //nolint:mnd
+	if len(commit.Parents) != 2 { //nolint:mnd
 		return false
 	}
 
