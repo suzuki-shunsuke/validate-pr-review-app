@@ -14,7 +14,7 @@ import (
 // Run validates pull request reviews.
 // It gets pull request reviews and committers via GitHub GraphQL API, and checks if people other than committers approve the PR.
 // If the PR isn't approved by people other than committers, it returns an error.
-func (c *Validator) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
+func (c *Validator) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop,funlen
 	pr := input.PR
 	result := &Result{}
 	ignoredApprovers := make(map[string]*github.IgnoredApproval, len(pr.Approvers))
@@ -71,12 +71,15 @@ func (c *Validator) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 		login := committer.Login
 		if _, ok := approvers[login]; ok && !commit.IsAllowedMergeCommit {
 			// Only one approval is given, but it's a self approval.
-			// Clean merge commits (e.g., "Update branch") are excluded
-			// from the self-approval check.
-			result.SelfApprover = login
+			// Clean merge commits (e.g., "Update branch") and empty commits
+			// are excluded from the self-approval check.
+			if result.SelfApprovers == nil {
+				result.SelfApprovers = make(map[string]struct{})
+			}
+			result.SelfApprovers[login] = struct{}{}
 		}
 	}
-	if result.SelfApprover != "" || len(result.UntrustedCommits) > 0 {
+	if len(result.SelfApprovers) > 0 || len(result.UntrustedCommits) > 0 {
 		result.State = StateTwoApprovalsAreRequired
 		return result
 	}
@@ -165,11 +168,11 @@ func (c *Validator) VerifyCommit(commit *github.Commit, trust *Trust, insecure *
 }
 
 type Result struct {
-	RequestID    string
-	Error        string
-	State        State
-	Approvers    []string
-	SelfApprover string
+	RequestID     string
+	Error         string
+	State         State
+	Approvers     []string
+	SelfApprovers map[string]struct{}
 	// app or untrusted machine user approvals
 	IgnoredApprovers []*github.IgnoredApproval
 	// app
@@ -225,7 +228,7 @@ func (r *Result) Reasons() []string {
 			reasons = append(reasons, "untrusted machine user commits")
 		}
 	}
-	if r.SelfApprover != "" {
+	if len(r.SelfApprovers) > 0 {
 		reasons = append(reasons, "self-approval")
 	}
 	return reasons
