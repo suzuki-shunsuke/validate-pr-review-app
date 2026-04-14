@@ -49,7 +49,7 @@ const maxCompareFiles = 300
 // isCleanMergeCommit checks whether a commit is a merge commit whose parents'
 // diffs to the merge commit have no overlapping files (i.e., no conflict resolution)
 // and whose non-PR parents are ancestors of the base branch.
-func (c *Controller) isCleanMergeCommit(ctx context.Context, logger *slog.Logger, ev *Event, commit *github.Commit, prCommitSHAs map[string]struct{}, baseSHA string) bool { //nolint:cyclop
+func (c *Controller) isCleanMergeCommit(ctx context.Context, logger *slog.Logger, ev *Event, commit *github.Commit, prCommitSHAs map[string]struct{}, prBaseSHA string) bool { //nolint:cyclop
 	if len(commit.Parents) < 2 { //nolint:mnd
 		return false
 	}
@@ -86,15 +86,15 @@ func (c *Controller) isCleanMergeCommit(ctx context.Context, logger *slog.Logger
 		if _, ok := prCommitSHAs[parentSHA]; ok {
 			continue
 		}
-		ancestor, err := c.gh.IsAncestor(ctx, ev.RepoOwner, ev.RepoName, parentSHA, baseSHA)
+		ancestor, err := c.gh.IsAncestor(ctx, ev.RepoOwner, ev.RepoName, parentSHA, prBaseSHA)
 		if err != nil {
 			logger.Warn("ancestor check API failed, requiring two approvals",
-				"error", err, "parent", parentSHA, "base", baseSHA)
+				"error", err, "parent", parentSHA, "base", prBaseSHA)
 			return false
 		}
 		if !ancestor {
 			logger.Info("merge parent is not an ancestor of base branch, requiring two approvals",
-				"parent", parentSHA, "base", baseSHA, "commit", commit.SHA)
+				"parent", parentSHA, "base", prBaseSHA, "commit", commit.SHA)
 			return false
 		}
 	}
