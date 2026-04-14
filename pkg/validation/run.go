@@ -69,8 +69,10 @@ func (c *Validator) Run(_ *slog.Logger, input *Input) *Result { //nolint:cyclop
 		}
 		committer := commit.Committer
 		login := committer.Login
-		if _, ok := approvers[login]; ok {
-			// Only one approval is given, but it's a self approval
+		if _, ok := approvers[login]; ok && !commit.IsAllowedMergeCommit {
+			// Only one approval is given, but it's a self approval.
+			// Clean merge commits (e.g., "Update branch") are excluded
+			// from the self-approval check.
 			result.SelfApprover = login
 		}
 	}

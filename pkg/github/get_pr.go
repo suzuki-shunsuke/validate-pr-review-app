@@ -16,11 +16,7 @@ func (c *Client) GetPR(ctx context.Context, owner, name string, number int) (*Pu
 	}
 	commits := make([]*Commit, len(pr.Commits.Nodes))
 	for i, v := range pr.Commits.Nodes {
-		commits[i] = &Commit{
-			SHA:       v.Commit.OID,
-			Committer: newUser(v.Commit.User()),
-			Signature: v.Commit.Signature,
-		}
+		commits[i] = newCommit(v)
 	}
 	// filter reviews
 	// Get the latest review for each user

@@ -34,11 +34,29 @@ func (c *UntrustedCommit) Message() string {
 }
 
 type Commit struct {
-	SHA       string        `json:"oid"`
-	Committer *User         `json:"committer"`
-	Signature *v4.Signature `json:"signature"`
+	SHA                  string        `json:"oid"`
+	Committer            *User         `json:"committer"`
+	Signature            *v4.Signature `json:"signature"`
+	Parents              []string      `json:"parents"`
+	IsAllowedMergeCommit bool          `json:"is_allowed_merge_commit"`
 }
 
 func (c *Commit) Linked() bool {
 	return c.Committer != nil && c.Committer.Login != ""
+}
+
+func newCommit(pc *v4.PullRequestCommit) *Commit {
+	var parents []string
+	if pc.Commit.Parents != nil {
+		parents = make([]string, len(pc.Commit.Parents.Nodes))
+		for i, p := range pc.Commit.Parents.Nodes {
+			parents[i] = p.OID
+		}
+	}
+	return &Commit{
+		SHA:       pc.Commit.OID,
+		Committer: newUser(pc.Commit.User()),
+		Signature: pc.Commit.Signature,
+		Parents:   parents,
+	}
 }
