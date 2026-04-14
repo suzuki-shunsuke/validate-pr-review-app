@@ -162,10 +162,6 @@ func Test_isCleanMergeCommit(t *testing.T) { //nolint:funlen
 	}
 }
 
-func intPtr(v int) *int {
-	return &v
-}
-
 func Test_checkApproverCommits(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	tests := []struct {
@@ -277,7 +273,7 @@ func Test_checkApproverCommits(t *testing.T) { //nolint:funlen
 						SHA:                     "empty1",
 						Committer:               &github.User{Login: "alice"},
 						Parents:                 []string{"p1"},
-						ChangedFilesIfAvailable: intPtr(0),
+						ChangedFilesIfAvailable: new(0),
 					},
 				},
 			},
@@ -295,7 +291,7 @@ func Test_checkApproverCommits(t *testing.T) { //nolint:funlen
 						SHA:                     "empty-merge1",
 						Committer:               &github.User{Login: "alice"},
 						Parents:                 []string{"p1", "p2"},
-						ChangedFilesIfAvailable: intPtr(0),
+						ChangedFilesIfAvailable: new(0),
 					},
 				},
 			},
@@ -332,13 +328,13 @@ func Test_checkApproverCommits(t *testing.T) { //nolint:funlen
 						SHA:                     "nonempty1",
 						Committer:               &github.User{Login: "alice"},
 						Parents:                 []string{"p1"},
-						ChangedFilesIfAvailable: intPtr(5),
+						ChangedFilesIfAvailable: new(5),
 					},
 					{
 						SHA:                     "empty1",
 						Committer:               &github.User{Login: "alice"},
 						Parents:                 []string{"p2"},
-						ChangedFilesIfAvailable: intPtr(0),
+						ChangedFilesIfAvailable: new(0),
 					},
 				},
 			},
