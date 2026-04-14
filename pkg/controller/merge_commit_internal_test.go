@@ -19,7 +19,7 @@ type mockGitHub struct {
 }
 
 func (m *mockGitHub) GetPR(_ context.Context, _, _ string, _ int) (*github.PullRequest, error) {
-	return nil, nil
+	return nil, nil //nolint:nilnil
 }
 
 func (m *mockGitHub) CreateCheckRun(_ context.Context, _ githubv4.CreateCheckRunInput) error {
