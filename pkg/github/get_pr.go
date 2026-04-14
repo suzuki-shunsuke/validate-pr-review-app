@@ -18,41 +18,60 @@ func (c *Client) GetPR(ctx context.Context, owner, name string, number int) (*Pu
 	for i, v := range pr.Commits.Nodes {
 		commits[i] = newCommit(v)
 	}
-	// filter reviews
-	// Get the latest review for each user
-	reviews := make(map[string]*v4.Review, len(pr.Reviews.Nodes))
-	for _, node := range pr.Reviews.Nodes {
-		if node.Commit.OID != pr.HeadRefOID {
-			// Exclude reviews for non head commits
-			continue
-		}
+
+	reviewsByCommit := groupReviewsByCommit(pr.Reviews.Nodes)
+	approversByCommit := buildApproversByCommit(reviewsByCommit)
+
+	p := &PullRequest{
+		HeadSHA:           pr.HeadRefOID,
+		Commits:           commits,
+		Approvers:         approversByCommit[pr.HeadRefOID],
+		ApproversByCommit: approversByCommit,
+	}
+	if p.Approvers == nil {
+		p.Approvers = make(map[string]*User)
+	}
+	return p, nil
+}
+
+// groupReviewsByCommit groups reviews by commit OID,
+// keeping only the latest review per user per commit.
+func groupReviewsByCommit(nodes []*v4.Review) map[string]map[string]*v4.Review {
+	reviewsByCommit := make(map[string]map[string]*v4.Review)
+	for _, node := range nodes {
 		review := newReview(node)
 		login := review.Author.Login
 		if login == "" {
-			// Skip reviews from deleted users
 			continue
 		}
-		if a, ok := reviews[login]; ok {
-			// Keep the latest review
+		commitOID := node.Commit.OID
+		if reviewsByCommit[commitOID] == nil {
+			reviewsByCommit[commitOID] = make(map[string]*v4.Review)
+		}
+		if a, ok := reviewsByCommit[commitOID][login]; ok {
 			if node.CreatedAt.Before(a.CreatedAt.Time) {
 				continue
 			}
-			reviews[login] = node
-			continue
 		}
-		reviews[login] = node
+		reviewsByCommit[commitOID][login] = node
 	}
-	m := make(map[string]*User, len(reviews))
-	for k, v := range reviews {
-		if v.State != "APPROVED" {
-			continue
+	return reviewsByCommit
+}
+
+// buildApproversByCommit converts grouped reviews to approvers maps,
+// filtering to only APPROVED reviews.
+func buildApproversByCommit(reviewsByCommit map[string]map[string]*v4.Review) map[string]map[string]*User {
+	approversByCommit := make(map[string]map[string]*User, len(reviewsByCommit))
+	for oid, reviews := range reviewsByCommit {
+		m := make(map[string]*User)
+		for k, v := range reviews {
+			if v.State == "APPROVED" {
+				m[k] = newUser(v.Author)
+			}
 		}
-		m[k] = newUser(v.Author)
+		if len(m) > 0 {
+			approversByCommit[oid] = m
+		}
 	}
-	p := &PullRequest{
-		HeadSHA:   pr.HeadRefOID,
-		Commits:   commits,
-		Approvers: m,
-	}
-	return p, nil
+	return approversByCommit
 }

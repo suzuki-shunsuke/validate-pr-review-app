@@ -7,6 +7,7 @@ import (
 
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/validation"
 )
 
 func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request) error {
@@ -42,7 +43,16 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, req *Request)
 	trust.Init()
 
 	// Run validation
-	result := c.validate(ctx, logger, ev, &trust, &insecure)
+	var result *validation.Result
+	if ev.EventType == eventPullRequest {
+		result = c.carryForwardCheck(ctx, logger, ev, &trust, &insecure)
+		if result == nil {
+			logger.Info("carry-forward check not applicable, skipping")
+			return nil
+		}
+	} else {
+		result = c.validate(ctx, logger, ev, &trust, &insecure)
+	}
 	result.RequestID = req.RequestID
 
 	if err := c.gh.CreateCheckRun(ctx, c.newCheckRunInput(logger, ev, result, &trust, &insecure)); err != nil {

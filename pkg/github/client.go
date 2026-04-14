@@ -26,6 +26,7 @@ type V3Client interface {
 
 type (
 	PullRequestReviewEvent = github.PullRequestReviewEvent
+	PullRequestEvent       = github.PullRequestEvent
 	CheckSuiteEvent        = github.CheckSuiteEvent
 	ParamNewApp            = v4.ParamNewApp
 )

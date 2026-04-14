@@ -24,6 +24,7 @@ const (
 	headerXHubSignature                   = "X-HUB-SIGNATURE"
 	headerXGitHubEvent                    = "X-GITHUB-EVENT"
 	eventPullRequestReview                = "pull_request_review"
+	eventPullRequest                      = "pull_request"
 	eventInstallation                     = "installation"
 	eventCheckSuite                       = "check_suite"
 )
@@ -44,7 +45,7 @@ func (c *Controller) normalizeHeaders(headers map[string]string) map[string]stri
 	return hs
 }
 
-func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) *Event {
+func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) *Event { //nolint:cyclop
 	headers := c.normalizeHeaders(req.Headers)
 	body := []byte(req.Body)
 	if err := c.verifySignature(body, headers); err != nil {
@@ -65,6 +66,13 @@ func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) *Event {
 			return nil
 		}
 		return newPullRequestReviewEvent(payload)
+	case eventPullRequest:
+		payload := &github.PullRequestEvent{}
+		if err := json.Unmarshal(body, payload); err != nil {
+			logger.Warn("parse a webhook payload", "error", err)
+			return nil
+		}
+		return newPullRequestEvent(payload)
 	case eventCheckSuite:
 		payload := &github.CheckSuiteEvent{}
 		if err := json.Unmarshal(body, payload); err != nil {
@@ -86,6 +94,7 @@ func (c *Controller) verifyWebhook(logger *slog.Logger, req *Request) *Event {
 }
 
 type Event struct {
+	EventType    string
 	Action       string
 	RepoFullName string
 	RepoOwner    string
@@ -98,12 +107,26 @@ type Event struct {
 
 func newPullRequestReviewEvent(ev *github.PullRequestReviewEvent) *Event {
 	return &Event{
+		EventType:    eventPullRequestReview,
 		Action:       ev.GetAction(),
 		RepoFullName: ev.GetRepo().GetFullName(),
 		RepoOwner:    ev.GetRepo().GetOwner().GetLogin(),
 		RepoName:     ev.GetRepo().GetName(),
 		PRNumber:     ev.GetPullRequest().GetNumber(),
 		ReviewState:  ev.GetReview().GetState(),
+		RepoID:       ev.GetRepo().GetNodeID(),
+		HeadSHA:      ev.GetPullRequest().GetHead().GetSHA(),
+	}
+}
+
+func newPullRequestEvent(ev *github.PullRequestEvent) *Event {
+	return &Event{
+		EventType:    eventPullRequest,
+		Action:       ev.GetAction(),
+		RepoFullName: ev.GetRepo().GetFullName(),
+		RepoOwner:    ev.GetRepo().GetOwner().GetLogin(),
+		RepoName:     ev.GetRepo().GetName(),
+		PRNumber:     ev.GetPullRequest().GetNumber(),
 		RepoID:       ev.GetRepo().GetNodeID(),
 		HeadSHA:      ev.GetPullRequest().GetHead().GetSHA(),
 	}
@@ -144,6 +167,7 @@ func newCheckSuiteEvent(logger *slog.Logger, ev *github.CheckSuiteEvent) (*Event
 		return nil, nil //nolint:nilnil
 	}
 	return &Event{
+		EventType:    eventCheckSuite,
 		Action:       ev.GetAction(),
 		RepoFullName: ev.GetRepo().GetFullName(),
 		RepoOwner:    ev.GetRepo().GetOwner().GetLogin(),

@@ -168,11 +168,12 @@ func (c *Validator) VerifyCommit(commit *github.Commit, trust *Trust, insecure *
 }
 
 type Result struct {
-	RequestID     string
-	Error         string
-	State         State
-	Approvers     []string
-	SelfApprovers map[string]struct{}
+	RequestID      string
+	Error          string
+	State          State
+	CarriedForward bool
+	Approvers      []string
+	SelfApprovers  map[string]struct{}
 	// app or untrusted machine user approvals
 	IgnoredApprovers []*github.IgnoredApproval
 	// app
