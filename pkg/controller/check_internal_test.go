@@ -109,8 +109,8 @@ func TestController_newCheckRunInput(t *testing.T) {
 				HeadSHA: "abc123",
 			},
 			result: &validation.Result{
-				State:        validation.StateTwoApprovalsAreRequired,
-				SelfApprover: "committer",
+				State:         validation.StateTwoApprovalsAreRequired,
+				SelfApprovers: map[string]struct{}{"committer": {}},
 			},
 			expected: githubv4.CreateCheckRunInput{
 				RepositoryID: githubv4.String("12345"),
@@ -177,8 +177,8 @@ func TestController_newCheckRunInput(t *testing.T) {
 				HeadSHA: "abc123",
 			},
 			result: &validation.Result{
-				State:        validation.StateTwoApprovalsAreRequired,
-				SelfApprover: "committer",
+				State:         validation.StateTwoApprovalsAreRequired,
+				SelfApprovers: map[string]struct{}{"committer": {}},
 				UntrustedCommits: []*github.UntrustedCommit{
 					{
 						Login:           "committer",

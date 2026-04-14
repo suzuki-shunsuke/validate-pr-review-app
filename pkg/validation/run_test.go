@@ -103,8 +103,8 @@ func TestController_Run(t *testing.T) {
 				},
 			},
 			expected: &validation.Result{
-				State:        validation.StateTwoApprovalsAreRequired,
-				SelfApprover: "committer",
+				State:         validation.StateTwoApprovalsAreRequired,
+				SelfApprovers: map[string]struct{}{"committer": {}},
 			},
 		},
 		{
@@ -602,8 +602,8 @@ func TestController_Run(t *testing.T) {
 				},
 			},
 			expected: &validation.Result{
-				State:        validation.StateTwoApprovalsAreRequired,
-				SelfApprover: "committer",
+				State:         validation.StateTwoApprovalsAreRequired,
+				SelfApprovers: map[string]struct{}{"committer": {}},
 			},
 		},
 		{
@@ -703,7 +703,7 @@ func TestResult_Reasons(t *testing.T) {
 		{
 			name: "self-approval only",
 			result: &validation.Result{
-				SelfApprover: "user1",
+				SelfApprovers: map[string]struct{}{"user1": {}},
 			},
 			expected: []string{"self-approval"},
 		},
@@ -761,7 +761,7 @@ func TestResult_Reasons(t *testing.T) {
 		{
 			name: "unsigned commit and self-approval",
 			result: &validation.Result{
-				SelfApprover: "user1",
+				SelfApprovers: map[string]struct{}{"user1": {}},
 				UntrustedCommits: []*github.UntrustedCommit{
 					{
 						Login:       "user1",
@@ -792,7 +792,7 @@ func TestResult_Reasons(t *testing.T) {
 		{
 			name: "all reasons combined",
 			result: &validation.Result{
-				SelfApprover: "user1",
+				SelfApprovers: map[string]struct{}{"user1": {}},
 				UntrustedCommits: []*github.UntrustedCommit{
 					{
 						Login:           "user1",

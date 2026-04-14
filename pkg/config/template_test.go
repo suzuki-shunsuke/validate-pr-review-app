@@ -142,9 +142,9 @@ Untrusted Machine Users: Nothing
 		{
 			name: "require two approvals",
 			result: &validation.Result{
-				State:        validation.StateTwoApprovalsAreRequired,
-				SelfApprover: "foo",
-				Approvers:    []string{"user1"},
+				State:         validation.StateTwoApprovalsAreRequired,
+				SelfApprovers: map[string]struct{}{"foo": {}},
+				Approvers:     []string{"user1"},
 				IgnoredApprovers: []*github.IgnoredApproval{
 					{
 						Login:                  "foo-bot",
@@ -163,7 +163,9 @@ Untrusted Machine Users: Nothing
 			template: "require_two_approvals",
 			wantText: `This pull request requires two approvals because:
 
-` + "`foo` approved this pull request, but it's a self-approval. `foo` pushes commits to this pull request." + `
+The following approvers have self-approved this pull request by pushing commits:
+
+- ` + "`foo`" + `
 
 The following commits are untrusted, so two approvals are required.
 
