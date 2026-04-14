@@ -16,7 +16,7 @@ func (c *Controller) validate(ctx context.Context, logger *slog.Logger, ev *Even
 	}
 	logger.Info("fetched a pull request", "pull_request", pr)
 
-	c.checkMergeCommits(ctx, logger, ev, pr)
+	c.checkApproverCommits(ctx, logger, ev, pr)
 
 	input := &validation.Input{
 		PR: pr,

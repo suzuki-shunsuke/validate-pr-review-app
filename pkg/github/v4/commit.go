@@ -5,11 +5,12 @@ type PullRequestCommit struct {
 }
 
 type Commit struct {
-	OID       string     `json:"oid"`
-	Committer *Committer `json:"committer"`
-	Author    *Committer `json:"author"`
-	Signature *Signature `json:"signature"`
-	Parents   *Parents   `json:"parents" graphql:"parents(first:10)"`
+	OID                     string     `json:"oid"`
+	Committer               *Committer `json:"committer"`
+	Author                  *Committer `json:"author"`
+	Signature               *Signature `json:"signature"`
+	Parents                 *Parents   `json:"parents" graphql:"parents(first:10)"`
+	ChangedFilesIfAvailable *int       `json:"changedFilesIfAvailable"`
 }
 
 type Parents struct {
