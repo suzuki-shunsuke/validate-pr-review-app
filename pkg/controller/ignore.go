@@ -8,7 +8,7 @@ func ignore(logger *slog.Logger, ev *Event) bool {
 	// For pull_request events, only process "synchronize" action.
 	if ev.EventType == eventPullRequest {
 		if ev.Action != "synchronize" {
-			logger.Info("ignore the pull_request event because the action is not 'synchronize'", "action", ev.Action)
+			logger.Debug("ignore the pull_request event because the action is not 'synchronize'", "action", ev.Action)
 			return true
 		}
 		return false
