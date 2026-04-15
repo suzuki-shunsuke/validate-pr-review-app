@@ -21,9 +21,11 @@ It helps organizations improve governance and security by ensuring PRs cannot be
 
 - At least **1 approval** required.
 - If the committer approves → **2 approvals required**.
+  - [As of v0.3.2, empty commits and trivial merge commits don't require 2 approvals](docs/allow-empty-commit-and-trivial-merge-commit.md)
 - If the PR contains [unsigned commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) or [commits not linked to a GitHub user](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/troubleshooting-commits/why-are-my-commits-linked-to-the-wrong-user) → **2 approvals required**.
 - Approvals from untrusted Machine Users or GitHub Apps are ignored.
 - If the PR contains commits from untrusted Machine Users or GitHub Apps → **2 approvals required**.
+- [See also Handling Pull Request Events](docs/handle-pull-request-event.md)
 
 ## How It Works
 
@@ -40,7 +42,7 @@ sequenceDiagram
     participant GitHub
     participant ValidatePRReviewApp as Validate PR Review App
 
-    GitHub ->> ValidatePRReviewApp: Send Pull Request Review Webhook
+    GitHub ->> ValidatePRReviewApp: Send Pull Request Review or Pull Request Webhook
     ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Webhook
     ValidatePRReviewApp ->> ValidatePRReviewApp: Ignore irrelevant events
     ValidatePRReviewApp ->> GitHub: Fetch PR reviews and commits (GitHub API)
