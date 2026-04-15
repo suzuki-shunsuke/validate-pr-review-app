@@ -12,6 +12,7 @@
 - [Create a private key](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps)
 - Subscribe Events
   - Pull request review
+  - Pull request (As of v0.3.2)
 
 After registering the app, you can get the app id from the setting page.
 Please add it to config.yaml.
