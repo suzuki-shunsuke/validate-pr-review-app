@@ -3,7 +3,7 @@ module github.com/suzuki-shunsuke/validate-pr-review-app
 go 1.26.2
 
 require (
-	cloud.google.com/go/secretmanager v1.18.0
+	cloud.google.com/go/secretmanager v1.19.0
 	github.com/aws/aws-lambda-go v1.54.0
 	github.com/aws/aws-sdk-go-v2 v1.41.5
 	github.com/aws/aws-sdk-go-v2/config v1.32.14
