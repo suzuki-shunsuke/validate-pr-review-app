@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/go-github/v84/github"
+	"github.com/google/go-github/v85/github"
 	"github.com/shurcooL/githubv4"
 	v3 "github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github/v3"
 	v4 "github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github/v4"
