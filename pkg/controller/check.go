@@ -75,7 +75,7 @@ func (c *Controller) newCheckRunInput(logger *slog.Logger, ev *Event, result *va
 func summarize(result *validation.Result, templates map[string]*template.Template) (string, error) {
 	var key string
 	if result.Error != "" {
-		key = "error"
+		key = config.TmplKeyError
 	} else {
 		key = string(result.State)
 	}
