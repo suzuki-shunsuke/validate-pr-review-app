@@ -25,6 +25,8 @@ var (
 	templateError []byte
 )
 
+const TmplKeyError = "error"
+
 func (c *Config) initTemplates() error {
 	defaultTemplates := map[string]string{
 		"footer":                string(templateFooter),
@@ -32,7 +34,7 @@ func (c *Config) initTemplates() error {
 		"approved":              string(templateApproved),
 		"no_approval":           string(templateNoApproval),
 		"require_two_approvals": string(templateRequireTwoApprovals),
-		"error":                 string(templateError),
+		TmplKeyError:            string(templateError),
 	}
 	if c.Templates == nil {
 		c.Templates = map[string]string{}
@@ -55,7 +57,7 @@ func (c *Config) initTemplates() error {
 		"no_approval",
 		"approved",
 		"require_two_approvals",
-		"error",
+		TmplKeyError,
 	}
 	templates := make(map[string]*template.Template, len(keys))
 	for _, k := range keys {

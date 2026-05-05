@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"slices"
 
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
@@ -62,8 +63,8 @@ func (c *Controller) carryForwardCheck(ctx context.Context, logger *slog.Logger,
 func (c *Controller) findCarryForwardApprovers(ctx context.Context, logger *slog.Logger, ev *Event, pr *github.PullRequest) map[string]*github.User {
 	prCommitSHAs := buildPRCommitSHAs(pr)
 	// Walk commits from newest to oldest.
-	for i := len(pr.Commits) - 1; i >= 0; i-- {
-		commit := pr.Commits[i]
+	for _, v := range slices.Backward(pr.Commits) {
+		commit := v
 
 		// Check if this commit has reviews.
 		if approvers, ok := pr.ApproversByCommit[commit.SHA]; ok && len(approvers) > 0 {

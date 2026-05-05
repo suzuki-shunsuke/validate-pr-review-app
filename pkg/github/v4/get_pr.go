@@ -11,9 +11,9 @@ import (
 func (c *Client) GetPR(ctx context.Context, owner, name string, number int) (*PullRequest, error) {
 	q := &GetPRQuery{}
 	variables := map[string]any{
-		"repoOwner": githubv4.String(owner),
-		"repoName":  githubv4.String(name),
-		"number":    githubv4.Int(number), //nolint:gosec
+		keyRepoOwner: githubv4.String(owner),
+		keyRepoName:  githubv4.String(name),
+		keyNumber:    githubv4.Int(number), //nolint:gosec
 	}
 	if err := c.v4Client.Query(ctx, q, variables); err != nil {
 		return nil, fmt.Errorf("get a pull request by GitHub GraphQL API: %w", err)
@@ -45,10 +45,10 @@ func (c *Client) GetPR(ctx context.Context, owner, name string, number int) (*Pu
 func (c *Client) ListReviews(ctx context.Context, owner, name string, number int, cursor string) ([]*Review, error) {
 	var reviews []*Review
 	variables := map[string]any{
-		"repoOwner": githubv4.String(owner),
-		"repoName":  githubv4.String(name),
-		"number":    githubv4.Int(number), //nolint:gosec
-		"cursor":    githubv4.String(cursor),
+		keyRepoOwner: githubv4.String(owner),
+		keyRepoName:  githubv4.String(name),
+		keyNumber:    githubv4.Int(number), //nolint:gosec
+		"cursor":     githubv4.String(cursor),
 	}
 	for range 100 {
 		q := &ListReviewsQuery{}
@@ -69,10 +69,10 @@ func (c *Client) ListReviews(ctx context.Context, owner, name string, number int
 func (c *Client) ListCommits(ctx context.Context, owner, name string, number int, cursor string) ([]*PullRequestCommit, error) {
 	var commits []*PullRequestCommit
 	variables := map[string]any{
-		"repoOwner": githubv4.String(owner),
-		"repoName":  githubv4.String(name),
-		"number":    githubv4.Int(number), //nolint:gosec
-		"cursor":    githubv4.String(cursor),
+		keyRepoOwner: githubv4.String(owner),
+		keyRepoName:  githubv4.String(name),
+		keyNumber:    githubv4.Int(number), //nolint:gosec
+		"cursor":     githubv4.String(cursor),
 	}
 	for range 100 {
 		q := &ListCommitsQuery{}
