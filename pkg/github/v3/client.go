@@ -29,7 +29,11 @@ func New(param *ParamNewApp) (*Client, error) {
 	c := retryablehttp.NewClient()
 	c.HTTPClient = &http.Client{Transport: itr}
 	c.Logger = param.Logger
+	gh, err := github.NewClient(github.WithHTTPClient(c.StandardClient()))
+	if err != nil {
+		return nil, fmt.Errorf("create a GitHub client: %w", err)
+	}
 	return &Client{
-		client: github.NewClient(c.StandardClient()),
+		client: gh,
 	}, nil
 }
