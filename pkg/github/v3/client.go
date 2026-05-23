@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
-	"github.com/google/go-github/v86/github"
+	"github.com/google/go-github/v87/github"
 	"github.com/suzuki-shunsuke/go-retryablehttp"
 )
 
@@ -29,7 +29,11 @@ func New(param *ParamNewApp) (*Client, error) {
 	c := retryablehttp.NewClient()
 	c.HTTPClient = &http.Client{Transport: itr}
 	c.Logger = param.Logger
+	gh, err := github.NewClient(github.WithHTTPClient(c.StandardClient()))
+	if err != nil {
+		return nil, fmt.Errorf("create a GitHub client: %w", err)
+	}
 	return &Client{
-		client: github.NewClient(c.StandardClient()),
+		client: gh,
 	}, nil
 }
