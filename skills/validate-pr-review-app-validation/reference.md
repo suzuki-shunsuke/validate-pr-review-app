@@ -1,6 +1,10 @@
 # Validation
 
-How validate-pr-review-app validates Pull Request reviews, and when a PR passes or fails.
+Validate PR Review App is a self-hosted GitHub App that validates Pull Request reviews.
+It helps organizations improve governance and security by ensuring PRs cannot be merged without
+proper approvals while keeping developer experience.
+
+This document explains how it validates Pull Request reviews, and when a PR passes or fails.
 
 ## Validation Rules
 
