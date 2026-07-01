@@ -15,12 +15,12 @@ description: |
 
 Read these files for the overview:
 
-- [header.md](header.md) — what validate-pr-review-app is (one-paragraph summary).
-- [how_it_works.md](how_it_works.md) — the end-to-end flow, with a sequence diagram.
-- [why.md](why.md) — why the app exists and how it compares to deny-self-approve, validate-pr-review-action, and GitHub Actions.
-- [features.md](features.md) — the security/governance and developer-experience features.
-- [rules.md](rules.md) — a summary of the validation rules (see the validate-pr-review-app-validation skill for the full rules and behavior).
-- [platforms.md](platforms.md) — supported platforms (AWS Lambda, HTTP Server).
+- [What validate-pr-review-app is](header.md) — a one-paragraph summary.
+- [How it works](how_it_works.md) — the end-to-end flow, with a sequence diagram.
+- [Why it exists](why.md) — how it compares to deny-self-approve, validate-pr-review-action, and GitHub Actions.
+- [Features](features.md) — the security/governance and developer-experience features.
+- [Validation rules (summary)](rules.md) — the full rules and behavior are in the validate-pr-review-app-validation skill.
+- [Supported platforms](platforms.md) — AWS Lambda and HTTP Server.
 
 For details on a specific topic, use the sibling skills: validate-pr-review-app-validation
 (validation rules and behavior), validate-pr-review-app-configuration (settings and secrets),
