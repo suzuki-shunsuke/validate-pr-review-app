@@ -8,6 +8,7 @@ It helps organizations improve governance and security by ensuring PRs cannot be
   - Centralized configuration: Manage settings in one place via the GitHub App, keeping governance and security strong with minimal overhead.
 - Good Developer Experience
   - Runs quickly and provides clear error feedback through the Checks API, so developers immediately understand why validation failed.
+  - Works with GitHub Merge Queue with no additional setup.
 
 ### Validation Rules
 

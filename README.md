@@ -20,6 +20,7 @@ It helps organizations improve governance and security by ensuring PRs cannot be
   - Centralized configuration: Manage settings in one place via the GitHub App, keeping governance and security strong with minimal overhead.
 - Good Developer Experience
   - Runs quickly and provides clear error feedback through the Checks API, so developers immediately understand why validation failed.
+  - Works with GitHub Merge Queue with no additional setup.
 
 ### Validation Rules
 
@@ -88,10 +89,6 @@ Install a skill using [vercel-labs/skills](https://github.com/vercel-labs/skills
 ```sh
 npx skills add suzuki-shunsuke/validate-pr-review-app --skill validate-pr-review-app-validation
 ```
-
-## Merge Queue Support
-
-This app supports [Merge Queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) with no additional settings.
 
 ## Trusted vs. Untrusted Users and GitHub Apps
 
