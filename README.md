@@ -19,13 +19,11 @@ It helps organizations improve governance and security by ensuring PRs cannot be
 
 ### Validation Rules
 
-- At least **1 approval** required.
-- If the committer approves → **2 approvals required**.
-  - [As of v0.3.2, empty commits and trivial merge commits don't require 2 approvals](docs/allow-empty-commit-and-trivial-merge-commit.md)
-- If the PR contains [unsigned commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) or [commits not linked to a GitHub user](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/troubleshooting-commits/why-are-my-commits-linked-to-the-wrong-user) → **2 approvals required**.
+- At least **1 approval** is required.
+- A **2nd approval** is required when a change carries more risk — for example when the committer approves their own PR, when the PR contains unsigned commits or commits not linked to a GitHub user, or when it involves untrusted Machine Users or GitHub Apps.
 - Approvals from untrusted Machine Users or GitHub Apps are ignored.
-- If the PR contains commits from untrusted Machine Users or GitHub Apps → **2 approvals required**.
-- [See also Handling Pull Request Events](docs/handle-pull-request-event.md)
+
+[See the validation skill for the full rules, how the app works, and how empty/trivial merge commits and Pull Request events are handled.](skills/validate-pr-review-app-validation/reference.md)
 
 ## How It Works
 
@@ -106,68 +104,46 @@ While GitHub Actions-based validation works for small projects, it doesn’t sca
 
 [About Agent Skills, please see the official document.](https://agentskills.io/home)
 
-We provide Agent Skills for validate-pr-review-app:
+This repository provides Agent Skills under [skills/](skills):
 
-[suzuki-shunsuke/agent-skills: validate-pr-review-app](https://github.com/suzuki-shunsuke/agent-skills/blob/main/skills/validate-pr-review-app/SKILL.md)
+- [validate-pr-review-app-validation](skills/validate-pr-review-app-validation/SKILL.md) — how PR review validation works, why approvals are required, and how empty/trivial merge commits and Pull Request events are handled
+- [validate-pr-review-app-configuration](skills/validate-pr-review-app-configuration/SKILL.md) — configure the app (trust model, secrets, environment variables, footer, unsigned commits)
+- [validate-pr-review-app-github-app](skills/validate-pr-review-app-github-app/SKILL.md) — register and set up the GitHub App
+- [validate-pr-review-app-operations](skills/validate-pr-review-app-operations/SKILL.md) — HTTP endpoints, logging, and monitoring
+- [validate-pr-review-app-verify-assets](skills/validate-pr-review-app-verify-assets/SKILL.md) — verify release assets and container images
 
-Install the skill using [vercel-labs/skills](https://github.com/vercel-labs/skills):
+Install a skill using [vercel-labs/skills](https://github.com/vercel-labs/skills):
 
 ```sh
-npx skills add suzuki-shunsuke/agent-skills --skill validate-pr-review-app
+npx skills add suzuki-shunsuke/validate-pr-review-app --skill validate-pr-review-app-validation
 ```
 
 ## Merge Queue Support
 
-This app supports [Merge Queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue).
-Additional settings aren't necessary.
+This app supports [Merge Queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) with no additional settings. [See the validation skill.](skills/validate-pr-review-app-validation/reference.md)
 
 ## Trusted vs. Untrusted Users and GitHub Apps
 
-- **Trusted Apps & Users**: properly managed, cannot be abused.
-- **Untrusted Apps & Users**: potentially exploitable (e.g., private keys exposed).
+Trusted Apps and Users are properly managed and cannot be abused; untrusted ones are potentially exploitable, so their approvals are ignored and their commits require a second approval.
+By default, `renovate` and `dependabot` are trusted Apps, and Machine Users are trusted unless configured otherwise.
 
-By default:
-
-- `renovate` and `dependabot` are trusted Apps.
-- Machine Users are trusted unless configured otherwise.
-  - This is because machine users can't be distinguished with normal users without configuration.
-
-Example:
-
-```yaml
-trusted_apps:
-  - renovate
-  - dependabot
-untrusted_machine_users:
-  - "*-bot"
-  - "!my-safe-bot" # exclude from the pattern above
-```
+[See the configuration skill to configure `trusted_apps` and `untrusted_machine_users`.](skills/validate-pr-review-app-configuration/reference.md)
 
 ## Using CSM Actions For Secure Automatic Code Fixes and Approvals
 
-By using the **Validate PR Review App**, you can prevent commits and approvals made by untrusted Apps or Machine Users.
-However, requiring two approvals every time CI automatically fixes code can hurt developer productivity.
+Requiring two approvals every time CI automatically fixes code can hurt developer productivity.
+[**CSM Actions**](https://github.com/csm-actions/docs) solves this with a **Client/Server Model** that keeps sensitive credentials on the server side, so automatic code fixes and approvals don't need extra reviews.
+By registering the Apps or Machine Users it uses in `trusted_apps` or `untrusted_machine_users`, you can achieve automatic code fixes and auto-merge without additional PR reviews.
 
-[**CSM Actions**](https://github.com/csm-actions/docs) solves this problem.
-CSM Actions is a collection of GitHub Actions that securely handle code modifications and approvals through a **Client/Server Model**.
-With this model, sensitive credentials such as a GitHub App’s Private Key or a Machine User’s Personal Access Token never need to be passed to the client side (regular GitHub Actions workflows). Instead, they are securely managed on the server side (a centrally managed GitHub repository and workflow).
-
-Here are some available Actions:
-
-- [**Securefix Action**](https://github.com/csm-actions/securefix-action): Securely create commits and pull requests.
-- [**Approve PR Action**](https://github.com/csm-actions/approve-pr-action): Securely approve PRs using a Machine User.
-- [**Update Branch Action**](https://github.com/csm-actions/update-branch-action): Securely update PR branches.
-  - If a reviewer updates a branch from the GitHub Web UI, another reviewer’s approval is required to prevent self-approval. With Update Branch Action, the branch is updated securely using a GitHub App.
-
-By registering the Apps or Machine Users used with CSM Actions in `trusted_apps` or `untrusted_machine_users`, you can achieve automatic code fixes and auto-merge without additional PR reviews.
+[See the validation skill for details.](skills/validate-pr-review-app-validation/reference.md)
 
 ## See Also
 
-- [Verify Release Assets](docs/verify-asset.md)
-- [Verify Container Images](docs/verify-image.md)
-- [GitHub App Settings](docs/github-app.md)
-- [Configuration](docs/config.md)
-- [Logging, Monitoring, and Security](docs/production.md)
+- [Validation](skills/validate-pr-review-app-validation/reference.md)
+- [Configuration](skills/validate-pr-review-app-configuration/reference.md)
+- [GitHub App Settings](skills/validate-pr-review-app-github-app/reference.md)
+- [Operations (HTTP endpoints, Logging, Monitoring, Security)](skills/validate-pr-review-app-operations/reference.md)
+- [Verify Release Assets and Container Images](skills/validate-pr-review-app-verify-assets/reference.md)
 
 ## License
 
