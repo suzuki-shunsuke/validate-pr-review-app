@@ -1,4 +1,6 @@
-# Verify downloaded assets from GitHub Releases
+# Verify Release Assets and Container Images
+
+## Verify downloaded assets from GitHub Releases
 
 You can verify downloaded assets using some tools.
 
@@ -6,7 +8,7 @@ You can verify downloaded assets using some tools.
 1. [slsa-verifier](https://github.com/slsa-framework/slsa-verifier)
 1. [Cosign](https://github.com/sigstore/cosign)
 
-## 1. GitHub CLI
+### 1. GitHub CLI
 
 You can install GitHub CLI by aqua.
 
@@ -23,7 +25,7 @@ gh attestation verify "$asset" \
   --signer-workflow suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml
 ```
 
-## 2. slsa-verifier
+### 2. slsa-verifier
 
 You can install slsa-verifier by aqua.
 
@@ -41,7 +43,7 @@ slsa-verifier verify-artifact "$asset" \
   --source-tag "$version"
 ```
 
-## 3. Cosign
+### 3. Cosign
 
 You can install Cosign by aqua.
 
@@ -64,4 +66,20 @@ cosign verify-blob \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   "$checksum_file"
 cat "$checksum_file" | sha256sum -c --ignore-missing
+```
+
+## Verify Container Images
+
+You can verify container images using Cosign.
+
+You can install Cosign by aqua.
+
+```sh
+aqua g -i sigstore/cosign
+```
+
+This skill includes the verification script [verify-image.sh](verify-image.sh).
+
+```sh
+bash verify-image.sh v0.1.0-0
 ```
