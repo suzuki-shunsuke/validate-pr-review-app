@@ -91,7 +91,7 @@ npx skills add suzuki-shunsuke/validate-pr-review-app --skill validate-pr-review
 
 ## Merge Queue Support
 
-This app supports [Merge Queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) with no additional settings. [See the validation skill.](skills/validate-pr-review-app-validation/reference.md)
+This app supports [Merge Queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) with no additional settings.
 
 ## Trusted vs. Untrusted Users and GitHub Apps
 
