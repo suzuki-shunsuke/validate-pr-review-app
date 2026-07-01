@@ -1,11 +1,15 @@
 ---
 name: validate-pr-review-app-validation
 description: |
-  Explain how validate-pr-review-app validates Pull Request reviews — the approval rules, why a
-  PR needs 1 or 2 approvals, how unsigned commits and untrusted apps/machine users affect the
-  requirement, how Pull Request synchronize events are handled, empty/trivial merge commits,
-  merge queue support, and CSM Actions for secure auto-fix/approval.
+  Understand what validate-pr-review-app is and how it validates Pull Request reviews.
+  validate-pr-review-app is a self-hosted GitHub App that ensures PRs cannot be merged without
+  proper approvals. This is the entry-point skill: it explains what the app is and how it works
+  overall, plus the approval rules, why a PR needs 1 or 2 approvals, how unsigned commits and
+  untrusted apps/machine users affect the requirement, how Pull Request synchronize events are
+  handled, empty/trivial merge commits, merge queue support, and CSM Actions for secure
+  auto-fix/approval.
   Use this skill when the user wants to:
+  - Understand what validate-pr-review-app is, what it does, or how it works overall (overview).
   - Understand or troubleshoot why a validate-pr-review-app check passed or failed.
   - Understand why a PR requires two approvals or how to avoid the two-approval requirement.
   - Understand how empty commits, trivial merge commits, or "update branch" are handled.
