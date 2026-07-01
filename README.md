@@ -2,22 +2,17 @@
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/suzuki-shunsuke/validate-pr-review-app) [Agent Skills](#agent-skills)
 
+![image](https://github.com/user-attachments/assets/68e6fd3f-b36a-4d62-a46c-76bbeaf1ebdb)
+
+![image](https://github.com/user-attachments/assets/aa460dc1-375c-46ad-ad05-24cdea7f1c4d)
+
 <!-- docfresh begin
 file:
-  path: skills/validate-pr-review-app-overview/header.md
+  path: skills/validate-pr-review-app-overview/reference.md
 -->
 Validate PR Review App is a self-hosted GitHub App that validates Pull Request reviews.
 It helps organizations improve governance and security by ensuring PRs cannot be merged without proper approvals while keeping developer experience.
 
-![image](https://github.com/user-attachments/assets/68e6fd3f-b36a-4d62-a46c-76bbeaf1ebdb)
-
-![image](https://github.com/user-attachments/assets/aa460dc1-375c-46ad-ad05-24cdea7f1c4d)
-<!-- docfresh end -->
-
-<!-- docfresh begin
-file:
-  path: skills/validate-pr-review-app-overview/features.md
--->
 ## Features
 
 - Security and Governance
@@ -25,25 +20,13 @@ file:
   - Centralized configuration: Manage settings in one place via the GitHub App, keeping governance and security strong with minimal overhead.
 - Good Developer Experience
   - Runs quickly and provides clear error feedback through the Checks API, so developers immediately understand why validation failed.
-<!-- docfresh end -->
 
-<!-- docfresh begin
-file:
-  path: skills/validate-pr-review-app-overview/rules.md
--->
 ### Validation Rules
 
 - At least **1 approval** is required.
 - A **2nd approval** is required when a change carries more risk — for example when the committer approves their own PR, when the PR contains unsigned commits or commits not linked to a GitHub user, or when it involves untrusted Machine Users or GitHub Apps.
 - Approvals from untrusted Machine Users or GitHub Apps are ignored.
-<!-- docfresh end -->
 
-[See the validation skill for the full rules, how the app works, and how empty/trivial merge commits and Pull Request events are handled.](skills/validate-pr-review-app-validation/reference.md)
-
-<!-- docfresh begin
-file:
-  path: skills/validate-pr-review-app-overview/how_it_works.md
--->
 ## How It Works
 
 1. Install the GitHub App in your repositories and [enable Webhook](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/using-webhooks-with-github-apps).
@@ -67,23 +50,13 @@ sequenceDiagram
     ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Reviews
     ValidatePRReviewApp ->> GitHub: Update Check (Checks API)
 ```
-<!-- docfresh end -->
 
-<!-- docfresh begin
-file:
-  path: skills/validate-pr-review-app-overview/why.md
--->
 ## Why?
 
 This project is the successor to [deny-self-approve](https://github.com/suzuki-shunsuke/deny-self-approve) (CLI) and [validate-pr-review-action](https://github.com/suzuki-shunsuke/validate-pr-review-action) (GitHub Action).
 Even with branch rulesets that require reviews, PRs can still be merged improperly — for example by abusing a machine user with `CODEOWNER` privileges, or by adding commits to someone else's PR and approving it yourself.
 GitHub Actions-based validation doesn't scale well for larger organizations (setup cost, easy to bypass, slower, poor error visibility), so this app solves these issues by working as a GitHub App, receiving Webhooks, and updating Checks directly.
-<!-- docfresh end -->
 
-<!-- docfresh begin
-file:
-  path: skills/validate-pr-review-app-overview/platforms.md
--->
 ## Supported Platforms
 
 - AWS Lambda
@@ -137,7 +110,7 @@ By registering the Apps or Machine Users it uses in `trusted_apps` or `untrusted
 
 ## See Also
 
-- [Overview (what it is, how it works, why)](skills/validate-pr-review-app-overview/SKILL.md)
+- [Overview (what it is, how it works, why)](skills/validate-pr-review-app-overview/reference.md)
 - [Validation](skills/validate-pr-review-app-validation/reference.md)
 - [Configuration](skills/validate-pr-review-app-configuration/reference.md)
 - [GitHub App Settings](skills/validate-pr-review-app-github-app/reference.md)

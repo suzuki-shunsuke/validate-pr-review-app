@@ -13,14 +13,9 @@ description: |
   configuration, GitHub App setup, operations, or verifying assets).
 ---
 
-Read these files for the overview:
-
-- [What validate-pr-review-app is](header.md) — a one-paragraph summary.
-- [How it works](how_it_works.md) — the end-to-end flow, with a sequence diagram.
-- [Why it exists](why.md) — how it compares to deny-self-approve, validate-pr-review-action, and GitHub Actions.
-- [Features](features.md) — the security/governance and developer-experience features.
-- [Validation rules (summary)](rules.md) — the full rules and behavior are in the validate-pr-review-app-validation skill.
-- [Supported platforms](platforms.md) — AWS Lambda and HTTP Server.
+Read [the overview](reference.md) — what validate-pr-review-app is, its features, a summary of the
+validation rules, how it works end to end (with a sequence diagram), why it exists, and the
+supported platforms.
 
 For details on a specific topic, use the sibling skills: validate-pr-review-app-validation
 (validation rules and behavior), validate-pr-review-app-configuration (settings and secrets),
