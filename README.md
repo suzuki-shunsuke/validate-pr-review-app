@@ -51,42 +51,11 @@ sequenceDiagram
 
 ## Why?
 
-This project is the successor to the following our OSS Projects:
+This project is the successor to [deny-self-approve](https://github.com/suzuki-shunsuke/deny-self-approve) (CLI) and [validate-pr-review-action](https://github.com/suzuki-shunsuke/validate-pr-review-action) (GitHub Action).
+Even with branch rulesets that require reviews, PRs can still be merged improperly — for example by abusing a machine user with `CODEOWNER` privileges, or by adding commits to someone else's PR and approving it yourself.
+GitHub Actions-based validation doesn't scale well for larger organizations (setup cost, easy to bypass, slower, poor error visibility), so this app solves these issues by working as a GitHub App, receiving Webhooks, and updating Checks directly.
 
-1. [deny-self-approve](https://github.com/suzuki-shunsuke/deny-self-approve) (CLI)
-2. [validate-pr-review-action](https://github.com/suzuki-shunsuke/validate-pr-review-action) (GitHub Action)
-
-When developing as a team, it's common to require that pull requests be reviewed by someone other than the author.
-Code reviews help improve code quality, facilitate knowledge sharing among team members, and prevent any single person from making unauthorized changes without approval.
-
-First, you should enable the following branch ruleset on the default branch.
-
-- `Require a pull request before merging`
-  - `Require review from Code Owners`
-  - `Require approval of the most recent reviewable push`
-- `Require status checks to pass`
-
-This rules require pull request reviews, but there are still several ways to improperly merge a pull request without a valid review:
-
-1. Abusing a machine user with `CODEOWNER` privileges to approve the PR.
-2. Adding commits to someone else’s PR and approving it yourself.
-3. Using a machine user or bot to add commits to someone else’s PR, then approving it yourself.
-
-[validate-pr-review-action](https://github.com/suzuki-shunsuke/validate-pr-review-action) validates pull request reviews via `pull_request_review` or `merge_group` events.
-While GitHub Actions-based validation works for small projects, it doesn’t scale well for larger organizations due to:
-
-- **Setup & management cost**
-  - Workflows must be added and maintained in every repository.
-  - Required Workflows don’t support the `pull_request_review` event.
-- **Security & governance**
-  - Easy to bypass by editing workflows.
-  - Hard to centrally manage trusted apps or settings.
-- **Developer experience**
-  - Slower execution compared to FaaS (serverless).
-  - Workflows trigger unnecessarily (e.g., on review comments).
-  - Poor error visibility (logs instead of clear feedback).
-
-**Validate PR Review App** solves these issues by working as a GitHub App, receiving Webhooks, and updating Checks directly.
+[See the overview skill for the full motivation and comparison.](skills/validate-pr-review-app-overview/reference.md)
 
 ## Supported Platforms
 
@@ -106,6 +75,7 @@ While GitHub Actions-based validation works for small projects, it doesn’t sca
 
 This repository provides Agent Skills under [skills/](skills):
 
+- [validate-pr-review-app-overview](skills/validate-pr-review-app-overview/SKILL.md) — what the app is, how it works end to end, and why it exists (entry point)
 - [validate-pr-review-app-validation](skills/validate-pr-review-app-validation/SKILL.md) — how PR review validation works, why approvals are required, and how empty/trivial merge commits and Pull Request events are handled
 - [validate-pr-review-app-configuration](skills/validate-pr-review-app-configuration/SKILL.md) — configure the app (trust model, secrets, environment variables, footer, unsigned commits)
 - [validate-pr-review-app-github-app](skills/validate-pr-review-app-github-app/SKILL.md) — register and set up the GitHub App
@@ -139,6 +109,7 @@ By registering the Apps or Machine Users it uses in `trusted_apps` or `untrusted
 
 ## See Also
 
+- [Overview (what it is, how it works, why)](skills/validate-pr-review-app-overview/reference.md)
 - [Validation](skills/validate-pr-review-app-validation/reference.md)
 - [Configuration](skills/validate-pr-review-app-configuration/reference.md)
 - [GitHub App Settings](skills/validate-pr-review-app-github-app/reference.md)

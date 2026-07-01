@@ -1,10 +1,8 @@
 # Validation
 
-Validate PR Review App is a self-hosted GitHub App that validates Pull Request reviews.
-It helps organizations improve governance and security by ensuring PRs cannot be merged without
-proper approvals while keeping developer experience.
-
-This document explains how it validates Pull Request reviews, and when a PR passes or fails.
+How validate-pr-review-app validates Pull Request reviews, and when a PR passes or fails.
+For an overview of what the app is and how it works end to end, see the overview skill
+(validate-pr-review-app-overview).
 
 ## Validation Rules
 
@@ -19,30 +17,6 @@ This document explains how it validates Pull Request reviews, and when a PR pass
 Trusted vs. untrusted Machine Users and GitHub Apps are configured in the app's
 configuration. See the configuration skill (`skills/validate-pr-review-app-configuration/reference.md`)
 for `trusted_apps` and `untrusted_machine_users`.
-
-## How It Works
-
-1. Install the GitHub App in your repositories and [enable Webhook](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/using-webhooks-with-github-apps).
-2. GitHub sends Webhook to the App when pull requests are reviewed or pull requests are added to merge queue.
-3. The App validates if the Webhook is valid.
-4. The App filters irrelevant events like review comments.
-5. The App fetches PR reviews and commits using the GitHub API.
-6. The App validates reviews.
-7. The App updates the Check via the Checks API.
-
-```mermaid
-sequenceDiagram
-    participant GitHub
-    participant ValidatePRReviewApp as Validate PR Review App
-
-    GitHub ->> ValidatePRReviewApp: Send Pull Request Review or Pull Request Webhook
-    ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Webhook
-    ValidatePRReviewApp ->> ValidatePRReviewApp: Ignore irrelevant events
-    ValidatePRReviewApp ->> GitHub: Fetch PR reviews and commits (GitHub API)
-    GitHub -->> ValidatePRReviewApp: Reviews & commits data
-    ValidatePRReviewApp ->> ValidatePRReviewApp: Validate Reviews
-    ValidatePRReviewApp ->> GitHub: Update Check (Checks API)
-```
 
 ## Merge Queue Support
 
