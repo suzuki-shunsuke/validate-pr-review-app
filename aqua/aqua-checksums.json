@@ -106,33 +106,33 @@
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/ko-build/ko/v0.19.0/ko_0.19.0_Darwin_arm64.tar.gz",
-      "checksum": "1F208520E58AC589FDA4F9F5B531174032A1F1EEEA218F7BD4381E0C63B97C31",
+      "id": "github_release/github.com/ko-build/ko/v0.19.1/ko_0.19.1_Darwin_arm64.tar.gz",
+      "checksum": "A1338C4140C8C94E789733E21B161A3DE177B467CD3C388B634FE1A869574509",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/ko-build/ko/v0.19.0/ko_0.19.0_Darwin_x86_64.tar.gz",
-      "checksum": "22D77D8AB7929BBE1670DED1DF1EF2D385C15B96BCFDC9428E98159ECA153B97",
+      "id": "github_release/github.com/ko-build/ko/v0.19.1/ko_0.19.1_Darwin_x86_64.tar.gz",
+      "checksum": "1B4ED52A5E506A55B085C7F106EB743EE756C776CC90FA232A539A47AD665310",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/ko-build/ko/v0.19.0/ko_0.19.0_Linux_arm64.tar.gz",
-      "checksum": "313E85EA4407C4F32085E5D9B59EBEAE748CB99712E28745B99EE8BA85807EE0",
+      "id": "github_release/github.com/ko-build/ko/v0.19.1/ko_0.19.1_Linux_arm64.tar.gz",
+      "checksum": "4099B2D1170D3B8A70E049237462EFC2DD14D5FA30E9D2E5E108FB4F778CDD3F",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/ko-build/ko/v0.19.0/ko_0.19.0_Linux_x86_64.tar.gz",
-      "checksum": "55AFA9C0738203DE68567E5A3F55372751C35D0B41C7B7E102C4053EC07E1698",
+      "id": "github_release/github.com/ko-build/ko/v0.19.1/ko_0.19.1_Linux_x86_64.tar.gz",
+      "checksum": "635AC6EA3FD376C935FEE597FBB29AB2C2449F49EF1655085FE3AA9C25FED7A5",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/ko-build/ko/v0.19.0/ko_0.19.0_Windows_arm64.tar.gz",
-      "checksum": "009F6A5824CCD3F1E53011DD9845E179A23B5BCB54E36DF7D6D8364FEF6BCCDE",
+      "id": "github_release/github.com/ko-build/ko/v0.19.1/ko_0.19.1_Windows_arm64.tar.gz",
+      "checksum": "7FD21854BC3BDAB2F71E4927CC8E39C60BDAF99992FD4442BFEE0FE84025FEED",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/ko-build/ko/v0.19.0/ko_0.19.0_Windows_x86_64.tar.gz",
-      "checksum": "7C51A7A92AB190B9EAFDDB6AE6819C597E4754040704A4ABDFBFD1651A75CEAA",
+      "id": "github_release/github.com/ko-build/ko/v0.19.1/ko_0.19.1_Windows_x86_64.tar.gz",
+      "checksum": "F70B0C9EA1874E81358A1886D478EBEE9EB17D4F07E8DCAA779C4250A2AAEA70",
       "algorithm": "sha256"
     },
     {
