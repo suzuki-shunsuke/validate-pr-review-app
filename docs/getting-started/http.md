@@ -18,10 +18,10 @@ git clone https://github.com/suzuki-shunsuke/validate-pr-review-app
 cd validate-pr-review-app/example
 ```
 
-2. [Create a GitHub App](../github-app.md)
+2. [Create a GitHub App](../../skills/validate-pr-review-app-github-app/reference.md)
 3. Prepare config.yaml and secret.yaml
-    1. [config.yaml](../config.md#non-secret-config)
-    2. [secret.yaml](../config.md#secrets)
+    1. [config.yaml](../../skills/validate-pr-review-app-configuration/reference.md#non-secret-config)
+    2. [secret.yaml](../../skills/validate-pr-review-app-configuration/reference.md#secrets)
 
 ```sh
 cp config.yaml.tmpl config.yaml
