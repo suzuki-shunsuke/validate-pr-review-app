@@ -9,7 +9,7 @@ jobs:
     uses: suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@1cf29d7b17983b901021799b87a55d357cfff790 # v9.0.0
     with:
       go-version-file: go.mod
-      aqua_version: v2.61.0
+      aqua_version: v2.62.0
       go_licenses_package: ./cmd/app
     permissions:
       contents: write
@@ -31,7 +31,7 @@ jobs:
           persist-credentials: false
       - uses: aquaproj/aqua-installer@96a9bc20066c5bf5e275b41019cfc165b25f4e2e # v4.0.5
         with:
-          aqua_version: v2.61.0
+          aqua_version: v2.62.0
 
       - run: ko version
         env:
