@@ -2,6 +2,28 @@
 
 Configuration consists of **secrets** and **non-secrets**.
 
+## Trusted vs. Untrusted Users and GitHub Apps
+
+- **Trusted Apps & Users**: properly managed, cannot be abused.
+- **Untrusted Apps & Users**: potentially exploitable (e.g., private keys exposed).
+
+By default:
+
+- `renovate` and `dependabot` are trusted Apps.
+- Machine Users are trusted unless configured otherwise.
+  - This is because machine users can't be distinguished with normal users without configuration.
+
+Example:
+
+```yaml
+trusted_apps:
+  - renovate
+  - dependabot
+untrusted_machine_users:
+  - "*-bot"
+  - "!my-safe-bot" # exclude from the pattern above
+```
+
 ## Secrets
 
 - `webhook_secret`
@@ -41,7 +63,7 @@ github_app_private_key: |
 
 ## JSON Schema
 
-[json-schema/config.json](../json-schema/config.json)
+[json-schema/config.json](https://github.com/suzuki-shunsuke/validate-pr-review-app/blob/main/json-schema/config.json)
 
 You can validate your config using JSON Schema and tools such as [ajv-cli](https://ajv.js.org/packages/ajv-cli.html).
 
@@ -110,7 +132,7 @@ repositories:
 
 You can customize the footer of this app's Checks tab.
 
-The default is: [footer.md](../pkg/config/templates/footer.md)
+The default is: [footer.md](https://github.com/suzuki-shunsuke/validate-pr-review-app/blob/main/pkg/config/templates/footer.md)
 
 For example, you can add the guide for developers:
 

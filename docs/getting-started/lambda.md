@@ -30,7 +30,7 @@ cd validate-pr-review-app/terraform/aws
 bash init.sh
 ```
 
-4. [Registering a GitHub App](../github-app.md)
+4. [Registering a GitHub App](../../skills/validate-pr-review-app-github-app/reference.md)
 
 Deactivate Webhook for now. We'll enable this after deploying the AWS Lambda Function.
 

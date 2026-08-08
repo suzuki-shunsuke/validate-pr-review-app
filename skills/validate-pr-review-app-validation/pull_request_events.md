@@ -7,7 +7,7 @@ By subscribing to Pull Request Events, validate-pr-review-app creates a check on
 validate-pr-review-app only handles the `synchronize` action of Pull Request Events and ignores all other actions.
 If the target commit has reviews, the reviews are validated using the same logic as before.
 If there are no reviews and the target commit is neither an empty commit nor a trivial merge commit, no check is created.
-[See Allow Empty Commits and Trivial Merge Commits for details about empty commits and trivial merge commits.](allow-empty-commit-and-trivial-merge-commit.md)
+[See Allow Empty Commits and Trivial Merge Commits for details about empty commits and trivial merge commits.](trivial_merge_commits.md)
 
 If the target commit is an empty commit or a trivial merge commit, validate-pr-review-app walks back through the parent commits on the PR's head branch using the same logic, and creates a check on the target commit.
 

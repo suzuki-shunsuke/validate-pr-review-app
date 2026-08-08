@@ -2,6 +2,8 @@
 
 As of v0.3.2, validate-pr-review-app doesn't require 2 approvals for empty commits and trivial merge commits by approvers.
 
+See [Handling Pull Request Events](pull_request_events.md) for how these commits are handled when a Pull Request `synchronize` event is received.
+
 ## What are trivial merge commits?
 
 When a PR's base branch can be merged into the feature branch without any conflict resolution, the resulting merge commit is referred to here as a "trivial merge commit".

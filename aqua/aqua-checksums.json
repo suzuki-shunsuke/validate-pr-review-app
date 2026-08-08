@@ -251,6 +251,36 @@
       "algorithm": "sha256"
     },
     {
+      "id": "github_release/github.com/suzuki-shunsuke/docfresh/v0.3.0/docfresh_darwin_amd64.tar.gz",
+      "checksum": "B1C195DCDF89834170314531A56C2A69BE2C94B18C94D10BBAEEA876994FE96F",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/suzuki-shunsuke/docfresh/v0.3.0/docfresh_darwin_arm64.tar.gz",
+      "checksum": "0A3EB3EF1BF924AAE22BB24D988FCD8490DB333EB9347E73BDA33CE2DF5845F2",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/suzuki-shunsuke/docfresh/v0.3.0/docfresh_linux_amd64.tar.gz",
+      "checksum": "35FBB56801A0987034695964482D2C422F4D81D2CA1749A17180F12478AD45FF",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/suzuki-shunsuke/docfresh/v0.3.0/docfresh_linux_arm64.tar.gz",
+      "checksum": "AD710C3B760C50F640EE912C85BDCA15EB74AEFAE7A44448A836199C9A30F819",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/suzuki-shunsuke/docfresh/v0.3.0/docfresh_windows_amd64.zip",
+      "checksum": "C99B582B8177D43CD3315C925A76D39F60E3680B7EBA9ED0CF2109E4B58B0E62",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/suzuki-shunsuke/docfresh/v0.3.0/docfresh_windows_arm64.zip",
+      "checksum": "75611D4B81199CC47C23CDC59166651B121A5E477D8B5342C313AFAA8F7AD58F",
+      "algorithm": "sha256"
+    },
+    {
       "id": "github_release/github.com/suzuki-shunsuke/ghalint/v1.5.6/ghalint_1.5.6_darwin_amd64.tar.gz",
       "checksum": "D2A0E8605333068065DCF4C9B7B7A24891EDA1750AC01FB755DFBA426A390883",
       "algorithm": "sha256"
