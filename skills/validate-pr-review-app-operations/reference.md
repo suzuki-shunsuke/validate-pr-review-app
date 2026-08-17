@@ -1,4 +1,13 @@
-# Logging, Monitoring, Security, etc
+# Operations
+
+Running and observing a deployed validate-pr-review-app server.
+
+## HTTP Server Endpoints
+
+- `GET /webhook`: GitHub Webhook Handler
+- `GET /ready`: Response 200 `{"status": "ok"}`
+
+## Logging, Monitoring, Security, etc
 
 Please see the following documents:
 
