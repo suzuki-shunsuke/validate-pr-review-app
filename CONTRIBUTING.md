@@ -35,4 +35,4 @@ cmdx l # golangci-lint
 
 ### Hot To Run App On Your Machine
 
-[Please see Getting Started (HTTP).](docs/getting-started/http.md)
+[Please see Getting Started (HTTP).](skills/validate-pr-review-app/references/getting-started-http.md)

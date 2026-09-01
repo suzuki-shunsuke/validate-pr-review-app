@@ -1,4 +1,4 @@
-# AWS Lambda
+# Getting Started - AWS Lambda
 
 Deploying the app to AWS Lambda using Terraform.
 
@@ -18,7 +18,7 @@ Requirements:
 git clone https://github.com/suzuki-shunsuke/validate-pr-review-app
 ```
 
-2. Move to [terraform/aws](../../terraform/aws).
+2. Move to [terraform/aws](https://github.com/suzuki-shunsuke/validate-pr-review-app/tree/main/terraform/aws).
 
 ```sh
 cd validate-pr-review-app/terraform/aws
@@ -30,11 +30,11 @@ cd validate-pr-review-app/terraform/aws
 bash init.sh
 ```
 
-4. [Registering a GitHub App](../github-app.md)
+4. [Registering a GitHub App](github-app.md)
 
 Deactivate Webhook for now. We'll enable this after deploying the AWS Lambda Function.
 
-5. Add the private key to [secret.yaml](../../terraform/aws/secret.yaml.tmpl) and remove the downloaded private key file.
+5. Add the private key to [secret.yaml](https://github.com/suzuki-shunsuke/validate-pr-review-app/blob/main/terraform/aws/secret.yaml.tmpl) and remove the downloaded private key file.
 
 secret.yaml
 
@@ -62,7 +62,7 @@ github_app_private_key: |
 
 9. Deploy the app by Terraform
 
-(Optional) If you want to change input variables, please check [variables.tf](../../terraform/aws/variables.tf) and create a file `terraform.tfvars`.
+(Optional) If you want to change input variables, please check [variables.tf](https://github.com/suzuki-shunsuke/validate-pr-review-app/blob/main/terraform/aws/variables.tf) and create a file `terraform.tfvars`.
 
 e.g.
 
@@ -138,10 +138,16 @@ terraform destroy
 Amazon API Gateway is also available instead of Lambda Function URL.
 ref. [Select a method to invoke your Lambda function using an HTTP request](https://docs.aws.amazon.com/lambda/latest/dg/furls-http-invoke-decision.html).
 
-Remove `use_lambda_function_url` from [config.yaml](../../terraform/aws/config.yaml.tmpl).
+Remove `use_lambda_function_url` from [config.yaml](https://github.com/suzuki-shunsuke/validate-pr-review-app/blob/main/terraform/aws/config.yaml.tmpl).
 
 ```yaml
 aws:
   secret_id: validate-pr-review-app
   # use_lambda_function_url: true
 ```
+
+## See Also
+
+- [Configuration](config.md)
+- [Secrets](secret.md)
+- [Logging, Monitoring, and Security](production.md)
