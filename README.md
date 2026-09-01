@@ -131,7 +131,7 @@ This repository provides an Agent Skill for validate-pr-review-app: [skills/vali
 Install the skill using [gh skill install](https://cli.github.com/manual/gh_skill_install):
 
 ```sh
-gh skill install suzuki-shunsuke/validate-pr-review-app --all
+gh skill install suzuki-shunsuke/validate-pr-review-app validate-pr-review-app
 ```
 
 ## Documentation
