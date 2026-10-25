@@ -311,28 +311,28 @@
       "algorithm": "sha256"
     },
     {
-      "id": "http/releases.hashicorp.com/terraform/1.16.4/terraform_1.16.4_darwin_amd64.zip",
-      "checksum": "2EE4B62064086E4B24B0D6CF2E61718FBAF0556FEBA990F708A5E32557554B3B",
+      "id": "http/releases.hashicorp.com/terraform/1.17.0/terraform_1.17.0_darwin_amd64.zip",
+      "checksum": "3773397524196E4EBBF7167E2B9FB478DFF1962D555D649F616BA97CA446A143",
       "algorithm": "sha256"
     },
     {
-      "id": "http/releases.hashicorp.com/terraform/1.16.4/terraform_1.16.4_darwin_arm64.zip",
-      "checksum": "42CFDF97AD722F79085FE2279B06D4B8680172DE3534B22EEDDD9A0FBBE7B8F1",
+      "id": "http/releases.hashicorp.com/terraform/1.17.0/terraform_1.17.0_darwin_arm64.zip",
+      "checksum": "7472A54CCA911D46C0E399A5EBBCE44444912D0D4DAD7495F37F1FA51E7CA6B7",
       "algorithm": "sha256"
     },
     {
-      "id": "http/releases.hashicorp.com/terraform/1.16.4/terraform_1.16.4_linux_amd64.zip",
-      "checksum": "DC94AF0EEF1147718AD7C8DAEA792ED199E3E0492EEC180D0ADAFA2A65A879DF",
+      "id": "http/releases.hashicorp.com/terraform/1.17.0/terraform_1.17.0_linux_amd64.zip",
+      "checksum": "C168CAB7C637A8769FDB90089DDD19DE701BC6FF8ACA64DC2E2185FE46F59F67",
       "algorithm": "sha256"
     },
     {
-      "id": "http/releases.hashicorp.com/terraform/1.16.4/terraform_1.16.4_linux_arm64.zip",
-      "checksum": "8263F301CB1A24489A4ADEED147BF28504053F77237B3EA97A0EF2972659DE30",
+      "id": "http/releases.hashicorp.com/terraform/1.17.0/terraform_1.17.0_linux_arm64.zip",
+      "checksum": "F32478134FFC6D710EEC474BBD316652CDDDC0F4E336973A3745E8D3A3309CDF",
       "algorithm": "sha256"
     },
     {
-      "id": "http/releases.hashicorp.com/terraform/1.16.4/terraform_1.16.4_windows_amd64.zip",
-      "checksum": "5C736ED6B0F13E98BC5029FE159574CCA33634C3477466C56442C28B513A7054",
+      "id": "http/releases.hashicorp.com/terraform/1.17.0/terraform_1.17.0_windows_amd64.zip",
+      "checksum": "2948DD7F77DEC0F562EC29000103E0441D915BE5E5F1A02C1CE23681951CFB19",
       "algorithm": "sha256"
     },
     {
