@@ -50,5 +50,5 @@ Don't read every reference file. Read only the one that matches the task.
 - [Getting Started - HTTP Server](references/getting-started-http.md) — to run the app locally as an HTTP server and receive webhooks via smee.io. Also lists the HTTP endpoints.
 - [Getting Started - AWS Lambda](references/getting-started-lambda.md) — to deploy the app to AWS Lambda with Terraform, using a Function URL or Amazon API Gateway.
 - [Logging, Monitoring, and Security](references/production.md) — to run the app in production, and to read or alert on its JSON logs.
-- [Verify Release Assets](references/verify-asset.md) — to verify downloaded release assets with GitHub CLI, slsa-verifier, or Cosign.
+- [Verify Release Assets](references/verify-asset.md) — to verify downloaded release assets with GitHub CLI, Cosign, packslip, or slsa-verifier.
 - [Verify Container Images](references/verify-image.md) — to verify container images with Cosign.
