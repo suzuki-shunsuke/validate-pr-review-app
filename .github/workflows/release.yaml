@@ -54,4 +54,4 @@ jobs:
       - run: echo "$GITHUB_TOKEN" | docker login ghcr.io -u "dummy" --password-stdin
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - run: cosign sign "$IMAGE_DIGEST"
+      - run: cosign sign --yes "$IMAGE_DIGEST"
