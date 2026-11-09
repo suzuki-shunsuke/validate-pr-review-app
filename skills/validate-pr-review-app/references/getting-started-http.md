@@ -75,6 +75,11 @@ smee -u <Webhook Proxy URL> -p 8080 --path /webhook
 - `GET /webhook`: GitHub Webhook Handler
 - `GET /ready`: Response 200 `{"status": "ok"}`
 
+`/webhook` returns 200 immediately and processes the webhook event in the background, because GitHub treats a delivery as failed if the server doesn't respond within 10 seconds.
+So the response status doesn't reflect the processing result. Check the server logs instead.
+On shutdown, the server waits for webhook events being processed in the background.
+If you run the server on a platform that throttles CPU after a response is returned (e.g. Cloud Run with request-based billing), allocate CPU always.
+
 ## Files
 
 - [example/config.yaml.tmpl](https://github.com/suzuki-shunsuke/validate-pr-review-app/blob/main/example/config.yaml.tmpl)

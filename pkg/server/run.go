@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"time"
 
 	"github.com/google/uuid"
@@ -48,6 +49,10 @@ func (h *Server) Start(ctx context.Context) {
 	if err := srv.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
 		slogerr.WithError(h.logger, err).Error("shutdown failed")
 	}
+	// Wait for webhook events being processed in the background.
+	// Don't cancel them because the Check Run should still be created to avoid leaving PRs in an indeterminate state.
+	h.logger.Info("waiting for in-flight webhook events to be processed")
+	h.wg.Wait()
 	h.logger.Info("server exited")
 }
 
@@ -65,27 +70,49 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Use context.Background() instead of r.Context()
-	// https://github.com/suzuki-shunsuke/validate-pr-review-app/pull/401
-	// When GitHub closes the webhook HTTP connection (after a few seconds timeout), r.Context() is canceled.
-	// So using r.Context() may cancel Create Check Run.
-	// Why context.Background() is correct?
-	// There are two sources of context cancellation, and neither should abort processing:
-	// 1. GitHub webhook connection timeout
-	//   GitHub may close the HTTP connection after a few seconds, but this does not indicate intent to abort processing — it's simply an HTTP connection timeout.
-	//   The application should continue processing the webhook event and create the check run regardless.
-	// 2. Server shutdown (k8s pod/node rotation)
-	//   validate-pr-review-app runs as an HTTP server on AWS Lambda, Kubernetes, etc.
-	//   Pod rollouts, node rotations, and other infrastructure events are unavoidable and will trigger server graceful shutdown, canceling the server's context.
-	//   However, these events do not mean we want to abort in-flight operations — the Check Run should still be created to avoid leaving PRs in an indeterminate state.
-	//
-	// Both cases differ from a CLI tool where Ctrl-C is an intentional user action to stop processing.
-	// In the webhook server case, neither the sender (GitHub) nor the infrastructure (k8s) intends to cancel the application's business logic.
-	if err := h.controller.Run(context.Background(), logger, &controller.Request{ //nolint:contextcheck
+	req := &controller.Request{
 		Body:      string(body),
 		Headers:   convertHeaders(r.Header),
 		RequestID: requestID,
-	}); err != nil {
+	}
+
+	// Process the webhook event in the background and return 200 immediately regardless of the result.
+	// GitHub terminates the connection and treats the delivery as failed if the server doesn't respond within 10 seconds.
+	// https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks#respond-within-10-seconds
+	// The processing result isn't returned to GitHub anyway, so responding before processing loses nothing.
+	// The request context isn't passed because it is canceled when the handler returns.
+	h.wg.Go(func() { //nolint:contextcheck
+		h.handle(logger, req)
+	})
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Server) handle(logger *slog.Logger, req *controller.Request) {
+	// net/http recovers panics in handlers, but not in goroutines started by them.
+	// Recover here so that a panic doesn't crash the whole server.
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error("panic while handling a request", "panic", r, "stack", string(debug.Stack()))
+		}
+	}()
+
+	// Use context.Background() instead of r.Context()
+	// https://github.com/suzuki-shunsuke/validate-pr-review-app/pull/401
+	// The request is processed after the response is returned, so r.Context() is already canceled.
+	// Why context.Background() is correct?
+	// There are two sources of context cancellation, and neither should abort processing:
+	// 1. The HTTP request
+	//   The response is returned before processing, and GitHub's connection may be closed at any time.
+	//   This does not indicate intent to abort processing.
+	// 2. Server shutdown (k8s pod/node rotation)
+	//   validate-pr-review-app runs as an HTTP server on Kubernetes, etc.
+	//   Pod rollouts, node rotations, and other infrastructure events are unavoidable and will trigger server graceful shutdown, canceling the server's context.
+	//   However, these events do not mean we want to abort in-flight operations — the Check Run should still be created to avoid leaving PRs in an indeterminate state.
+	//   The server waits for in-flight operations on shutdown.
+	//
+	// Both cases differ from a CLI tool where Ctrl-C is an intentional user action to stop processing.
+	// In the webhook server case, neither the sender (GitHub) nor the infrastructure (k8s) intends to cancel the application's business logic.
+	if err := h.controller.Run(context.Background(), logger, req); err != nil {
 		slogerr.WithError(logger, err).Error("handle request")
 	}
 }
