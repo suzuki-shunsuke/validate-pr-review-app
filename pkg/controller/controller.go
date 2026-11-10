@@ -23,7 +23,7 @@ func New(input *InputNew) (*Controller, error) {
 	gh, err := github.New(&github.ParamNewApp{
 		AppID:          input.Config.AppID,
 		InstallationID: input.Config.InstallationID,
-		KeyFile:        input.GitHubAppPrivateKey,
+		Signer:         input.GitHubAppSigner,
 		Logger:         input.Logger,
 	})
 	if err != nil {
@@ -38,11 +38,12 @@ func New(input *InputNew) (*Controller, error) {
 }
 
 type InputNew struct {
-	Config              *config.Config
-	Version             string
-	WebhookSecret       []byte
-	GitHubAppPrivateKey string
-	Logger              *slog.Logger
+	Config        *config.Config
+	Version       string
+	WebhookSecret []byte
+	// GitHubAppSigner signs JWTs with the GitHub App's private key or AWS KMS.
+	GitHubAppSigner github.Signer
+	Logger          *slog.Logger
 }
 
 type Validator interface {
