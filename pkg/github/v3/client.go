@@ -2,34 +2,19 @@ package v3
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 
-	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v93/github"
-	"github.com/suzuki-shunsuke/go-retryablehttp"
 )
 
 type Client struct {
 	client *github.Client
 }
 
-type ParamNewApp struct {
-	AppID          int64
-	KeyFile        string
-	InstallationID int64
-	Logger         *slog.Logger
-}
-
-func New(param *ParamNewApp) (*Client, error) {
-	itr, err := ghinstallation.New(http.DefaultTransport, param.AppID, param.InstallationID, []byte(param.KeyFile))
-	if err != nil {
-		return nil, fmt.Errorf("create a transport with private key: %w", err)
-	}
-	c := retryablehttp.NewClient()
-	c.HTTPClient = &http.Client{Transport: itr}
-	c.Logger = param.Logger
-	gh, err := github.NewClient(github.WithHTTPClient(c.StandardClient()))
+// New creates a GitHub REST API client.
+// httpClient must handle authentication, retries, and timeouts.
+func New(httpClient *http.Client) (*Client, error) {
+	gh, err := github.NewClient(github.WithHTTPClient(httpClient))
 	if err != nil {
 		return nil, fmt.Errorf("create a GitHub client: %w", err)
 	}

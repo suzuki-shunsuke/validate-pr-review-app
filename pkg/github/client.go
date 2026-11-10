@@ -3,9 +3,14 @@ package github
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"net/http"
+	"time"
 
+	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v93/github"
 	"github.com/shurcooL/githubv4"
+	"github.com/suzuki-shunsuke/go-retryablehttp"
 	v3 "github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github/v3"
 	v4 "github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github/v4"
 )
@@ -29,27 +34,48 @@ type (
 	PullRequestReviewEvent = github.PullRequestReviewEvent
 	PullRequestEvent       = github.PullRequestEvent
 	CheckSuiteEvent        = github.CheckSuiteEvent
-	ParamNewApp            = v4.ParamNewApp
 )
+
+// requestTimeout is the timeout of each attempt of an HTTP request to GitHub API.
+// Each retry has its own timeout.
+// It prevents a stalled connection from blocking webhook processing forever.
+// Note that it doesn't bound the wait between retries:
+// go-retryablehttp waits as long as the Retry-After header says on 429 and 503 responses.
+const requestTimeout = 30 * time.Second
+
+type ParamNewApp struct {
+	AppID          int64
+	KeyFile        string
+	InstallationID int64
+	Logger         *slog.Logger
+}
 
 var ValidateSignature = github.ValidateSignature //nolint:gochecknoglobals
 
-func New(param *v4.ParamNewApp) (*Client, error) {
-	v4Client, err := v4.New(param)
+func New(param *ParamNewApp) (*Client, error) {
+	httpClient, err := newHTTPClient(param)
 	if err != nil {
-		return nil, fmt.Errorf("create GitHub v4 client: %w", err)
+		return nil, err
 	}
-	v3Client, err := v3.New(&v3.ParamNewApp{
-		AppID:          param.AppID,
-		InstallationID: param.InstallationID,
-		KeyFile:        param.KeyFile,
-		Logger:         param.Logger,
-	})
+	v3Client, err := v3.New(httpClient)
 	if err != nil {
 		return nil, fmt.Errorf("create GitHub v3 client: %w", err)
 	}
 	return &Client{
-		v4Client: v4Client,
+		v4Client: v4.New(httpClient),
 		v3Client: v3Client,
 	}, nil
+}
+
+// newHTTPClient creates an HTTP client shared by the GitHub REST and GraphQL API clients.
+// It authenticates as the GitHub App installation, retries failed requests, and times out each attempt.
+func newHTTPClient(param *ParamNewApp) (*http.Client, error) {
+	itr, err := ghinstallation.New(http.DefaultTransport, param.AppID, param.InstallationID, []byte(param.KeyFile))
+	if err != nil {
+		return nil, fmt.Errorf("create a transport with private key: %w", err)
+	}
+	c := retryablehttp.NewClient()
+	c.HTTPClient = &http.Client{Transport: itr, Timeout: requestTimeout}
+	c.Logger = param.Logger
+	return c.StandardClient(), nil
 }
