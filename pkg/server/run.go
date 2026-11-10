@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
@@ -17,6 +18,7 @@ import (
 const (
 	readHeaderTimeout = 10 * time.Second
 	defaultPort       = "8080"
+	maxBodySize       = 25 << 20 // 25 MB
 )
 
 func (h *Server) Start(ctx context.Context) {
@@ -88,7 +90,8 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 	// Register the request before reading the body so that the server waits for it on shutdown
 	// even if srv.Shutdown times out while the body is being read.
 	if !h.acquire() {
-		// Return 503 so that GitHub treats the delivery as failed and it can be redelivered.
+		// Return 503 so that GitHub treats the delivery as failed.
+		// GitHub doesn't redeliver failed deliveries automatically, but they can be redelivered manually from Recent Deliveries.
 		logger.Warn("reject the request because the server is shutting down")
 		http.Error(w, "the server is shutting down", http.StatusServiceUnavailable)
 		return
@@ -100,8 +103,16 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	body, err := io.ReadAll(r.Body)
+	// Limit the body size because the body is held in memory until it is processed in the background.
+	// GitHub caps webhook payloads at 25 MB.
+	// https://docs.github.com/en/webhooks/webhook-events-and-payloads#payload-cap
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxBodySize))
 	if err != nil {
+		if maxBytesErr, ok := errors.AsType[*http.MaxBytesError](err); ok {
+			logger.Warn("the request body is too large", "limit", maxBytesErr.Limit)
+			http.Error(w, "the request body is too large", http.StatusRequestEntityTooLarge)
+			return
+		}
 		slogerr.WithError(logger, err).Error("read request body")
 		http.Error(w, "failed to read the request body", http.StatusBadRequest)
 		return

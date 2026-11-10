@@ -77,7 +77,12 @@ smee -u <Webhook Proxy URL> -p 8080 --path /webhook
 
 `/webhook` returns 200 immediately and processes the webhook event in the background, because GitHub treats a delivery as failed if the server doesn't respond within 10 seconds.
 So the response status doesn't reflect the processing result. Check the server logs instead.
-On shutdown, the server waits for webhook events being processed in the background, and returns 503 to new webhook requests so that GitHub treats them as failed and they can be redelivered.
+On shutdown, the server waits for webhook events being processed in the background, and returns 503 to new webhook requests so that GitHub treats them as failed.
+GitHub doesn't redeliver failed deliveries automatically, but you can redeliver them manually from the GitHub App's Recent Deliveries.
+The server doesn't limit how long it waits, so set the platform's grace period (e.g. `terminationGracePeriodSeconds` on Kubernetes) longer than the worst-case processing time.
+Otherwise the process is killed during processing and the Check Run isn't created.
+Sending a second SIGINT or SIGTERM terminates the server immediately.
+`/webhook` rejects request bodies larger than 25 MB, which is GitHub's cap on webhook payloads.
 If you run the server on a platform that throttles CPU after a response is returned (e.g. Cloud Run with request-based billing), allocate CPU always.
 
 ## Files

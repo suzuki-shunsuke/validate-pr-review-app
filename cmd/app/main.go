@@ -34,6 +34,13 @@ func run() int {
 func core(logger *slog.Logger, logLevel *slog.LevelVar) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	go func() {
+		// Restore the default signal behavior after the first signal,
+		// so that a second signal terminates the process immediately
+		// even if the graceful shutdown is stuck (e.g. waiting for in-flight webhook events).
+		<-ctx.Done()
+		stop()
+	}()
 	if err := entrypoint.Run(ctx, logger, logLevel, os.Getenv, version); err != nil {
 		return fmt.Errorf("run entrypoint: %w", err)
 	}

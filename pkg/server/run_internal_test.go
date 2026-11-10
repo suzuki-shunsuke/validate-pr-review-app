@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
-	"time"
+	"testing/synctest"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/controller"
@@ -120,33 +120,60 @@ func TestServer_Run_closing(t *testing.T) {
 
 func TestServer_waitInFlight(t *testing.T) {
 	t.Parallel()
-	ctrl := &blockingController{
-		release: make(chan struct{}),
-		reqs:    make(chan *controller.Request, 1),
-	}
+	synctest.Test(t, func(t *testing.T) {
+		ctrl := &blockingController{
+			release: make(chan struct{}),
+			reqs:    make(chan *controller.Request, 1),
+		}
+		srv, err := New(slog.New(slog.DiscardHandler), ctrl, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		srv.Run(httptest.NewRecorder(), newTestRequest(t))
+
+		done := make(chan struct{})
+		go func() {
+			srv.waitInFlight()
+			close(done)
+		}()
+
+		// Wait until every goroutine in the bubble is blocked:
+		// the controller on release, and waitInFlight on wg.Wait.
+		synctest.Wait()
+		select {
+		case <-done:
+			t.Fatal("waitInFlight returned while a request was still being processed")
+		default:
+		}
+
+		close(ctrl.release)
+		<-ctrl.reqs
+		synctest.Wait()
+		select {
+		case <-done:
+		default:
+			t.Fatal("waitInFlight didn't return after the request was processed")
+		}
+	})
+}
+
+func TestServer_Run_tooLargeBody(t *testing.T) {
+	t.Parallel()
+	ctrl := &countingController{}
 	srv, err := New(slog.New(slog.DiscardHandler), ctrl, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	srv.Run(httptest.NewRecorder(), newTestRequest(t))
-
-	done := make(chan struct{})
-	go func() {
-		srv.waitInFlight()
-		close(done)
-	}()
-
-	select {
-	case <-done:
-		t.Fatal("waitInFlight returned while a request was still being processed")
-	case <-time.After(100 * time.Millisecond):
+	body := strings.NewReader(strings.Repeat("a", maxBodySize+1))
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/webhook", body)
+	rec := httptest.NewRecorder()
+	srv.Run(rec, req)
+	if rec.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("status code: wanted %d, got %d", http.StatusRequestEntityTooLarge, rec.Code)
 	}
-
-	close(ctrl.release)
-	<-ctrl.reqs
-	select {
-	case <-done:
-	case <-time.After(5 * time.Second):
-		t.Fatal("waitInFlight didn't return after the request was processed")
+	// The request must be unregistered so that shutdown doesn't hang.
+	srv.waitInFlight()
+	if n := ctrl.calls.Load(); n != 0 {
+		t.Fatalf("the controller was called %d times for a too large body", n)
 	}
 }
