@@ -39,10 +39,17 @@ type (
 // requestTimeout is the timeout of each attempt of an HTTP request to GitHub API.
 // Each retry has its own timeout.
 // It prevents a stalled connection from blocking webhook processing forever.
+// GitHub terminates API requests that take more than 10 seconds to process,
+// so waiting much longer than that is pointless.
+// It is also short enough that a retry can happen within the HTTP server's graceful shutdown (25 seconds).
+// https://docs.github.com/en/rest/using-the-rest-api/troubleshooting-the-rest-api
+// https://docs.github.com/en/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api
 // Note that it doesn't bound the wait between retries:
 // go-retryablehttp waits as long as the Retry-After header says on 429 and 503 responses.
-const requestTimeout = 30 * time.Second
+const requestTimeout = 15 * time.Second
 
+// ParamNewApp is the parameter of New.
+// The GitHub API clients authenticate as the installation of the GitHub App.
 type ParamNewApp struct {
 	AppID          int64
 	KeyFile        string
@@ -52,10 +59,12 @@ type ParamNewApp struct {
 
 var ValidateSignature = github.ValidateSignature //nolint:gochecknoglobals
 
+// New creates a client of GitHub REST and GraphQL APIs.
+// Both share one HTTP client, so they share the authentication, retry, and timeout settings.
 func New(param *ParamNewApp) (*Client, error) {
 	httpClient, err := newHTTPClient(param)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create an HTTP client for GitHub API: %w", err)
 	}
 	v3Client, err := v3.New(httpClient)
 	if err != nil {
