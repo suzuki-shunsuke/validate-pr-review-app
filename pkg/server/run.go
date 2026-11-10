@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"runtime/debug"
@@ -17,7 +18,15 @@ import (
 
 const (
 	readHeaderTimeout = 10 * time.Second
-	defaultPort       = "8080"
+	// readTimeout bounds reading the whole request, including the body.
+	// Without it, a client that stalls or trickles the body keeps the handler running indefinitely.
+	// A request is registered as in-flight before its body is read, so such a client would also use up the graceful shutdown time
+	// that is meant for webhook events being processed in the background.
+	// GitHub closes the connection if the server doesn't respond within 10 seconds, so reading much longer than that is pointless.
+	// The extra 5 seconds are headroom for network and proxy latency.
+	// It is shorter than shutdownTimeout, so a slow client can't use up the whole graceful shutdown.
+	readTimeout = 15 * time.Second
+	defaultPort = "8080"
 	// maxBodySize is the maximum size of a webhook request body (25 MiB).
 	// GitHub caps webhook payloads at 25 MB. 25 MiB is slightly larger, so payloads from GitHub are never rejected.
 	// https://docs.github.com/en/webhooks/webhook-events-and-payloads#payload-cap
@@ -40,6 +49,12 @@ func (h *Server) Start(ctx context.Context) {
 		Addr:              ":" + port,
 		Handler:           mux,
 		ReadHeaderTimeout: readHeaderTimeout,
+		ReadTimeout:       readTimeout,
+		// If IdleTimeout is zero, ReadTimeout is used as the idle timeout of keep-alive connections.
+		// Keep them without a timeout as before, because closing them earlier than a load balancer in front of the server does
+		// (e.g. AWS ALB: 60s, Google Cloud load balancers: about 600s) causes intermittent 502 errors.
+		// A negative value means no timeout.
+		IdleTimeout: -1,
 	}
 
 	go func() {
@@ -134,6 +149,12 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
 			rejectTooLargeBody(logger, w)
+			return
+		}
+		if netErr, ok := errors.AsType[net.Error](err); ok && netErr.Timeout() {
+			// Expected when the client sends the body too slowly (readTimeout).
+			slogerr.WithError(logger, err).Warn("timed out reading the request body")
+			http.Error(w, "timed out reading the request body", http.StatusRequestTimeout)
 			return
 		}
 		slogerr.WithError(logger, err).Error("read request body")

@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -244,4 +245,30 @@ func (r *countingReader) Read(p []byte) (int, error) {
 	clear(p)
 	r.n += len(p)
 	return len(p), nil
+}
+
+// timeoutReader simulates a read on a connection whose read deadline (ReadTimeout) has passed.
+type timeoutReader struct{}
+
+func (timeoutReader) Read([]byte) (int, error) {
+	return 0, os.ErrDeadlineExceeded
+}
+
+func TestServer_Run_readTimeout(t *testing.T) {
+	t.Parallel()
+	ctrl := &countingController{}
+	srv, err := New(slog.New(slog.DiscardHandler), ctrl, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/webhook", timeoutReader{})
+	rec := httptest.NewRecorder()
+	srv.Run(rec, req)
+	if rec.Code != http.StatusRequestTimeout {
+		t.Fatalf("status code: wanted %d, got %d", http.StatusRequestTimeout, rec.Code)
+	}
+	srv.wg.Wait()
+	if n := ctrl.calls.Load(); n != 0 {
+		t.Fatalf("the controller was called %d times although reading the body timed out", n)
+	}
 }
