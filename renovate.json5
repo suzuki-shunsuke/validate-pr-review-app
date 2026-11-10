@@ -6,4 +6,13 @@
     "github>aquaproj/aqua-renovate-config#2.14.0",
     "github>aquaproj/aqua-renovate-config:file#2.14.0(aqua/imports/.*\\.ya?ml)",
   ],
+  packageRules: [
+    {
+      // bradleyfalzon/ghinstallation/v2 exposes golang-jwt/jwt/v4 types in its API (Signer, NewRSASigner),
+      // so jwt v5 can't be used until ghinstallation migrates to it.
+      matchPackageNames: ["github.com/golang-jwt/jwt/v4"],
+      matchUpdateTypes: ["major"],
+      enabled: false,
+    },
+  ],
 }
