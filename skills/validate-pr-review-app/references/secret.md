@@ -87,6 +87,7 @@ The IAM role of validate-pr-review-app (e.g. the Lambda execution role, or the I
 
 The AWS KMS key isn't checked at startup.
 Misconfigurations such as a wrong key ID, a missing `kms:Sign` permission, or a wrong region are detected when validate-pr-review-app processes a webhook.
-Webhooks are processed in the background after responding to GitHub, so such errors don't appear as failed webhook deliveries in GitHub.
+Such errors don't appear as failed webhook deliveries in GitHub.
+The HTTP server processes webhooks in the background after responding to GitHub, and AWS Lambda returns 200 even if processing a webhook fails.
 No check run is created, and the error is output only to the logs.
 If a check run isn't created after you enable AWS KMS, please check the logs.
