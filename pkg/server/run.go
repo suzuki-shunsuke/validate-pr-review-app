@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
@@ -17,6 +18,10 @@ import (
 const (
 	readHeaderTimeout = 10 * time.Second
 	defaultPort       = "8080"
+	// maxBodySize is the maximum size of a webhook request body (25 MiB).
+	// GitHub caps webhook payloads at 25 MB. 25 MiB is slightly larger, so payloads from GitHub are never rejected.
+	// https://docs.github.com/en/webhooks/webhook-events-and-payloads#payload-cap
+	maxBodySize = 25 << 20
 	// shutdownTimeout bounds the whole graceful shutdown, including waiting for webhook events processed in the background.
 	// It is shorter than Kubernetes' default terminationGracePeriodSeconds (30s).
 	shutdownTimeout = 25 * time.Second
@@ -118,8 +123,19 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	body, err := io.ReadAll(r.Body)
+	// Limit the body size because the body is held in memory until it is processed in the background.
+	// Reject the request without reading the body if Content-Length already exceeds the limit.
+	// Otherwise, MaxBytesReader stops reading once the limit is exceeded (e.g. Content-Length is unknown).
+	if r.ContentLength > maxBodySize {
+		rejectTooLargeBody(logger, w)
+		return
+	}
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxBodySize))
 	if err != nil {
+		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
+			rejectTooLargeBody(logger, w)
+			return
+		}
 		slogerr.WithError(logger, err).Error("read request body")
 		http.Error(w, "failed to read the request body", http.StatusBadRequest)
 		return
@@ -143,6 +159,11 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 		h.handle(logger, req)
 	}()
 	w.WriteHeader(http.StatusOK)
+}
+
+func rejectTooLargeBody(logger *slog.Logger, w http.ResponseWriter) {
+	logger.Warn("reject the request because the body is too large", "limit", maxBodySize)
+	http.Error(w, "the request body is too large", http.StatusRequestEntityTooLarge)
 }
 
 func (h *Server) handle(logger *slog.Logger, req *controller.Request) {
