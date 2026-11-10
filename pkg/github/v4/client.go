@@ -1,14 +1,10 @@
 package v4
 
 import (
-	"fmt"
-	"log/slog"
 	"net/http"
 
-	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v93/github"
 	"github.com/shurcooL/githubv4"
-	"github.com/suzuki-shunsuke/go-retryablehttp"
 )
 
 type Client struct {
@@ -17,22 +13,10 @@ type Client struct {
 
 type PullRequestReviewEvent = github.PullRequestReviewEvent
 
-func New(param *ParamNewApp) (*Client, error) {
-	itr, err := ghinstallation.New(http.DefaultTransport, param.AppID, param.InstallationID, []byte(param.KeyFile))
-	if err != nil {
-		return nil, fmt.Errorf("create a transport with private key: %w", err)
-	}
-	c := retryablehttp.NewClient()
-	c.HTTPClient = &http.Client{Transport: itr}
-	c.Logger = param.Logger
+// New creates a GitHub GraphQL API client.
+// httpClient must handle authentication, retries, and timeouts.
+func New(httpClient *http.Client) *Client {
 	return &Client{
-		v4Client: githubv4.NewClient(c.StandardClient()),
-	}, nil
-}
-
-type ParamNewApp struct {
-	AppID          int64
-	KeyFile        string
-	InstallationID int64
-	Logger         *slog.Logger
+		v4Client: githubv4.NewClient(httpClient),
+	}
 }
