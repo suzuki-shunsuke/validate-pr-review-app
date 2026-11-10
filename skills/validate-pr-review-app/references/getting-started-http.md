@@ -72,7 +72,7 @@ smee -u <Webhook Proxy URL> -p 8080 --path /webhook
 
 ## Endpoints
 
-- `GET /webhook`: GitHub Webhook Handler
+- `POST /webhook`: GitHub Webhook Handler
 - `GET /ready`: Response 200 `{"status": "ok"}`
 
 `/webhook` returns 200 immediately and processes the webhook event in the background, because GitHub treats a delivery as failed if the server doesn't respond within 10 seconds.
