@@ -2,11 +2,13 @@ package server
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
 	"os"
 	"runtime/debug"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,6 +19,10 @@ import (
 const (
 	readHeaderTimeout = 10 * time.Second
 	defaultPort       = "8080"
+	// maxBodySize is the maximum size of a webhook request body.
+	// GitHub caps webhook payloads at 25 MB.
+	// https://docs.github.com/en/webhooks/webhook-events-and-payloads#payload-cap
+	maxBodySize = 25 << 20
 	// shutdownTimeout bounds the whole graceful shutdown, including waiting for webhook events processed in the background.
 	// It is shorter than Kubernetes' default terminationGracePeriodSeconds (30s).
 	shutdownTimeout = 25 * time.Second
@@ -118,15 +124,22 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
+	// Limit the body size because the body is held in memory until it is processed in the background.
+	// Read into strings.Builder so that converting it to a string doesn't copy the body again.
+	var body strings.Builder
+	if _, err := io.Copy(&body, http.MaxBytesReader(w, r.Body, maxBodySize)); err != nil {
+		if maxBytesErr, ok := errors.AsType[*http.MaxBytesError](err); ok {
+			logger.Warn("reject the request because the body is too large", "limit", maxBytesErr.Limit)
+			http.Error(w, "the request body is too large", http.StatusRequestEntityTooLarge)
+			return
+		}
 		slogerr.WithError(logger, err).Error("read request body")
 		http.Error(w, "failed to read the request body", http.StatusBadRequest)
 		return
 	}
 
 	req := &controller.Request{
-		Body:      string(body),
+		Body:      body.String(),
 		Headers:   convertHeaders(r.Header),
 		RequestID: requestID,
 	}

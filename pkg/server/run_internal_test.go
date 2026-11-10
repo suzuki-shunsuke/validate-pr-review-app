@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -33,6 +34,14 @@ type countingController struct {
 func (c *countingController) Run(context.Context, *slog.Logger, *controller.Request) error {
 	c.calls.Add(1)
 	return nil
+}
+
+// zeroReader is an endless reader of zero bytes.
+type zeroReader struct{}
+
+func (zeroReader) Read(p []byte) (int, error) {
+	clear(p)
+	return len(p), nil
 }
 
 type panicController struct{}
@@ -185,4 +194,26 @@ func TestServer_waitInFlight_timeout(t *testing.T) {
 		<-ctrl.reqs
 		synctest.Wait()
 	})
+}
+
+func TestServer_Run_tooLargeBody(t *testing.T) {
+	t.Parallel()
+	ctrl := &countingController{}
+	srv, err := New(slog.New(slog.DiscardHandler), ctrl, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Generate the body on the fly instead of allocating a large string.
+	body := io.LimitReader(zeroReader{}, maxBodySize+1)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/webhook", body)
+	rec := httptest.NewRecorder()
+	srv.Run(rec, req)
+	if rec.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("status code: wanted %d, got %d", http.StatusRequestEntityTooLarge, rec.Code)
+	}
+	// The request must be unregistered from the WaitGroup, otherwise this blocks forever.
+	srv.wg.Wait()
+	if n := ctrl.calls.Load(); n != 0 {
+		t.Fatalf("the controller was called %d times for a too large body", n)
+	}
 }

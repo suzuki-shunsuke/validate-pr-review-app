@@ -79,6 +79,7 @@ smee -u <Webhook Proxy URL> -p 8080 --path /webhook
 So the response status doesn't reflect the processing result. Check the Check Run on the pull request for the result, and the server logs for errors.
 On shutdown, the server stops accepting new requests and waits up to 25 seconds for webhook events being processed in the background.
 Events that don't finish in time are aborted, and their Check Runs may not be created.
+`/webhook` rejects request bodies larger than 25 MB with 413, which is GitHub's cap on webhook payloads.
 If you run the server on a platform that throttles CPU after a response is returned (e.g. Cloud Run with request-based billing), allocate CPU always.
 
 ## Files
