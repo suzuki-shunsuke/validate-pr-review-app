@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -10,6 +9,7 @@ import (
 	"sync/atomic"
 	"testing"
 	"testing/synctest"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/controller"
@@ -33,14 +33,6 @@ type countingController struct {
 func (c *countingController) Run(context.Context, *slog.Logger, *controller.Request) error {
 	c.calls.Add(1)
 	return nil
-}
-
-// zeroReader is an endless reader of zero bytes.
-type zeroReader struct{}
-
-func (zeroReader) Read(p []byte) (int, error) {
-	clear(p)
-	return len(p), nil
 }
 
 type panicController struct{}
@@ -113,7 +105,7 @@ func TestServer_Run_closing(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	srv.waitInFlight()
+	srv.waitInFlight(t.Context())
 
 	// Requests after shutdown starts must be rejected without calling the controller.
 	rec := httptest.NewRecorder()
@@ -142,7 +134,7 @@ func TestServer_waitInFlight(t *testing.T) {
 
 		done := make(chan struct{})
 		go func() {
-			srv.waitInFlight()
+			srv.waitInFlight(t.Context())
 			close(done)
 		}()
 
@@ -166,24 +158,31 @@ func TestServer_waitInFlight(t *testing.T) {
 	})
 }
 
-func TestServer_Run_tooLargeBody(t *testing.T) {
+func TestServer_waitInFlight_timeout(t *testing.T) {
 	t.Parallel()
-	ctrl := &countingController{}
-	srv, err := New(slog.New(slog.DiscardHandler), ctrl, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// Generate the body on the fly instead of allocating a large string.
-	body := io.LimitReader(zeroReader{}, maxBodySize+1)
-	req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/webhook", body)
-	rec := httptest.NewRecorder()
-	srv.Run(rec, req)
-	if rec.Code != http.StatusRequestEntityTooLarge {
-		t.Fatalf("status code: wanted %d, got %d", http.StatusRequestEntityTooLarge, rec.Code)
-	}
-	// The request must be unregistered so that shutdown doesn't hang.
-	srv.waitInFlight()
-	if n := ctrl.calls.Load(); n != 0 {
-		t.Fatalf("the controller was called %d times for a too large body", n)
-	}
+	synctest.Test(t, func(t *testing.T) {
+		ctrl := &blockingController{
+			release: make(chan struct{}),
+			reqs:    make(chan *controller.Request, 1),
+		}
+		srv, err := New(slog.New(slog.DiscardHandler), ctrl, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		srv.Run(httptest.NewRecorder(), newTestRequest(t))
+
+		// The time in the bubble is fake, so this doesn't actually take shutdownTimeout.
+		ctx, cancel := context.WithTimeout(t.Context(), shutdownTimeout)
+		defer cancel()
+		start := time.Now()
+		srv.waitInFlight(ctx)
+		if elapsed := time.Since(start); elapsed != shutdownTimeout {
+			t.Fatalf("waitInFlight should give up after %s, but returned after %s", shutdownTimeout, elapsed)
+		}
+
+		// Finish the blocked request so that the bubble can exit.
+		close(ctrl.release)
+		<-ctrl.reqs
+		synctest.Wait()
+	})
 }

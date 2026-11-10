@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"errors"
 	"io"
 	"log/slog"
 	"net/http"
@@ -17,12 +16,10 @@ import (
 
 const (
 	readHeaderTimeout = 10 * time.Second
-	// readTimeout bounds reading the whole request including the body.
-	// A request is registered as in-flight before its body is read, and the server waits for in-flight requests on shutdown without a deadline,
-	// so a client that stalls while sending the body would otherwise block shutdown forever.
-	readTimeout = 30 * time.Second
-	defaultPort = "8080"
-	maxBodySize = 25 << 20 // 25 MB
+	defaultPort       = "8080"
+	// shutdownTimeout bounds the whole graceful shutdown, including waiting for webhook events processed in the background.
+	// It is shorter than Kubernetes' default terminationGracePeriodSeconds (30s).
+	shutdownTimeout = 25 * time.Second
 )
 
 func (h *Server) Start(ctx context.Context) {
@@ -38,7 +35,6 @@ func (h *Server) Start(ctx context.Context) {
 		Addr:              ":" + port,
 		Handler:           mux,
 		ReadHeaderTimeout: readHeaderTimeout,
-		ReadTimeout:       readTimeout,
 	}
 
 	go func() {
@@ -51,31 +47,36 @@ func (h *Server) Start(ctx context.Context) {
 
 	h.logger.Info("shutting down gracefully...")
 
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:mnd
+	// srv.Shutdown and waitInFlight share one deadline so that the whole shutdown is bounded by shutdownTimeout.
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
-		if errors.Is(err, context.DeadlineExceeded) {
-			// Expected when handlers are still running (e.g. reading a slow request body).
-			// waitInFlight still waits for them.
-			h.logger.Warn("timed out waiting for active connections to close; keep waiting for in-flight webhook events")
-		} else {
-			slogerr.WithError(h.logger, err).Error("shutdown failed")
-		}
+		slogerr.WithError(h.logger, err).Error("shutdown failed")
 	}
-	h.waitInFlight()
+	h.waitInFlight(shutdownCtx) //nolint:contextcheck
 	h.logger.Info("server exited")
 }
 
 // waitInFlight stops accepting new webhook requests and waits for in-flight ones,
-// including ones processed in the background.
+// including ones processed in the background, until ctx is done.
 // They aren't canceled because the Check Run should still be created to avoid leaving PRs in an indeterminate state.
+// If ctx is done first, it gives up waiting and the remaining events are aborted when the process exits.
 // srv.Shutdown may return before all handlers finish (e.g. on timeout), so handlers can still call acquire concurrently.
-func (h *Server) waitInFlight() {
+func (h *Server) waitInFlight(ctx context.Context) {
 	h.mu.Lock()
 	h.closing = true
 	h.mu.Unlock()
 	h.logger.Info("waiting for in-flight webhook events to be processed")
-	h.wg.Wait()
+	done := make(chan struct{})
+	go func() {
+		h.wg.Wait()
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-ctx.Done():
+		h.logger.Warn("gave up waiting for in-flight webhook events; they are aborted and their Check Runs may not be created")
+	}
 }
 
 // acquire registers an in-flight webhook request.
@@ -99,7 +100,7 @@ func ready(w http.ResponseWriter, _ *http.Request) {
 func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 	logger, requestID := h.newLogger(r)
 	// Register the request before reading the body so that the server waits for it on shutdown
-	// even if srv.Shutdown times out while the body is being read.
+	// even if srv.Shutdown returns while the body is being read.
 	if !h.acquire() {
 		// srv.Shutdown closes the listener first, so new connections are refused during shutdown.
 		// This path is reached only by requests on connections accepted before that,
@@ -117,16 +118,8 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	// Limit the body size because the body is held in memory until it is processed in the background.
-	// GitHub caps webhook payloads at 25 MB.
-	// https://docs.github.com/en/webhooks/webhook-events-and-payloads#payload-cap
-	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxBodySize))
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		if maxBytesErr, ok := errors.AsType[*http.MaxBytesError](err); ok {
-			logger.Warn("the request body is too large", "limit", maxBytesErr.Limit)
-			http.Error(w, "the request body is too large", http.StatusRequestEntityTooLarge)
-			return
-		}
 		slogerr.WithError(logger, err).Error("read request body")
 		http.Error(w, "failed to read the request body", http.StatusBadRequest)
 		return
@@ -173,7 +166,7 @@ func (h *Server) handle(logger *slog.Logger, req *controller.Request) {
 	//   validate-pr-review-app runs as an HTTP server on Kubernetes, etc.
 	//   Pod rollouts, node rotations, and other infrastructure events are unavoidable and will trigger server graceful shutdown, canceling the server's context.
 	//   However, these events do not mean we want to abort in-flight operations — the Check Run should still be created to avoid leaving PRs in an indeterminate state.
-	//   The server waits for in-flight operations on shutdown.
+	//   The server waits for in-flight operations on shutdown, up to shutdownTimeout.
 	//
 	// Both cases differ from a CLI tool where Ctrl-C is an intentional user action to stop processing.
 	// In the webhook server case, neither the sender (GitHub) nor the infrastructure (k8s) intends to cancel the application's business logic.
