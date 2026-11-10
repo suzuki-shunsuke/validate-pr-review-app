@@ -13,12 +13,18 @@ type Secret struct {
 	WebhookSecret       string `json:"webhook_secret" yaml:"webhook_secret"`
 }
 
-func (s *Secret) Validate() error {
+// Validate validates the secret.
+// useKMS is true if JWTs are signed by AWS KMS.
+// Then the GitHub App's private key must not be set, otherwise it's required.
+func (s *Secret) Validate(useKMS bool) error {
 	if s == nil {
 		return errors.New("Secret is nil")
 	}
-	if s.GitHubAppPrivateKey == "" {
-		return errors.New("GitHubAppPrivateKey is required")
+	if useKMS && s.GitHubAppPrivateKey != "" {
+		return errors.New("GitHubAppPrivateKey must not be set when aws.kms_key_id is set")
+	}
+	if !useKMS && s.GitHubAppPrivateKey == "" {
+		return errors.New("GitHubAppPrivateKey is required unless aws.kms_key_id is set")
 	}
 	if s.WebhookSecret == "" {
 		return errors.New("WebhookSecret is required")

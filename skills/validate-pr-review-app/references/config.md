@@ -57,8 +57,11 @@ installation_id: 00000000 # GitHub App Installation ID
 
 # Optional
 aws:
-  secret_id: validate-pr-review-app # Secret ID in AWS Secrets Manager
+  secret_id: validate-pr-review-app # Optional. Secret ID in AWS Secrets Manager
   use_lambda_function_url: true # Optional. true when using Lambda Function URL. Default: false
+  # Optional. AWS KMS key where the GitHub App private key is imported. Key ID, key ARN, alias name, or alias ARN.
+  # If this is set, github_app_private_key must not be set. Please see secret.md.
+  kms_key_id: arn:aws:kms:us-east-1:123456789012:key/00000000-0000-0000-0000-000000000000
 check_name: validate-review # GitHub Check Name that validate-pr-review-app updates. Default: validate-review
 log_level: info # debug, info, warn, error. Default: info
 trust:

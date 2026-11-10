@@ -10,13 +10,13 @@
         },
         "use_lambda_function_url": {
           "type": "boolean"
+        },
+        "kms_key_id": {
+          "type": "string"
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "secret_id"
-      ]
+      "type": "object"
     },
     "Config": {
       "properties": {

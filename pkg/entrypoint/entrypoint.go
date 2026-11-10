@@ -9,6 +9,7 @@ import (
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/config"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/controller"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/gcloud"
+	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/github"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/logging"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/secret"
 	"github.com/suzuki-shunsuke/validate-pr-review-app/pkg/server"
@@ -26,15 +27,19 @@ func Run(ctx context.Context, logger *slog.Logger, logLevel *slog.LevelVar, getE
 	if err != nil {
 		return err
 	}
-	if err := s.Validate(); err != nil {
+	if err := s.Validate(cfg.UseAWSKMS()); err != nil {
 		return fmt.Errorf("validate secret: %w", err)
 	}
+	signer, err := newSigner(ctx, cfg, s)
+	if err != nil {
+		return err
+	}
 	ctrl, err := controller.New(&controller.InputNew{
-		Config:              cfg,
-		Version:             version,
-		WebhookSecret:       []byte(s.WebhookSecret),
-		GitHubAppPrivateKey: s.GitHubAppPrivateKey,
-		Logger:              logger,
+		Config:          cfg,
+		Version:         version,
+		WebhookSecret:   []byte(s.WebhookSecret),
+		GitHubAppSigner: signer,
+		Logger:          logger,
 	})
 	if err != nil {
 		return fmt.Errorf("create controller: %w", err)
@@ -57,6 +62,24 @@ func Run(ctx context.Context, logger *slog.Logger, logLevel *slog.LevelVar, getE
 	}
 	server.Start(ctx)
 	return nil
+}
+
+// newSigner creates a Signer of JWTs for the GitHub App.
+// If aws.kms_key_id is set, JWTs are signed by AWS KMS.
+// Otherwise, they are signed with the GitHub App's private key.
+func newSigner(ctx context.Context, cfg *config.Config, s *secret.Secret) (github.Signer, error) {
+	if cfg.UseAWSKMS() {
+		signer, err := aws.NewKMSSigner(ctx, cfg.AWS.KMSKeyID)
+		if err != nil {
+			return nil, fmt.Errorf("create a signer with AWS KMS: %w", err)
+		}
+		return signer, nil
+	}
+	signer, err := github.NewRSASigner(s.GitHubAppPrivateKey)
+	if err != nil {
+		return nil, fmt.Errorf("create a signer with the GitHub App's private key: %w", err)
+	}
+	return signer, nil
 }
 
 func readSecret(ctx context.Context, cfg *config.Config) (*secret.Secret, error) {
