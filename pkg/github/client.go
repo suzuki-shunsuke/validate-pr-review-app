@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-github/v93/github"
 	"github.com/shurcooL/githubv4"
 	"github.com/suzuki-shunsuke/go-retryablehttp"
