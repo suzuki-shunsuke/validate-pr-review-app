@@ -41,7 +41,8 @@ type (
 // It prevents a stalled connection from blocking webhook processing forever.
 // GitHub terminates API requests that take more than 10 seconds to process,
 // so waiting much longer than that is pointless.
-// It is also short enough that a retry can happen within the HTTP server's graceful shutdown (25 seconds).
+// It is also short enough that a retry can start within the HTTP server's graceful shutdown (25 seconds),
+// and finish in time if it succeeds quickly. It doesn't bound the total time of a request with retries.
 // https://docs.github.com/en/rest/using-the-rest-api/troubleshooting-the-rest-api
 // https://docs.github.com/en/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api
 // Note that it doesn't bound the wait between retries:
