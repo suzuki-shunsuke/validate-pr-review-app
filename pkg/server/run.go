@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"runtime/debug"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,8 +18,8 @@ import (
 const (
 	readHeaderTimeout = 10 * time.Second
 	defaultPort       = "8080"
-	// maxBodySize is the maximum size of a webhook request body.
-	// GitHub caps webhook payloads at 25 MB.
+	// maxBodySize is the maximum size of a webhook request body (25 MiB).
+	// GitHub caps webhook payloads at 25 MB. 25 MiB is slightly larger, so payloads from GitHub are never rejected.
 	// https://docs.github.com/en/webhooks/webhook-events-and-payloads#payload-cap
 	maxBodySize = 25 << 20
 	// shutdownTimeout bounds the whole graceful shutdown, including waiting for webhook events processed in the background.
@@ -125,12 +124,16 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	// Limit the body size because the body is held in memory until it is processed in the background.
-	// Read into strings.Builder so that converting it to a string doesn't copy the body again.
-	var body strings.Builder
-	if _, err := io.Copy(&body, http.MaxBytesReader(w, r.Body, maxBodySize)); err != nil {
-		if maxBytesErr, ok := errors.AsType[*http.MaxBytesError](err); ok {
-			logger.Warn("reject the request because the body is too large", "limit", maxBytesErr.Limit)
-			http.Error(w, "the request body is too large", http.StatusRequestEntityTooLarge)
+	// Reject the request without reading the body if Content-Length already exceeds the limit.
+	// Otherwise, MaxBytesReader stops reading once the limit is exceeded (e.g. Content-Length is unknown).
+	if r.ContentLength > maxBodySize {
+		rejectTooLargeBody(logger, w)
+		return
+	}
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxBodySize))
+	if err != nil {
+		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
+			rejectTooLargeBody(logger, w)
 			return
 		}
 		slogerr.WithError(logger, err).Error("read request body")
@@ -139,7 +142,7 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req := &controller.Request{
-		Body:      body.String(),
+		Body:      string(body),
 		Headers:   convertHeaders(r.Header),
 		RequestID: requestID,
 	}
@@ -156,6 +159,11 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 		h.handle(logger, req)
 	}()
 	w.WriteHeader(http.StatusOK)
+}
+
+func rejectTooLargeBody(logger *slog.Logger, w http.ResponseWriter) {
+	logger.Warn("reject the request because the body is too large", "limit", maxBodySize)
+	http.Error(w, "the request body is too large", http.StatusRequestEntityTooLarge)
 }
 
 func (h *Server) handle(logger *slog.Logger, req *controller.Request) {
