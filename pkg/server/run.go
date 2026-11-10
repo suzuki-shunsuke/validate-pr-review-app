@@ -17,8 +17,12 @@ import (
 
 const (
 	readHeaderTimeout = 10 * time.Second
-	defaultPort       = "8080"
-	maxBodySize       = 25 << 20 // 25 MB
+	// readTimeout bounds reading the whole request including the body.
+	// A request is registered as in-flight before its body is read, and the server waits for in-flight requests on shutdown without a deadline,
+	// so a client that stalls while sending the body would otherwise block shutdown forever.
+	readTimeout = 30 * time.Second
+	defaultPort = "8080"
+	maxBodySize = 25 << 20 // 25 MB
 )
 
 func (h *Server) Start(ctx context.Context) {
@@ -34,6 +38,7 @@ func (h *Server) Start(ctx context.Context) {
 		Addr:              ":" + port,
 		Handler:           mux,
 		ReadHeaderTimeout: readHeaderTimeout,
+		ReadTimeout:       readTimeout,
 	}
 
 	go func() {
@@ -90,6 +95,9 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 	// Register the request before reading the body so that the server waits for it on shutdown
 	// even if srv.Shutdown times out while the body is being read.
 	if !h.acquire() {
+		// srv.Shutdown closes the listener first, so new connections are refused during shutdown.
+		// This path is reached only by requests on connections accepted before that,
+		// whose handlers start after srv.Shutdown has returned (e.g. on timeout).
 		// Return 503 so that GitHub treats the delivery as failed.
 		// GitHub doesn't redeliver failed deliveries automatically, but they can be redelivered manually from Recent Deliveries.
 		logger.Warn("reject the request because the server is shutting down")

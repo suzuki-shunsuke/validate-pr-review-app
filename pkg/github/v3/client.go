@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v93/github"
 	"github.com/suzuki-shunsuke/go-retryablehttp"
 )
+
+// requestTimeout is the timeout of each attempt of an HTTP request to GitHub API. Each retry has its own timeout.
+const requestTimeout = 30 * time.Second
 
 type Client struct {
 	client *github.Client
@@ -27,7 +31,9 @@ func New(param *ParamNewApp) (*Client, error) {
 		return nil, fmt.Errorf("create a transport with private key: %w", err)
 	}
 	c := retryablehttp.NewClient()
-	c.HTTPClient = &http.Client{Transport: itr}
+	// Set a timeout so that a stalled request doesn't block processing forever.
+	// The HTTP server waits for in-flight webhook events on shutdown without a deadline.
+	c.HTTPClient = &http.Client{Transport: itr, Timeout: requestTimeout}
 	c.Logger = param.Logger
 	gh, err := github.NewClient(github.WithHTTPClient(c.StandardClient()))
 	if err != nil {
