@@ -54,7 +54,13 @@ func (h *Server) Start(ctx context.Context) {
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second) //nolint:mnd
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
-		slogerr.WithError(h.logger, err).Error("shutdown failed")
+		if errors.Is(err, context.DeadlineExceeded) {
+			// Expected when handlers are still running (e.g. reading a slow request body).
+			// waitInFlight still waits for them.
+			h.logger.Warn("timed out waiting for active connections to close; keep waiting for in-flight webhook events")
+		} else {
+			slogerr.WithError(h.logger, err).Error("shutdown failed")
+		}
 	}
 	h.waitInFlight()
 	h.logger.Info("server exited")

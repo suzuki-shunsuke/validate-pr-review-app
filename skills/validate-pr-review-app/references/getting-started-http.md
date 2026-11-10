@@ -72,7 +72,7 @@ smee -u <Webhook Proxy URL> -p 8080 --path /webhook
 
 ## Endpoints
 
-- `GET /webhook`: GitHub Webhook Handler
+- `POST /webhook`: GitHub Webhook Handler
 - `GET /ready`: Response 200 `{"status": "ok"}`
 
 `/webhook` returns 200 immediately and processes the webhook event in the background, because GitHub treats a delivery as failed if the server doesn't respond within 10 seconds.
@@ -80,8 +80,11 @@ So the response status doesn't reflect the processing result. Check the server l
 On shutdown, the server stops accepting new connections and waits for webhook events being processed in the background.
 Webhook deliveries during shutdown fail (the connection is refused, or 503 is returned for a connection accepted before shutdown), so GitHub treats them as failed.
 GitHub doesn't redeliver failed deliveries automatically, but you can redeliver them manually from the GitHub App's Recent Deliveries.
-The server doesn't limit how long it waits, but each GitHub API request times out after 30 seconds (and is retried a limited number of times), and reading a webhook request times out after 30 seconds, so the processing time is bounded. Set the platform's grace period (e.g. `terminationGracePeriodSeconds` on Kubernetes) longer than the worst-case processing time.
-Otherwise the process is killed during processing and the Check Run isn't created.
+The server doesn't limit how long it waits, so that the Check Run is created whenever possible.
+Reading a webhook request and each GitHub API request attempt time out after 30 seconds, so a stalled connection doesn't block it forever.
+However, the processing time isn't strictly bounded: for example, when GitHub API returns a rate limit error with a `Retry-After` header, the server waits as long as GitHub says before retrying.
+Set the platform's grace period (e.g. `terminationGracePeriodSeconds` on Kubernetes) long enough for typical processing.
+If the process is killed during processing, the Check Run isn't created.
 Sending a second SIGINT or SIGTERM terminates the server immediately.
 `/webhook` rejects request bodies larger than 25 MB, which is GitHub's cap on webhook payloads.
 If you run the server on a platform that throttles CPU after a response is returned (e.g. Cloud Run with request-based billing), allocate CPU always.
