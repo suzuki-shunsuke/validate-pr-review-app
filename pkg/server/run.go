@@ -49,11 +49,33 @@ func (h *Server) Start(ctx context.Context) {
 	if err := srv.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
 		slogerr.WithError(h.logger, err).Error("shutdown failed")
 	}
-	// Wait for webhook events being processed in the background.
-	// Don't cancel them because the Check Run should still be created to avoid leaving PRs in an indeterminate state.
+	h.waitInFlight()
+	h.logger.Info("server exited")
+}
+
+// waitInFlight stops accepting new webhook requests and waits for in-flight ones,
+// including ones processed in the background.
+// They aren't canceled because the Check Run should still be created to avoid leaving PRs in an indeterminate state.
+// srv.Shutdown may return before all handlers finish (e.g. on timeout), so handlers can still call acquire concurrently.
+func (h *Server) waitInFlight() {
+	h.mu.Lock()
+	h.closing = true
+	h.mu.Unlock()
 	h.logger.Info("waiting for in-flight webhook events to be processed")
 	h.wg.Wait()
-	h.logger.Info("server exited")
+}
+
+// acquire registers an in-flight webhook request.
+// It returns false if the server is shutting down.
+// The caller must call h.wg.Done() when the request is processed if it returns true.
+func (h *Server) acquire() bool {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.closing {
+		return false
+	}
+	h.wg.Add(1)
+	return true
 }
 
 func ready(w http.ResponseWriter, _ *http.Request) {
@@ -63,6 +85,21 @@ func ready(w http.ResponseWriter, _ *http.Request) {
 
 func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 	logger, requestID := h.newLogger(r)
+	// Register the request before reading the body so that the server waits for it on shutdown
+	// even if srv.Shutdown times out while the body is being read.
+	if !h.acquire() {
+		// Return 503 so that GitHub treats the delivery as failed and it can be redelivered.
+		logger.Warn("reject the request because the server is shutting down")
+		http.Error(w, "the server is shutting down", http.StatusServiceUnavailable)
+		return
+	}
+	background := false
+	defer func() {
+		if !background {
+			h.wg.Done()
+		}
+	}()
+
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		slogerr.WithError(logger, err).Error("read request body")
@@ -81,9 +118,12 @@ func (h *Server) Run(w http.ResponseWriter, r *http.Request) {
 	// https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks#respond-within-10-seconds
 	// The processing result isn't returned to GitHub anyway, so responding before processing loses nothing.
 	// The request context isn't passed because it is canceled when the handler returns.
-	h.wg.Go(func() { //nolint:contextcheck
+	// The background goroutine takes over the h.wg.Done() call.
+	background = true
+	go func() { //nolint:contextcheck
+		defer h.wg.Done()
 		h.handle(logger, req)
-	})
+	}()
 	w.WriteHeader(http.StatusOK)
 }
 
